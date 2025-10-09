@@ -1,5 +1,4 @@
 
-
 'use client';
 import Link from 'next/link';
 import {
@@ -7,6 +6,7 @@ import {
   Search,
 } from 'lucide-react';
 import React from 'react';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 
 import {
   Card,
@@ -14,6 +14,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -25,6 +26,24 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
+
+
+const chartData = [
+  { month: "January", enrollees: 186 },
+  { month: "February", enrollees: 305 },
+  { month: "March", enrollees: 237 },
+  { month: "April", enrollees: 73 },
+  { month: "May", enrollees: 209 },
+  { month: "June", enrollees: 214 },
+]
+
+const chartConfig = {
+  enrollees: {
+    label: "Enrollees",
+    color: "hsl(var(--primary))",
+  },
+} satisfies ChartConfig
 
 
 export default function AdminDashboardPage() {
@@ -71,43 +90,34 @@ export default function AdminDashboardPage() {
           </div>
           <Card>
             <CardHeader>
-              <CardTitle>Recent Enrollments</CardTitle>
-              <CardDescription>
-                The latest students to enroll in the system.
-              </CardDescription>
+              <CardTitle>Enrollment Analytics</CardTitle>
+              <CardDescription>Monthly new enrollees for the first semester.</CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Student Name</TableHead>
-                    <TableHead>Course</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell>Juan Dela Cruz</TableCell>
-                    <TableCell>BS in Information Technology</TableCell>
-                    <TableCell>2024-07-28</TableCell>
-                    <TableCell><Badge>Enrolled</Badge></TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Maria Clara</TableCell>
-                    <TableCell>BS in Information Technology</TableCell>
-                    <TableCell>2024-07-27</TableCell>
-                    <TableCell><Badge>Enrolled</Badge></TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Jose Rizal</TableCell>
-                    <TableCell>BS in Information Technology</TableCell>
-                    <TableCell>2024-07-26</TableCell>
-                    <TableCell><Badge>Enrolled</Badge></TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+               <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+                <BarChart accessibilityLayer data={chartData}>
+                  <CartesianGrid vertical={false} />
+                  <XAxis
+                    dataKey="month"
+                    tickLine={false}
+                    tickMargin={10}
+                    axisLine={false}
+                    tickFormatter={(value) => value.slice(0, 3)}
+                  />
+                  <YAxis />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="enrollees" fill="var(--color-enrollees)" radius={4} />
+                </BarChart>
+              </ChartContainer>
             </CardContent>
+             <CardFooter className="flex-col items-start gap-2 text-sm">
+              <div className="flex gap-2 font-medium leading-none">
+                Trending up for June 2024
+              </div>
+              <div className="leading-none text-muted-foreground">
+                Showing total enrollees for the last 6 months
+              </div>
+            </CardFooter>
           </Card>
         </main>
     </>
