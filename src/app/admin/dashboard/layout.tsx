@@ -37,6 +37,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 
 export default function AdminDashboardLayout({
@@ -45,20 +46,23 @@ export default function AdminDashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const schoolLogo = PlaceHolderImages.find(p => p.id === 'school-logo-sm');
 
   return (
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader>
           <div className="flex items-center gap-2">
-            <Image
-              src="https://picsum.photos/seed/school-logo/40/40"
-              alt="School Logo"
-              width={40}
-              height={40}
-              data-ai-hint="school logo"
-              className="rounded-full"
-            />
+            {schoolLogo && (
+                <Image
+                src={schoolLogo.imageUrl}
+                alt={schoolLogo.description}
+                width={40}
+                height={40}
+                data-ai-hint={schoolLogo.imageHint}
+                className="rounded-full"
+                />
+            )}
             <span className="font-semibold text-lg">BSIT Enrollment</span>
           </div>
         </SidebarHeader>
@@ -111,14 +115,16 @@ export default function AdminDashboardLayout({
         <header className="flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6 md:hidden">
           <SidebarTrigger />
            <div className="flex items-center gap-2">
-            <Image
-              src="https://picsum.photos/seed/school-logo/40/40"
-              alt="School Logo"
-              width={40}
-              height={40}
-              data-ai-hint="school logo"
-              className="rounded-full"
-            />
+            {schoolLogo && (
+                <Image
+                src={schoolLogo.imageUrl}
+                alt={schoolLogo.description}
+                width={40}
+                height={40}
+                data-ai-hint={schoolLogo.imageHint}
+                className="rounded-full"
+                />
+            )}
             <span className="font-semibold text-lg">BSIT Enrollment</span>
           </div>
         </header>

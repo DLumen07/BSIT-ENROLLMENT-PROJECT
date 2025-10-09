@@ -11,6 +11,12 @@
       "description": "A logo for the school.",
       "imageUrl": "https://picsum.photos/seed/school-logo/150/150",
       "imageHint": "school logo"
+    },
+    {
+      "id": "school-logo-sm",
+      "description": "A small logo for the school.",
+      "imageUrl": "https://picsum.photos/seed/school-logo/40/40",
+      "imageHint": "school logo"
     }
   ]
 }
