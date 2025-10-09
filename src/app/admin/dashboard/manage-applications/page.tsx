@@ -11,6 +11,7 @@ import {
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuTrigger,
+    DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 
 const pendingApplications = [
@@ -82,6 +83,8 @@ export default function ManageApplicationsPage() {
                                                             </DropdownMenuTrigger>
                                                             <DropdownMenuContent align="end">
                                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                                <DropdownMenuItem>View Credentials</DropdownMenuItem>
+                                                                <DropdownMenuSeparator />
                                                                 <DropdownMenuItem>Approve</DropdownMenuItem>
                                                                 <DropdownMenuItem>Reject</DropdownMenuItem>
                                                             </DropdownMenuContent>
