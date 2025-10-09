@@ -9,13 +9,13 @@
     {
       "id": "school-logo",
       "description": "A logo for the school.",
-      "imageUrl": "https://picsum.photos/seed/school-logo/150/150",
+      "imageUrl": "/school-logo.png",
       "imageHint": "school logo"
     },
     {
       "id": "school-logo-sm",
       "description": "A small logo for the school.",
-      "imageUrl": "https://picsum.photos/seed/school-logo/40/40",
+      "imageUrl": "/school-logo-sm.png",
       "imageHint": "school logo"
     }
   ]
