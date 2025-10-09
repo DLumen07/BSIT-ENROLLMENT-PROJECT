@@ -107,12 +107,12 @@ export default function AdminDashboardLayout({
 }) {
   const pathname = usePathname();
   const schoolLogo = PlaceHolderImages.find(p => p.id === 'school-logo-sm');
-  const isEnrollmentPath = pathname.startsWith('/admin/dashboard/manage-enrollment');
+  const isEnrollmentPath = pathname.startsWith('/admin/dashboard/manage-');
   const [isEnrollmentOpen, setIsEnrollmentOpen] = useState(isEnrollmentPath);
 
   useEffect(() => {
-    setIsEnrollmentOpen(isEnrollmentPath);
-  }, [isEnrollmentPath]);
+    setIsEnrollmentOpen(pathname.startsWith('/admin/dashboard/manage-'));
+  }, [pathname]);
 
 
   return (
@@ -166,24 +166,24 @@ export default function AdminDashboardLayout({
                     <CollapsibleContent>
                         <SidebarMenuSub>
                             <SidebarMenuSubItem>
-                                <SidebarMenuSubButton asChild isActive={pathname === '/admin/dashboard/manage-enrollment/manage-applications'}>
-                                    <Link href="/admin/dashboard/manage-enrollment/manage-applications">
+                                <SidebarMenuSubButton asChild isActive={pathname === '/admin/dashboard/manage-applications'}>
+                                    <Link href="/admin/dashboard/manage-applications">
                                         <FileSignature />
                                         <span>Manage Applications</span>
                                     </Link>
                                 </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
                             <SidebarMenuSubItem>
-                                 <SidebarMenuSubButton asChild isActive={pathname === '/admin/dashboard/manage-enrollment/manage-blocks'}>
-                                    <Link href="/admin/dashboard/manage-enrollment/manage-blocks">
+                                 <SidebarMenuSubButton asChild isActive={pathname === '/admin/dashboard/manage-blocks'}>
+                                    <Link href="/admin/dashboard/manage-blocks">
                                         <LayoutGrid />
                                         <span>Manage Blocks</span>
                                     </Link>
                                 </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
                             <SidebarMenuSubItem>
-                                 <SidebarMenuSubButton asChild isActive={pathname === '/admin/dashboard/manage-enrollment/manage-subjects'}>
-                                    <Link href="/admin/dashboard/manage-enrollment/manage-subjects">
+                                 <SidebarMenuSubButton asChild isActive={pathname === '/admin/dashboard/manage-subjects'}>
+                                    <Link href="/admin/dashboard/manage-subjects">
                                         <BookCopy />
                                         <span>Manage Subjects</span>
                                     </Link>
