@@ -2,7 +2,7 @@
 'use client';
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ChevronRight, MoreHorizontal, CheckCircle2, XCircle, Pencil, X, ArrowLeft } from 'lucide-react';
+import { ChevronRight, MoreHorizontal, CheckCircle2, XCircle, Pencil, X, ArrowLeft, RotateCw, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -27,6 +27,17 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const initialPendingApplications = [
     { 
@@ -88,6 +99,10 @@ export default function ManageApplicationsPage() {
     isOpen: false,
     application: null,
   });
+  const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; application: Application | null }>({
+      isOpen: false,
+      application: null,
+  });
 
   const credentialLabels: { key: keyof Application['credentials']; label: string }[] = [
     { key: 'birthCertificate', label: 'Birth Certificate' },
@@ -121,6 +136,18 @@ export default function ManageApplicationsPage() {
     setRejectedApplications(prev => [...prev, { ...application, rejectionReason: reason }]);
     handleCloseRejectionDialog();
   };
+  
+  const handleRetrieve = (application: Application) => {
+    const { rejectionReason, ...rest } = application;
+    setRejectedApplications(prev => prev.filter(app => app.id !== application.id));
+    setPendingApplications(prev => [...prev, rest]);
+  };
+
+  const handleDelete = (application: Application) => {
+    setRejectedApplications(prev => prev.filter(app => app.id !== application.id));
+    setDeleteDialog({ isOpen: false, application: null });
+  };
+
 
   return (
     <>
@@ -265,6 +292,7 @@ export default function ManageApplicationsPage() {
                                         <TableHead>Course</TableHead>
                                         <TableHead>Year</TableHead>
                                         <TableHead>Reason</TableHead>
+                                        <TableHead className="text-right">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -275,6 +303,31 @@ export default function ManageApplicationsPage() {
                                             <TableCell>{application.course}</TableCell>
                                             <TableCell>{application.year}</TableCell>
                                             <TableCell>{application.rejectionReason}</TableCell>
+                                            <TableCell className="text-right">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" className="h-8 w-8 p-0">
+                                                            <span className="sr-only">Open menu</span>
+                                                            <MoreHorizontal className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                        <DropdownMenuItem onSelect={() => handleRetrieve(application)}>
+                                                            <RotateCw className="mr-2 h-4 w-4" />
+                                                            Retrieve
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuSeparator />
+                                                        <DropdownMenuItem
+                                                            className="text-red-600 focus:text-red-600"
+                                                            onSelect={() => setDeleteDialog({ isOpen: true, application })}
+                                                        >
+                                                            <Trash2 className="mr-2 h-4 w-4" />
+                                                            Permanently Delete
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -364,11 +417,36 @@ export default function ManageApplicationsPage() {
                 </DialogContent>
             </Dialog>
         )}
+        
+        {deleteDialog.isOpen && deleteDialog.application && (
+            <AlertDialog open={deleteDialog.isOpen} onOpenChange={(open) => !open && setDeleteDialog({ isOpen: false, application: null })}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This will permanently delete the application for <span className="font-semibold">{deleteDialog.application.name}</span>. This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            className="bg-red-600 text-white hover:bg-red-700"
+                            onClick={() => handleDelete(deleteDialog.application!)}
+                        >
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        )}
+
     </>
   );
 }
 
     
+    
+
     
 
     
