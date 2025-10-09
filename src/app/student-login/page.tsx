@@ -88,6 +88,12 @@ export default function StudentLoginPage() {
                     Login with Email
                   </Button>
                 </form>
+                <div className="text-center text-sm">
+                  Don't have an account?{' '}
+                  <Link href="/student-signup" className="underline">
+                    Sign up
+                  </Link>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -101,5 +107,3 @@ export default function StudentLoginPage() {
     </div>
   );
 }
-
-    
