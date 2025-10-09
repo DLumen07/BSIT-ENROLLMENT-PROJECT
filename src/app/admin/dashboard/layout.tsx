@@ -10,10 +10,15 @@ import {
   BarChart3,
   ChevronRight,
   Search,
+  ChevronDown,
+  FileSignature,
+  LayoutGrid,
+  BookCopy,
 } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
 import { usePathname } from 'next/navigation';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 import {
   SidebarProvider,
@@ -26,6 +31,9 @@ import {
   SidebarFooter,
   SidebarTrigger,
   SidebarInset,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import {
@@ -39,6 +47,7 @@ import {
 import { ThemeToggle } from '@/components/theme-toggle';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 const Breadcrumb = () => {
     const pathname = usePathname();
@@ -49,39 +58,40 @@ const Breadcrumb = () => {
         return str.charAt(0).toUpperCase() + str.slice(1);
     }
     
-    if (segments.length <= 2) { 
-        return (
-             <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <span className="text-foreground">Dashboard</span>
-            </div>
-        );
+    if (segments.length < 2) {
+      return null;
     }
 
     return (
         <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
             {segments.map((segment, index) => {
-                if (index === 0) return null;
+                 if (index === 0) return null;
 
                 const href = '/' + segments.slice(0, index + 1).join('/');
                 const isLast = index === segments.length - 1;
                 
                 const displayName = capitalize(segment);
 
-                if (isLast) {
-                    return (
-                        <React.Fragment key={href}>
-                           <ChevronRight className="h-4 w-4" />
-                           <span className="text-foreground">{displayName}</span>
-                        </React.Fragment>
-                    );
+                 if (index === 1) { 
+                    return isLast ? (
+                        <span className="text-foreground">{displayName}</span>
+                    ) : (
+                         <Link href={href} className={'hover:text-foreground'}>
+                           {displayName}
+                        </Link>
+                    )
                 }
 
                 return (
                     <React.Fragment key={href}>
-                        {index > 1 && <ChevronRight className="h-4 w-4" />}
-                        <Link href={href} className={'hover:text-foreground'}>
-                           {displayName}
-                        </Link>
+                       <ChevronRight className="h-4 w-4" />
+                        {isLast ? (
+                           <span className="text-foreground">{displayName}</span>
+                        ) : (
+                           <Link href={href} className={'hover:text-foreground'}>
+                                {displayName}
+                           </Link>
+                        )}
                     </React.Fragment>
                 );
             })}
@@ -97,6 +107,7 @@ export default function AdminDashboardLayout({
 }) {
   const pathname = usePathname();
   const schoolLogo = PlaceHolderImages.find(p => p.id === 'school-logo-sm');
+  const isEnrollmentPath = pathname.startsWith('/admin/dashboard/manage-enrollment');
 
   return (
     <SidebarProvider>
@@ -132,13 +143,49 @@ export default function AdminDashboardLayout({
                 Students
               </SidebarMenuButton>
             </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={pathname.startsWith('/admin/dashboard/manage-enrollment')}>
-                  <Link href="/admin/dashboard/manage-enrollment">
-                      <ClipboardList />
-                      Manage Enrollment
-                  </Link>
-              </SidebarMenuButton>
+            <SidebarMenuItem asChild>
+                <Collapsible open={isEnrollmentPath}>
+                    <CollapsibleTrigger asChild>
+                        <SidebarMenuButton
+                            className="justify-between"
+                            isActive={isEnrollmentPath}
+                        >
+                            <div className="flex items-center gap-2">
+                                <ClipboardList />
+                                Manage Enrollment
+                            </div>
+                            <ChevronDown className="h-4 w-4 data-[state=open]:rotate-180" />
+                        </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                        <SidebarMenuSub>
+                            <SidebarMenuSubItem>
+                                <SidebarMenuSubButton asChild isActive={pathname === '/admin/dashboard/manage-enrollment/manage-applications'}>
+                                    <Link href="/admin/dashboard/manage-enrollment/manage-applications">
+                                        <FileSignature />
+                                        <span>Manage Applications</span>
+                                    </Link>
+                                </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                            <SidebarMenuSubItem>
+                                 <SidebarMenuSubButton asChild isActive={pathname === '/admin/dashboard/manage-enrollment/manage-blocks'}>
+                                    <Link href="/admin/dashboard/manage-enrollment/manage-blocks">
+                                        <LayoutGrid />
+                                        <span>Manage Blocks</span>
+                                    </Link>
+                                </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                            <SidebarMenuSubItem>
+                                 <SidebarMenuSubButton asChild isActive={pathname === '/admin/dashboard/manage-enrollment/manage-subjects'}>
+                                    <Link href="/admin/dashboard/manage-enrollment/manage-subjects">
+                                        <BookCopy />
+                                        <span>Manage Subjects</span>
+                                    </Link>
+                                </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                        </SidebarMenuSub>
+                    </CollapsibleContent>
+                </Collapsible>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton href="#">
