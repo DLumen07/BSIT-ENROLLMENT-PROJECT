@@ -74,9 +74,9 @@ const Breadcrumb = () => {
 
                  if (index === 1) { 
                     return isLast ? (
-                        <span className="text-foreground">{displayName}</span>
+                        <span key={href} className="text-foreground">{displayName}</span>
                     ) : (
-                         <Link href={href} className={'hover:text-foreground'}>
+                         <Link key={href} href={href} className={'hover:text-foreground'}>
                            {displayName}
                         </Link>
                     )
