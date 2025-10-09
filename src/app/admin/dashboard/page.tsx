@@ -4,9 +4,11 @@ import Link from 'next/link';
 import {
   ChevronRight,
   Search,
+  ArrowUpRight,
 } from 'lucide-react';
 import React from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import Image from 'next/image';
 
 import {
   Card,
@@ -27,6 +29,8 @@ import {
 } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 
 const chartData = [
@@ -44,6 +48,39 @@ const chartConfig = {
     color: "hsl(var(--primary))",
   },
 } satisfies ChartConfig
+
+const recentApplications = [
+    {
+        name: 'Olivia Martin',
+        email: 'olivia.martin@email.com',
+        course: 'BSIT',
+        avatar: 'https://picsum.photos/seed/om-avatar/32/32',
+    },
+    {
+        name: 'Jackson Lee',
+        email: 'jackson.lee@email.com',
+        course: 'ACT',
+        avatar: 'https://picsum.photos/seed/jl-avatar/32/32',
+    },
+    {
+        name: 'Isabella Nguyen',
+        email: 'isabella.nguyen@email.com',
+        course: 'BSIT',
+        avatar: 'https://picsum.photos/seed/in-avatar/32/32',
+    },
+    {
+        name: 'William Kim',
+        email: 'will@email.com',
+        course: 'BSIT',
+        avatar: 'https://picsum.photos/seed/wk-avatar/32/32',
+    },
+     {
+        name: 'Sofia Davis',
+        email: 'sofia.davis@email.com',
+        course: 'ACT',
+        avatar: 'https://picsum.photos/seed/sd-avatar/32/32',
+    },
+]
 
 
 export default function AdminDashboardPage() {
@@ -88,37 +125,90 @@ export default function AdminDashboardPage() {
               </CardContent>
             </Card>
           </div>
-          <Card>
-            <CardHeader>
-              <CardTitle>Enrollment Analytics</CardTitle>
-              <CardDescription>Monthly new enrollees for the first semester.</CardDescription>
-            </CardHeader>
-            <CardContent>
-               <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-                <BarChart accessibilityLayer data={chartData}>
-                  <CartesianGrid vertical={false} />
-                  <XAxis
-                    dataKey="month"
-                    tickLine={false}
-                    tickMargin={10}
-                    axisLine={false}
-                    tickFormatter={(value) => value.slice(0, 3)}
-                  />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="enrollees" fill="var(--color-enrollees)" radius={4} />
-                </BarChart>
-              </ChartContainer>
-            </CardContent>
-             <CardFooter className="flex-col items-start gap-2 text-sm">
-              <div className="flex gap-2 font-medium leading-none">
-                Trending up for June 2024
-              </div>
-              <div className="leading-none text-muted-foreground">
-                Showing total enrollees for the last 6 months
-              </div>
-            </CardFooter>
-          </Card>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="flex flex-col">
+                <CardHeader>
+                    <CardTitle>Enrollment Analytics</CardTitle>
+                    <CardDescription>Monthly new enrollees for the first semester.</CardDescription>
+                </CardHeader>
+                <CardContent className="flex-1">
+                    <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+                    <BarChart accessibilityLayer data={chartData}>
+                        <CartesianGrid vertical={false} />
+                        <XAxis
+                        dataKey="month"
+                        tickLine={false}
+                        tickMargin={10}
+                        axisLine={false}
+                        tickFormatter={(value) => value.slice(0, 3)}
+                        />
+                        <YAxis />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Bar dataKey="enrollees" fill="var(--color-enrollees)" radius={4} />
+                    </BarChart>
+                    </ChartContainer>
+                </CardContent>
+                <CardFooter className="flex-col items-start gap-2 text-sm">
+                <div className="flex gap-2 font-medium leading-none">
+                    Trending up for June 2024
+                </div>
+                <div className="leading-none text-muted-foreground">
+                    Showing total enrollees for the last 6 months
+                </div>
+                </CardFooter>
+            </Card>
+            <Card>
+                <CardHeader className="flex flex-row items-center">
+                    <div className="grid gap-2">
+                        <CardTitle>Recent Applications</CardTitle>
+                        <CardDescription>
+                            You have 45 pending applications.
+                        </CardDescription>
+                    </div>
+                    <Button asChild size="sm" className="ml-auto gap-1">
+                        <Link href="/admin/dashboard/manage-enrollment/manage-applications">
+                        View All
+                        <ArrowUpRight className="h-4 w-4" />
+                        </Link>
+                    </Button>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Student</TableHead>
+                                <TableHead className="text-right">Course</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {recentApplications.map((app) => (
+                                <TableRow key={app.email}>
+                                    <TableCell>
+                                        <div className="flex items-center gap-4">
+                                            <Avatar className="hidden h-9 w-9 sm:flex">
+                                                <AvatarImage src={app.avatar} alt="Avatar" data-ai-hint="person avatar" />
+                                                <AvatarFallback>{app.name.charAt(0)}</AvatarFallback>
+                                            </Avatar>
+                                            <div className="grid gap-1">
+                                                <p className="text-sm font-medium leading-none">
+                                                    {app.name}
+                                                </p>
+                                                <p className="text-sm text-muted-foreground">
+                                                    {app.email}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <Badge variant="outline">{app.course}</Badge>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+          </div>
         </main>
     </>
   );

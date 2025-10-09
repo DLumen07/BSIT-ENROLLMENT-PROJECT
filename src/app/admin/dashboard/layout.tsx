@@ -49,8 +49,7 @@ const Breadcrumb = () => {
         return str.charAt(0).toUpperCase() + str.slice(1);
     }
     
-    // Don't render breadcrumbs for the main dashboard page, as it's handled in the return
-    if (segments.length <= 2) { // /admin/dashboard
+    if (segments.length <= 2) { 
         return (
              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                 <span className="text-foreground">Dashboard</span>
@@ -61,16 +60,13 @@ const Breadcrumb = () => {
     return (
         <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
             {segments.map((segment, index) => {
-                // Skip the first segment ('admin')
                 if (index === 0) return null;
 
                 const href = '/' + segments.slice(0, index + 1).join('/');
                 const isLast = index === segments.length - 1;
                 
-                // Capitalize and replace hyphens for display
                 const displayName = capitalize(segment);
 
-                // Don't link the last segment
                 if (isLast) {
                     return (
                         <React.Fragment key={href}>
