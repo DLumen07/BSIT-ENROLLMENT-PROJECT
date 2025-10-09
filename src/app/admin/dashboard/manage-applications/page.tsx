@@ -212,8 +212,8 @@ export default function ManageApplicationsPage() {
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setSelectedApplication(null)}>Reject</Button>
-                        <Button onClick={() => setSelectedApplication(null)}>Approve</Button>
+                        <Button variant="destructive" onClick={() => setSelectedApplication(null)}>Reject</Button>
+                        <Button className="bg-green-500 hover:bg-green-600 text-white" onClick={() => setSelectedApplication(null)}>Approve</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
