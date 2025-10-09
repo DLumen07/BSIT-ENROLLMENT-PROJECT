@@ -1,10 +1,44 @@
-import {Button} from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import Link from 'next/link';
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
+      <header className="px-4 lg:px-6 h-14 flex items-center bg-white shadow-sm">
+        <Link
+          href="#"
+          className="flex items-center justify-center"
+          prefetch={false}
+        >
+          <span className="text-xl font-bold text-primary">
+            BSIT Enrollment
+          </span>
+        </Link>
+        <nav className="ml-auto flex gap-4 sm:gap-6">
+          <Link
+            href="#features"
+            className="text-sm font-medium hover:underline underline-offset-4 text-primary"
+            prefetch={false}
+          >
+            Features
+          </Link>
+          <Link
+            href="#testimonials"
+            className="text-sm font-medium hover:underline underline-offset-4 text-primary"
+            prefetch={false}
+          >
+            Testimonials
+          </Link>
+          <Link
+            href="#cta"
+            className="text-sm font-medium hover:underline underline-offset-4 text-primary"
+            prefetch={false}
+          >
+            Enroll
+          </Link>
+        </nav>
+      </header>
       <main className="flex-1">
         <section className="w-full py-12 md:py-24 lg:py-32 bg-primary">
           <div className="container px-4 md:px-6">
