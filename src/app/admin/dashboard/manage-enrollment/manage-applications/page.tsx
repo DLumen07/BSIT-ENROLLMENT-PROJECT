@@ -156,7 +156,7 @@ export default function ManageApplicationsPage() {
                 <div className="space-y-0.5">
                     <h1 className="text-2xl font-bold tracking-tight">Manage Applications</h1>
                     <p className="text-muted-foreground">
-                        Review and process student applications. 'Pending' is the default view.
+                        Review, approve, and reject applications for enrollment.
                     </p>
                 </div>
                  <Button asChild variant="outline" size="icon" className="h-7 w-7">
@@ -443,10 +443,3 @@ export default function ManageApplicationsPage() {
     </>
   );
 }
-
-    
-    
-
-    
-
-    
