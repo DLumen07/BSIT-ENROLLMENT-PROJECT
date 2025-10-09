@@ -7,7 +7,7 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-background">
       <header className="w-full h-4 bg-primary" />
       <main className="flex-1 flex flex-col items-center justify-center text-center p-4">
-        <div className="flex flex-col items-center space-y-6">
+        <div className="flex flex-col items-center space-y-6 border rounded-lg shadow-lg p-8 md:p-12">
           <Image
             src="https://picsum.photos/seed/school-logo/150/150"
             alt="School Logo"
