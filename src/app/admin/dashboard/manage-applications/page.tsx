@@ -1,10 +1,17 @@
 
 import Link from 'next/link';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, MoreHorizontal } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const pendingApplications = [
     { id: 1, name: 'John Doe', date: '2024-08-01' },
@@ -59,9 +66,20 @@ export default function ManageApplicationsPage() {
                                                 <TableRow key={application.id}>
                                                     <TableCell className="font-medium">{application.name}</TableCell>
                                                     <TableCell>{application.date}</TableCell>
-                                                    <TableCell className="text-right space-x-2">
-                                                        <Button variant="outline" size="sm">Reject</Button>
-                                                        <Button size="sm">Approve</Button>
+                                                    <TableCell className="text-right">
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                                                    <span className="sr-only">Open menu</span>
+                                                                    <MoreHorizontal className="h-4 w-4" />
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent align="end">
+                                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                                <DropdownMenuItem>Approve</DropdownMenuItem>
+                                                                <DropdownMenuItem>Reject</DropdownMenuItem>
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
                                                     </TableCell>
                                                 </TableRow>
                                             ))}
