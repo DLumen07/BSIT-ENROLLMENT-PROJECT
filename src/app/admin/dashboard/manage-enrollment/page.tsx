@@ -30,7 +30,7 @@ export default function ManageEnrollmentPage() {
       <header className="flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6">
         <div className="flex-1">
           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <span>Admin</span>
+            <Link href="/admin/dashboard" className="hover:text-foreground">Admin</Link>
             <ChevronRight className="h-4 w-4" />
             <span className="text-foreground">Manage Enrollment</span>
           </div>

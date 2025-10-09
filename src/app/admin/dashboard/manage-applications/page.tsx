@@ -1,4 +1,5 @@
 
+import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
@@ -8,11 +9,11 @@ export default function ManageApplicationsPage() {
         <header className="flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6">
             <div className="flex-1">
                 <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <span>Admin</span>
-                <ChevronRight className="h-4 w-4" />
-                <span>Manage Enrollment</span>
-                <ChevronRight className="h-4 w-4" />
-                <span className="text-foreground">Manage Applications</span>
+                  <Link href="/admin/dashboard" className="hover:text-foreground">Admin</Link>
+                  <ChevronRight className="h-4 w-4" />
+                  <Link href="/admin/dashboard/manage-enrollment" className="hover:text-foreground">Manage Enrollment</Link>
+                  <ChevronRight className="h-4 w-4" />
+                  <span className="text-foreground">Manage Applications</span>
                 </div>
             </div>
         </header>
