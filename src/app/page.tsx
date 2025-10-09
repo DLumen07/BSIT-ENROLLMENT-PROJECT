@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import Link from 'next/link';
+import { User, UserCog } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -18,12 +19,18 @@ export default function Home() {
           <h1 className="text-4xl font-bold tracking-tight text-foreground">
             BSIT Enrollment System
           </h1>
-          <div className="flex gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-xs">
             <Button asChild size="lg">
-              <Link href="/student-login">Students</Link>
+              <Link href="/student-login">
+                <User />
+                Students
+              </Link>
             </Button>
-            <Button asChild variant="destructive" size="lg">
-              <Link href="/admin-login">Administrator</Link>
+            <Button asChild variant="accent" size="lg">
+              <Link href="/admin-login">
+                <UserCog />
+                Administrator
+              </Link>
             </Button>
           </div>
         </div>
