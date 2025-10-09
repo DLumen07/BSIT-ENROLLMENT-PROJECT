@@ -3,6 +3,14 @@ import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+
+const pendingApplications = [
+    { id: 1, name: 'John Doe', date: '2024-08-01' },
+    { id: 2, name: 'Jane Smith', date: '2024-08-02' },
+    { id: 3, name: 'Peter Jones', date: '2024-08-02' },
+];
 
 export default function ManageApplicationsPage() {
   return (
@@ -38,7 +46,27 @@ export default function ManageApplicationsPage() {
                                     <CardDescription>Applications awaiting review.</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <p>Pending application content will be displayed here.</p>
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Student Name</TableHead>
+                                                <TableHead>Application Date</TableHead>
+                                                <TableHead className="text-right">Actions</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {pendingApplications.map((application) => (
+                                                <TableRow key={application.id}>
+                                                    <TableCell className="font-medium">{application.name}</TableCell>
+                                                    <TableCell>{application.date}</TableCell>
+                                                    <TableCell className="text-right space-x-2">
+                                                        <Button variant="outline" size="sm">Reject</Button>
+                                                        <Button size="sm">Approve</Button>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
                                 </CardContent>
                             </Card>
                         </TabsContent>
