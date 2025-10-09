@@ -5,6 +5,12 @@
       "description": "A hero image for the landing page.",
       "imageUrl": "https://picsum.photos/seed/1/600/400",
       "imageHint": "abstract geometric"
+    },
+    {
+      "id": "school-logo",
+      "description": "A logo for the school.",
+      "imageUrl": "https://picsum.photos/seed/school-logo/150/150",
+      "imageHint": "school logo"
     }
   ]
 }
