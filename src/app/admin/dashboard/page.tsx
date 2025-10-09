@@ -3,14 +3,10 @@
 'use client';
 import Link from 'next/link';
 import {
-  Bell,
-  Search,
   ChevronRight,
 } from 'lucide-react';
-import Image from 'next/image';
 import React from 'react';
 
-import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -18,15 +14,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -36,7 +23,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ThemeToggle } from '@/components/theme-toggle';
 
 
 export default function AdminDashboardPage() {
@@ -49,46 +35,6 @@ export default function AdminDashboardPage() {
               <ChevronRight className="h-4 w-4" />
               <span className="text-foreground">Dashboard</span>
             </div>
-          </div>
-          <div className="hidden md:flex items-center gap-4">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search..."
-                className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
-              />
-            </div>
-            <ThemeToggle />
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <Bell className="h-5 w-5" />
-              <span className="sr-only">Toggle notifications</span>
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
-                  <Image
-                    src="https://picsum.photos/seed/admin-avatar/32/32"
-                    width={32}
-                    height={32}
-                    alt="Admin Avatar"
-                    className="rounded-full"
-                    data-ai-hint="person avatar"
-                  />
-                  <span className="sr-only">Toggle user menu</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Admin Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Settings</DropdownMenuItem>
-                <DropdownMenuItem>Support</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/">Logout</Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </header>
         <main className="flex-1 p-4 sm:p-6 space-y-6">

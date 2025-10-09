@@ -112,20 +112,50 @@ export default function AdminDashboardLayout({
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <header className="flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6 md:hidden">
-          <SidebarTrigger />
-           <div className="flex items-center gap-2">
-            {schoolLogo && (
-                <Image
-                src={schoolLogo.imageUrl}
-                alt={schoolLogo.description}
-                width={40}
-                height={40}
-                data-ai-hint={schoolLogo.imageHint}
-                className="rounded-full"
-                />
-            )}
-            <span className="font-semibold text-lg">BSIT Enrollment</span>
+        <header className="flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6">
+          <SidebarTrigger className="md:hidden"/>
+          <div className="flex-1">
+             {/* This will be the breadcrumb, to be implemented later */}
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="relative hidden md:block">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search..."
+                className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
+              />
+            </div>
+            <ThemeToggle />
+            <Button variant="ghost" size="icon" className="rounded-full">
+              <Bell className="h-5 w-5" />
+              <span className="sr-only">Toggle notifications</span>
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <Image
+                    src="https://picsum.photos/seed/admin-avatar/32/32"
+                    width={32}
+                    height={32}
+                    alt="Admin Avatar"
+                    className="rounded-full"
+                    data-ai-hint="person avatar"
+                  />
+                  <span className="sr-only">Toggle user menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Admin Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>Settings</DropdownMenuItem>
+                <DropdownMenuItem>Support</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/">Logout</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
         {children}
