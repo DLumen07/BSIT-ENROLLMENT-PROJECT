@@ -203,7 +203,6 @@ export default function ManageApplicationsPage() {
                                                 <TableHead>Student Name</TableHead>
                                                 <TableHead>Course</TableHead>
                                                 <TableHead>Year</TableHead>
-                                                <TableHead>Status</TableHead>
                                                 <TableHead className="text-right">Actions</TableHead>
                                             </TableRow>
                                         </TableHeader>
@@ -214,9 +213,6 @@ export default function ManageApplicationsPage() {
                                                     <TableCell className="font-medium">{application.name}</TableCell>
                                                     <TableCell>{application.course}</TableCell>
                                                     <TableCell>{application.year}</TableCell>
-                                                    <TableCell>
-                                                        <Badge className="bg-green-500 hover:bg-green-600">Approved</Badge>
-                                                    </TableCell>
                                                     <TableCell className="text-right">
                                                         <DropdownMenu>
                                                             <DropdownMenuTrigger asChild>
