@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertTriangle } from 'lucide-react';
+import { Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
@@ -22,12 +22,12 @@ export default function StudentDashboardPage() {
         </div>
 
         {!isEnrolled && (
-            <Alert variant="destructive" className="mt-6">
-                <AlertTriangle className="h-4 w-4" />
+            <Alert className="mt-6 border-accent">
+                <Info className="h-4 w-4" />
                 <AlertTitle>Important Notice</AlertTitle>
                 <AlertDescription className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     You are not yet officially enrolled for the current academic year. Please proceed to the enrollment page to complete the process.
-                    <Button asChild variant="secondary" className="mt-2 sm:mt-0">
+                    <Button asChild variant="accent" className="mt-2 sm:mt-0">
                         <Link href="/student/dashboard/enrollment">Go to Enrollment</Link>
                     </Button>
                 </AlertDescription>
