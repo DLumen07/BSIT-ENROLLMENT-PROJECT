@@ -89,21 +89,10 @@ export default {
             height: '0',
           },
         },
-        glow: {
-            '0%, 100%': {
-                boxShadow:
-                '0 0 20px 5px hsl(var(--primary)/0.2), 0 0 20px 5px hsl(var(--accent)/0.2)',
-            },
-            '50%': {
-                boxShadow:
-                '0 0 30px 10px hsl(var(--primary)/0.5), 0 0 30px 10px hsl(var(--accent)/0.5)',
-            },
-        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        glow: 'glow 4s ease-in-out infinite',
       },
     },
   },
