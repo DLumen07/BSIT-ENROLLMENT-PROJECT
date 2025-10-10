@@ -124,8 +124,8 @@ export default function AdminDashboardLayout({
                 <Image
                 src={schoolLogo.imageUrl}
                 alt={schoolLogo.description}
-                width={50}
-                height={50}
+                width={60}
+                height={60}
                 data-ai-hint={schoolLogo.imageHint}
                 className="rounded-full"
                 />
