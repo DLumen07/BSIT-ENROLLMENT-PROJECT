@@ -282,7 +282,7 @@ export default function ManageApplicationsPage() {
                         <div className="flex flex-wrap items-center gap-2">
                             <Popover>
                                 <PopoverTrigger asChild>
-                                    <Button variant="ghost" className="gap-2">
+                                    <Button variant="ghost" className="gap-2 hover:bg-transparent hover:text-accent">
                                         <Filter className="h-4 w-4" />
                                         Filter
                                     </Button>
@@ -628,5 +628,3 @@ export default function ManageApplicationsPage() {
     </>
   );
 }
-
-    
