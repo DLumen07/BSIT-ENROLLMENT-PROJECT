@@ -81,6 +81,56 @@ const initialPendingApplications = [
     },
 ];
 
+const initialApprovedApplications = [
+    { 
+        id: 4, 
+        studentId: '2024-0999', 
+        name: 'Emily White', 
+        course: 'BSIT', 
+        year: 3, 
+        status: 'Old',
+        credentials: {
+            birthCertificate: true,
+            grades: true,
+            goodMoral: true,
+            registrationForm: true,
+        }
+    },
+     { 
+        id: 5, 
+        studentId: '2024-0998', 
+        name: 'Chris Green', 
+        course: 'ACT', 
+        year: 2, 
+        status: 'Old',
+        credentials: {
+            birthCertificate: true,
+            grades: true,
+            goodMoral: true,
+            registrationForm: true,
+        }
+    },
+];
+
+const initialRejectedApplications = [
+     { 
+        id: 6, 
+        studentId: '2024-0997', 
+        name: 'Michael Brown', 
+        course: 'BSIT', 
+        year: 1, 
+        status: 'New',
+        credentials: {
+            birthCertificate: false,
+            grades: true,
+            goodMoral: true,
+            registrationForm: true,
+        },
+        rejectionReason: 'Incomplete or missing documents.'
+    },
+];
+
+
 const rejectionReasons = [
     { id: 'incomplete_docs', label: 'Incomplete or missing documents.' },
     { id: 'not_qualified', label: 'Does not meet the minimum qualifications.' },
@@ -92,8 +142,8 @@ type Application = typeof initialPendingApplications[0] & { rejectionReason?: st
 
 export default function ManageApplicationsPage() {
   const [pendingApplications, setPendingApplications] = useState<Application[]>(initialPendingApplications);
-  const [approvedApplications, setApprovedApplications] = useState<Application[]>([]);
-  const [rejectedApplications, setRejectedApplications] = useState<Application[]>([]);
+  const [approvedApplications, setApprovedApplications] = useState<Application[]>(initialApprovedApplications);
+  const [rejectedApplications, setRejectedApplications] = useState<Application[]>(initialRejectedApplications);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [rejectionDialog, setRejectionDialog] = useState<{ isOpen: boolean; application: Application | null }>({
     isOpen: false,
