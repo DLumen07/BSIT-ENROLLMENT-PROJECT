@@ -1,6 +1,6 @@
 
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,28 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 
 type Subject = {
@@ -51,11 +73,70 @@ const formatTime = (timeStr: string) => {
     return `${formattedHour}:${minute.toString().padStart(2, '0')} ${ampm}`;
 }
 
+const colorChoices = [
+    'bg-blue-200/50 dark:bg-blue-800/50 border-blue-400',
+    'bg-green-200/50 dark:bg-green-800/50 border-green-400',
+    'bg-yellow-200/50 dark:bg-yellow-800/50 border-yellow-400',
+    'bg-orange-200/50 dark:bg-orange-800/50 border-orange-400',
+    'bg-purple-200/50 dark:bg-purple-800/50 border-purple-400',
+    'bg-pink-200/50 dark:bg-pink-800/50 border-pink-400',
+    'bg-red-200/50 dark:bg-red-800/50 border-red-400',
+    'bg-indigo-200/50 dark:bg-indigo-800/50 border-indigo-400',
+];
+
+const detailedTimeSlots = Array.from({ length: 12 * 2 }, (_, i) => {
+    const hour = Math.floor(i / 2) + 7;
+    const minute = (i % 2) * 30;
+    const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+    return { value: time, label: formatTime(time) };
+});
+
 export default function SchedulePage() {
     const params = useParams();
     const blockId = decodeURIComponent(params.blockId as string);
 
-    const [subjects] = React.useState<Subject[]>(initialSubjects);
+    const [subjects, setSubjects] = useState<Subject[]>(initialSubjects);
+    const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [subjectToDelete, setSubjectToDelete] = useState<Subject | null>(null);
+
+    const handleAddSubject = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        const newSubject: Omit<Subject, 'id' | 'color'> = {
+            code: formData.get('code') as string,
+            description: formData.get('description') as string,
+            instructor: formData.get('instructor') as string,
+            day: formData.get('day') as string,
+            startTime: formData.get('startTime') as string,
+            endTime: formData.get('endTime') as string,
+        };
+
+        if (Object.values(newSubject).some(val => !val)) {
+            // Basic validation
+            alert('Please fill all fields');
+            return;
+        }
+
+        const randomColor = colorChoices[Math.floor(Math.random() * colorChoices.length)];
+        
+        setSubjects([...subjects, { ...newSubject, id: Date.now(), color: randomColor }]);
+        setIsAddDialogOpen(false);
+    };
+
+    const openDeleteDialog = (subject: Subject) => {
+        setSubjectToDelete(subject);
+        setIsDeleteDialogOpen(true);
+    };
+
+    const handleDeleteSubject = () => {
+        if (subjectToDelete) {
+            setSubjects(subjects.filter(s => s.id !== subjectToDelete.id));
+            setIsDeleteDialogOpen(false);
+            setSubjectToDelete(null);
+        }
+    };
+
 
     return (
         <main className="flex-1 p-4 sm:p-6 space-y-6">
@@ -66,91 +147,170 @@ export default function SchedulePage() {
                         Manage the subjects, schedule, and instructors for this block.
                     </p>
                 </div>
-                 <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Add Subject
-                </Button>
+                 <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                    <DialogTrigger asChild>
+                        <Button>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Add Subject
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Add New Subject</DialogTitle>
+                            <DialogDescription>
+                                Enter the details for the new subject.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <form id="add-subject-form" onSubmit={handleAddSubject}>
+                            <div className="grid gap-4 py-4">
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="code" className="text-right">Code</Label>
+                                    <Input id="code" name="code" className="col-span-3" required />
+                                </div>
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="description" className="text-right">Description</Label>
+                                    <Input id="description" name="description" className="col-span-3" required />
+                                </div>
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="instructor" className="text-right">Instructor</Label>
+                                    <Input id="instructor" name="instructor" className="col-span-3" required />
+                                </div>
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="day" className="text-right">Day</Label>
+                                    <Select name="day" required>
+                                        <SelectTrigger className="col-span-3">
+                                            <SelectValue placeholder="Select a day" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {days.map(day => <SelectItem key={day} value={day}>{day}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                 <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="startTime" className="text-right">Start Time</Label>
+                                    <Select name="startTime" required>
+                                        <SelectTrigger className="col-span-3">
+                                            <SelectValue placeholder="Select start time" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {detailedTimeSlots.map(ts => <SelectItem key={`start-${ts.value}`} value={ts.value}>{ts.label}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                 <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="endTime" className="text-right">End Time</Label>
+                                    <Select name="endTime" required>
+                                        <SelectTrigger className="col-span-3">
+                                            <SelectValue placeholder="Select end time" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {detailedTimeSlots.map(ts => <SelectItem key={`end-${ts.value}`} value={ts.value}>{ts.label}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        </form>
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
+                            <Button type="submit" form="add-subject-form">Create Subject</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
             <Card>
                 <CardContent className="p-4 overflow-x-auto">
-                    <div className="grid grid-cols-[4rem_1fr] min-w-[800px]">
-                        {/* Time Column */}
-                        <div className="flex flex-col">
-                           <div className="h-10"></div> {/* Spacer for day header */}
-                           {timeSlots.map(time => (
-                               <div key={time} className="h-16 flex items-start justify-end pr-2">
-                                   <span className="text-xs text-muted-foreground -translate-y-1/2">{formatTime(time)}</span>
-                               </div>
-                           ))}
-                        </div>
+                     <div className="grid grid-cols-[4rem_repeat(6,1fr)] min-w-[800px]">
+                        {/* Top-left empty cell */}
+                        <div></div>
+                        {/* Day Headers */}
+                        {days.map(day => (
+                            <div key={day} className="h-10 text-center font-semibold text-muted-foreground text-sm p-2 sticky top-0 bg-background z-10">{day}</div>
+                        ))}
 
-                        {/* Schedule Grid */}
-                        <div className="grid grid-cols-6 relative">
-                            {/* Day Headers */}
-                            {days.map(day => (
-                                <div key={day} className="h-10 text-center font-semibold text-muted-foreground text-sm p-2 sticky top-0 bg-background z-10">{day}</div>
+                        {/* Time Column and Grid */}
+                        <div className="col-start-1 row-start-2 relative">
+                             {timeSlots.map((time, index) => (
+                                <div key={time} className="h-16 relative">
+                                    <span className="absolute -top-2 right-2 text-xs text-muted-foreground">{formatTime(time)}</span>
+                                </div>
                             ))}
-
-                            {/* Grid Lines */}
-                             <div className="col-span-6 grid grid-cols-6 grid-rows-12 relative">
-                                {Array.from({ length: 12 * 6 }).map((_, i) => (
-                                    <div key={i} className="h-16 border-t border-r border-dashed"></div>
-                                ))}
-                            </div>
+                        </div>
+                        <div className="col-start-2 col-span-6 row-start-2 relative grid grid-cols-6 grid-rows-12">
+                             {/* Grid Lines */}
+                            {Array.from({ length: 12 * 6 }).map((_, i) => (
+                                <div key={i} className="h-16 border-t border-r border-dashed"></div>
+                            ))}
                             
                             {/* Scheduled Subjects */}
-                            <div className="absolute inset-0 top-10">
-                                {subjects.map(subject => {
-                                    const top = timeToPosition(subject.startTime);
-                                    const height = timeToPosition(subject.endTime) - top;
-                                    const dayIndex = days.indexOf(subject.day);
-                                    
-                                    if (dayIndex === -1) return null;
+                            {subjects.map(subject => {
+                                const top = timeToPosition(subject.startTime);
+                                const height = timeToPosition(subject.endTime) - top;
+                                const dayIndex = days.indexOf(subject.day);
+                                
+                                if (dayIndex === -1) return null;
 
-                                    return (
-                                        <div
-                                            key={subject.id}
-                                            className={cn("absolute rounded-lg p-2 border text-xs overflow-hidden m-px w-[calc(100%-4px)]", subject.color)}
-                                            style={{
-                                                top: `${top}rem`,
-                                                height: `${height}rem`,
-                                                left: `calc(${(100 / 6) * dayIndex}% + 2px)`,
-                                                width: `calc(${(100 / 6)}% - 4px)`,
-                                            }}
-                                        >
-                                            <p className="font-bold truncate">{subject.code}</p>
-                                            <p className="truncate">{subject.description}</p>
-                                            <p className="truncate text-muted-foreground">{subject.instructor}</p>
-                                            
-                                            <div className="absolute bottom-1 right-1 left-1 text-muted-foreground flex items-center gap-1 bg-background/50 backdrop-blur-sm p-1 rounded-sm text-[10px]">
-                                                <Clock className="h-3 w-3 shrink-0" />
-                                                <span className="truncate">{formatTime(subject.startTime)} - {formatTime(subject.endTime)}</span>
-                                            </div>
-
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" className="absolute top-0 right-0 h-6 w-6 p-1 text-muted-foreground hover:bg-transparent hover:text-accent focus-visible:ring-0 focus-visible:ring-offset-0">
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem>
-                                                        <Pencil className="mr-2 h-4 w-4" /> Edit
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem className="text-destructive focus:bg-destructive focus:text-destructive-foreground">
-                                                        <Trash2 className="mr-2 h-4 w-4" /> Delete
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
+                                return (
+                                    <div
+                                        key={subject.id}
+                                        className={cn("absolute rounded-lg p-2 border text-xs overflow-hidden m-px", subject.color)}
+                                        style={{
+                                            top: `${top}rem`,
+                                            height: `${height}rem`,
+                                            left: `calc(${(100 / 6) * dayIndex}% + 2px)`,
+                                            width: `calc(${(100 / 6)}% - 4px)`,
+                                        }}
+                                    >
+                                        <p className="font-bold truncate">{subject.code}</p>
+                                        <p className="truncate">{subject.description}</p>
+                                        <p className="truncate text-muted-foreground">{subject.instructor}</p>
+                                        
+                                        <div className="absolute bottom-1 right-1 left-1 text-muted-foreground flex items-center gap-1 bg-background/50 backdrop-blur-sm p-1 rounded-sm text-[10px]">
+                                            <Clock className="h-3 w-3 shrink-0" />
+                                            <span className="truncate">{formatTime(subject.startTime)} - {formatTime(subject.endTime)}</span>
                                         </div>
-                                    )
-                                })}
-                            </div>
 
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" className="absolute top-0 right-0 h-6 w-6 p-1 text-muted-foreground hover:bg-transparent hover:text-accent focus-visible:ring-0 focus-visible:ring-offset-0">
+                                                    <MoreHorizontal className="h-4 w-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuItem>
+                                                    <Pencil className="mr-2 h-4 w-4" /> Edit
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem 
+                                                    className="text-destructive focus:bg-destructive focus:text-destructive-foreground"
+                                                    onSelect={() => openDeleteDialog(subject)}
+                                                >
+                                                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </div>
+                                )
+                            })}
                         </div>
                     </div>
                 </CardContent>
             </Card>
+
+            <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the subject <span className="font-semibold">{subjectToDelete?.code}</span>.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setSubjectToDelete(null)}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDeleteSubject} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </main>
     );
 }
+
+    
