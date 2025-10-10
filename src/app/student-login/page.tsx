@@ -90,11 +90,11 @@ export default function StudentLoginPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <Button variant="outline" className="w-full hover:border-accent hover:shadow-[0_0_8px_hsl(var(--accent)/0.5)] transition-shadow">
+                <Button variant="outline" className="w-full hover:bg-transparent hover:border-accent hover:shadow-[0_0_8px_hsl(var(--accent)/0.5)] transition-shadow">
                   <GoogleIcon className="mr-2 h-5 w-5" />
                   Sign in with Google
                 </Button>
-                <Button variant="outline" className="w-full hover:border-accent hover:shadow-[0_0_8px_hsl(var(--accent)/0.5)] transition-shadow">
+                <Button variant="outline" className="w-full hover:bg-transparent hover:border-accent hover:shadow-[0_0_8px_hsl(var(--accent)/0.5)] transition-shadow">
                   <FacebookIcon className="mr-2 h-5 w-5 text-[#1877F2]" />
                   Sign in with Facebook
                 </Button>
