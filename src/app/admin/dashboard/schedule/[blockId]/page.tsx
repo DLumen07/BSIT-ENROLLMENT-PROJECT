@@ -33,11 +33,14 @@ const initialSubjects: Subject[] = [
 ];
 
 const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const timeSlots = Array.from({ length: 11 }, (_, i) => `${(i + 7).toString().padStart(2, '0')}:00`); // 7 AM to 5 PM
+const timeSlots = Array.from({ length: 12 }, (_, i) => `${(i + 7).toString().padStart(2, '0')}:00`); // 7 AM to 6 PM
+
+const HOUR_HEIGHT_REM = 4; // 4rem = 64px per hour
 
 const timeToPosition = (time: string) => {
     const [hour, minute] = time.split(':').map(Number);
-    return (hour - 7) * 60 + minute;
+    const totalMinutes = (hour - 7) * 60 + minute;
+    return (totalMinutes / 60) * HOUR_HEIGHT_REM;
 };
 
 const formatTime = (timeStr: string) => {
@@ -70,97 +73,81 @@ export default function SchedulePage() {
             </div>
             <Card>
                 <CardContent className="p-4 overflow-x-auto">
-                    <div className="relative grid grid-cols-[auto_repeat(6,minmax(120px,1fr))] grid-rows-[auto_repeat(660,minmax(0,1fr))]" style={{ minWidth: '800px' }}>
-                        {/* Time column */}
-                        <div className="row-start-1 col-start-1 sticky left-0 bg-background z-10 pr-2">
-                             {/* Empty cell for day header alignment */}
+                    <div className="grid grid-cols-[4rem_1fr] min-w-[800px]">
+                        {/* Time Column */}
+                        <div className="flex flex-col">
+                           <div className="h-10"></div> {/* Spacer for day header */}
+                           {timeSlots.map(time => (
+                               <div key={time} className="h-16 flex items-start justify-end pr-2">
+                                   <span className="text-xs text-muted-foreground -translate-y-1/2">{formatTime(time)}</span>
+                               </div>
+                           ))}
                         </div>
-                        {timeSlots.map((time, index) => (
-                             <div 
-                                key={time} 
-                                className="row-start-1 col-start-1 sticky left-0 bg-background z-10 pr-2 text-xs text-muted-foreground text-right"
-                                style={{ gridRow: `${index * 60 + 2}`}}
-                            >
-                                <span className="-translate-y-1/2">{formatTime(time)}</span>
+
+                        {/* Schedule Grid */}
+                        <div className="grid grid-cols-6 relative">
+                            {/* Day Headers */}
+                            {days.map(day => (
+                                <div key={day} className="h-10 text-center font-semibold text-muted-foreground text-sm p-2 sticky top-0 bg-background z-10">{day}</div>
+                            ))}
+
+                            {/* Grid Lines */}
+                             <div className="col-span-6 grid grid-cols-6 grid-rows-12 relative">
+                                {Array.from({ length: 12 * 6 }).map((_, i) => (
+                                    <div key={i} className="h-16 border-t border-r border-dashed"></div>
+                                ))}
                             </div>
-                        ))}
-
-                        {/* Day headers */}
-                        {days.map((day, i) => (
-                            <div key={day} className="row-start-1 text-center font-semibold text-muted-foreground text-sm p-2 sticky top-0 bg-background z-10" style={{ gridColumn: `${i + 2}` }}>{day}</div>
-                        ))}
-
-                        {/* Grid lines */}
-                        {days.map((day, dayIndex) => (
-                            timeSlots.slice(0, -1).map((time, timeIndex) => (
-                                <div
-                                    key={`${day}-${time}`}
-                                    className="border-r border-t border-dashed"
-                                    style={{
-                                        gridColumn: `${dayIndex + 2}`,
-                                        gridRow: `${timeIndex * 60 + 2} / span 60`,
-                                    }}
-                                ></div>
-                            ))
-                        ))}
-                        {/* Final row border bottom */}
-                        {days.map((day, dayIndex) => (
-                            <div
-                                key={`bottom-border-${day}`}
-                                className="border-r border-b border-dashed"
-                                style={{
-                                    gridColumn: `${dayIndex + 2}`,
-                                    gridRow: `${timeSlots.length * 60 + 1}`,
-                                }}
-                            ></div>
-                        ))}
-
-
-                        {/* Scheduled subjects */}
-                        {subjects.map(subject => {
-                            const top = timeToPosition(subject.startTime);
-                            const height = timeToPosition(subject.endTime) - top;
-                            const dayIndex = days.indexOf(subject.day);
-
-                            if (dayIndex === -1) return null;
                             
-                            return (
-                                <div
-                                    key={subject.id}
-                                    className={cn("relative rounded-lg p-2 border text-xs overflow-hidden m-px", subject.color)}
-                                    style={{
-                                        gridColumnStart: dayIndex + 2,
-                                        gridRowStart: top + 2,
-                                        gridRowEnd: top + height + 2,
-                                    }}
-                                >
-                                    <p className="font-bold truncate">{subject.code}</p>
-                                    <p className="truncate">{subject.description}</p>
-                                    <p className="truncate text-muted-foreground">{subject.instructor}</p>
+                            {/* Scheduled Subjects */}
+                            <div className="absolute inset-0 top-10">
+                                {subjects.map(subject => {
+                                    const top = timeToPosition(subject.startTime);
+                                    const height = timeToPosition(subject.endTime) - top;
+                                    const dayIndex = days.indexOf(subject.day);
                                     
-                                    <div className="absolute bottom-1 right-1 left-1 text-muted-foreground flex items-center gap-1 bg-background/50 backdrop-blur-sm p-1 rounded-sm text-[10px]">
-                                        <Clock className="h-3 w-3 shrink-0" />
-                                        <span className="truncate">{formatTime(subject.startTime)} - {formatTime(subject.endTime)}</span>
-                                    </div>
+                                    if (dayIndex === -1) return null;
 
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost" className="absolute top-0 right-0 h-6 w-6 p-1 text-muted-foreground hover:bg-transparent hover:text-accent focus-visible:ring-0 focus-visible:ring-offset-0">
-                                                <MoreHorizontal className="h-4 w-4" />
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                            <DropdownMenuItem>
-                                                <Pencil className="mr-2 h-4 w-4" /> Edit
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem className="text-destructive focus:bg-destructive focus:text-destructive-foreground">
-                                                <Trash2 className="mr-2 h-4 w-4" /> Delete
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </div>
-                            )
-                        })}
+                                    return (
+                                        <div
+                                            key={subject.id}
+                                            className={cn("absolute rounded-lg p-2 border text-xs overflow-hidden m-px w-[calc(100%-4px)]", subject.color)}
+                                            style={{
+                                                top: `${top}rem`,
+                                                height: `${height}rem`,
+                                                left: `calc(${(100 / 6) * dayIndex}% + 2px)`,
+                                                width: `calc(${(100 / 6)}% - 4px)`,
+                                            }}
+                                        >
+                                            <p className="font-bold truncate">{subject.code}</p>
+                                            <p className="truncate">{subject.description}</p>
+                                            <p className="truncate text-muted-foreground">{subject.instructor}</p>
+                                            
+                                            <div className="absolute bottom-1 right-1 left-1 text-muted-foreground flex items-center gap-1 bg-background/50 backdrop-blur-sm p-1 rounded-sm text-[10px]">
+                                                <Clock className="h-3 w-3 shrink-0" />
+                                                <span className="truncate">{formatTime(subject.startTime)} - {formatTime(subject.endTime)}</span>
+                                            </div>
+
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" className="absolute top-0 right-0 h-6 w-6 p-1 text-muted-foreground hover:bg-transparent hover:text-accent focus-visible:ring-0 focus-visible:ring-offset-0">
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem>
+                                                        <Pencil className="mr-2 h-4 w-4" /> Edit
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem className="text-destructive focus:bg-destructive focus:text-destructive-foreground">
+                                                        <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+
+                        </div>
                     </div>
                 </CardContent>
             </Card>
