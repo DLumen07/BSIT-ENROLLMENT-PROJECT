@@ -1,6 +1,6 @@
 
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -13,7 +13,6 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -35,6 +34,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const yearLevelMap: Record<string, string> = {
     '1st-year': '1st Year',
@@ -43,11 +43,18 @@ const yearLevelMap: Record<string, string> = {
     '4th-year': '4th Year',
 };
 
+const specializations = [
+    { value: 'none', label: 'None' },
+    { value: 'AP', label: 'Application Programming (AP)' },
+    { value: 'DD', label: 'Digital Design (DD)' },
+];
+
 type Block = {
     id: number;
     name: string;
     capacity: number;
     enrolled: number;
+    specialization?: string;
 };
 
 
@@ -55,10 +62,11 @@ export default function YearLevelBlocksPage() {
     const params = useParams();
     const year = params.year as string;
     const yearLabel = yearLevelMap[year] || 'Unknown Year';
+    const isUpperYear = year === '3rd-year' || year === '4th-year';
 
     const [blocks, setBlocks] = useState<Block[]>([
-        { id: 1, name: `BSIT ${year.charAt(0)}-A`, capacity: 40, enrolled: 38 },
-        { id: 2, name: `BSIT ${year.charAt(0)}-B`, capacity: 40, enrolled: 35 },
+        { id: 1, name: `BSIT ${year.charAt(0)}-A`, capacity: 40, enrolled: 38, specialization: isUpperYear ? 'AP' : undefined },
+        { id: 2, name: `BSIT ${year.charAt(0)}-B`, capacity: 40, enrolled: 35, specialization: isUpperYear ? 'DD' : undefined },
     ]);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -66,6 +74,13 @@ export default function YearLevelBlocksPage() {
     const [selectedBlock, setSelectedBlock] = useState<Block | null>(null);
     const [blockName, setBlockName] = useState('');
     const [blockCapacity, setBlockCapacity] = useState('');
+    const [blockSpecialization, setBlockSpecialization] = useState('none');
+
+     useEffect(() => {
+        setBlockName('');
+        setBlockCapacity('');
+        setBlockSpecialization('none');
+    }, [isAddDialogOpen, isEditDialogOpen]);
 
     const handleAddBlock = () => {
         if (blockName && blockCapacity) {
@@ -74,21 +89,18 @@ export default function YearLevelBlocksPage() {
                 name: blockName,
                 capacity: parseInt(blockCapacity, 10),
                 enrolled: 0,
+                specialization: isUpperYear && blockSpecialization !== 'none' ? blockSpecialization : undefined,
             };
             setBlocks([...blocks, newBlock]);
             setIsAddDialogOpen(false);
-            setBlockName('');
-            setBlockCapacity('');
         }
     };
 
     const handleEditBlock = () => {
         if (selectedBlock && blockName && blockCapacity) {
-            setBlocks(blocks.map(b => b.id === selectedBlock.id ? { ...b, name: blockName, capacity: parseInt(blockCapacity, 10) } : b));
+            setBlocks(blocks.map(b => b.id === selectedBlock.id ? { ...b, name: blockName, capacity: parseInt(blockCapacity, 10), specialization: isUpperYear && blockSpecialization !== 'none' ? blockSpecialization : undefined } : b));
             setIsEditDialogOpen(false);
             setSelectedBlock(null);
-            setBlockName('');
-            setBlockCapacity('');
         }
     };
     
@@ -104,6 +116,7 @@ export default function YearLevelBlocksPage() {
         setSelectedBlock(block);
         setBlockName(block.name);
         setBlockCapacity(block.capacity.toString());
+        setBlockSpecialization(block.specialization || 'none');
         setIsEditDialogOpen(true);
     };
 
@@ -111,6 +124,10 @@ export default function YearLevelBlocksPage() {
         setSelectedBlock(block);
         setIsDeleteDialogOpen(true);
     };
+    
+    const getBlockDisplayName = (block: Block) => {
+        return block.specialization ? `${block.name} (${block.specialization})` : block.name;
+    }
 
 
     return (
@@ -146,6 +163,21 @@ export default function YearLevelBlocksPage() {
                                     <Label htmlFor="block-capacity">Capacity</Label>
                                     <Input id="block-capacity" type="number" value={blockCapacity} onChange={e => setBlockCapacity(e.target.value)} placeholder="e.g., 40" />
                                 </div>
+                                {isUpperYear && (
+                                     <div className="space-y-2">
+                                        <Label htmlFor="block-specialization">Specialization</Label>
+                                        <Select value={blockSpecialization} onValueChange={setBlockSpecialization}>
+                                            <SelectTrigger id="block-specialization">
+                                                <SelectValue placeholder="Select a specialization" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {specializations.map(spec => (
+                                                    <SelectItem key={spec.value} value={spec.value}>{spec.label}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                )}
                             </div>
                             <DialogFooter>
                                 <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
@@ -176,14 +208,14 @@ export default function YearLevelBlocksPage() {
                                     blocks.map(block => (
                                         <TableRow key={block.id}>
                                             <TableCell className="font-medium">
-                                                {block.name}
+                                                {getBlockDisplayName(block)}
                                             </TableCell>
                                             <TableCell>{block.capacity}</TableCell>
                                             <TableCell>{block.enrolled}</TableCell>
                                             <TableCell className="text-right">
                                                  <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" className="h-8 w-8 p-0 text-muted-foreground hover:bg-transparent hover:text-accent focus-visible:ring-0 focus-visible:ring-offset-0">
+                                                        <Button variant="ghost" className="h-8 w-8 p-0 text-muted-foreground hover:bg-transparent hover:text-accent focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:bg-transparent data-[state=open]:text-accent">
                                                             <span className="sr-only">Open menu</span>
                                                             <MoreHorizontal className="h-4 w-4" />
                                                         </Button>
@@ -227,7 +259,7 @@ export default function YearLevelBlocksPage() {
                     <DialogHeader>
                         <DialogTitle>Edit Block</DialogTitle>
                         <DialogDescription>
-                            Update the name and capacity for this block.
+                            Update the name, capacity, and specialization for this block.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-2">
@@ -239,6 +271,21 @@ export default function YearLevelBlocksPage() {
                             <Label htmlFor="edit-block-capacity">Capacity</Label>
                             <Input id="edit-block-capacity" type="number" value={blockCapacity} onChange={e => setBlockCapacity(e.target.value)} />
                         </div>
+                         {isUpperYear && (
+                            <div className="space-y-2">
+                                <Label htmlFor="edit-block-specialization">Specialization</Label>
+                                <Select value={blockSpecialization} onValueChange={setBlockSpecialization}>
+                                    <SelectTrigger id="edit-block-specialization">
+                                        <SelectValue placeholder="Select a specialization" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {specializations.map(spec => (
+                                            <SelectItem key={spec.value} value={spec.value}>{spec.label}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
@@ -252,7 +299,7 @@ export default function YearLevelBlocksPage() {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete the <span className="font-semibold">{selectedBlock?.name}</span> block.
+                            This action cannot be undone. This will permanently delete the <span className="font-semibold">{getBlockDisplayName(selectedBlock!)}</span> block.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -264,3 +311,5 @@ export default function YearLevelBlocksPage() {
         </>
     );
 }
+
+    
