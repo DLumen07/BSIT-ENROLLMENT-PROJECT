@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, MoreHorizontal, Trash2, Pencil } from 'lucide-react';
+import { PlusCircle, MoreHorizontal, Trash2, Pencil, Calendar } from 'lucide-react';
 import {
     Dialog,
     DialogContent,
@@ -23,6 +23,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
+    DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import {
     AlertDialog,
@@ -175,9 +176,7 @@ export default function YearLevelBlocksPage() {
                                     blocks.map(block => (
                                         <TableRow key={block.id}>
                                             <TableCell className="font-medium">
-                                                <Link href={`/admin/dashboard/schedule/${encodeURIComponent(block.name)}`} className="hover:underline">
-                                                    {block.name}
-                                                </Link>
+                                                {block.name}
                                             </TableCell>
                                             <TableCell>{block.capacity}</TableCell>
                                             <TableCell>{block.enrolled}</TableCell>
@@ -190,6 +189,13 @@ export default function YearLevelBlocksPage() {
                                                         </Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem asChild>
+                                                            <Link href={`/admin/dashboard/schedule/${encodeURIComponent(block.name)}`}>
+                                                                <Calendar className="mr-2 h-4 w-4" />
+                                                                Manage Schedule
+                                                            </Link>
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuSeparator />
                                                         <DropdownMenuItem onSelect={() => openEditDialog(block)}>
                                                             <Pencil className="mr-2 h-4 w-4" /> Edit
                                                         </DropdownMenuItem>
