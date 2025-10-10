@@ -123,7 +123,7 @@ export default function YearLevelBlocksPage() {
                     </div>
                     <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                         <DialogTrigger asChild>
-                            <Button variant="outline" className="rounded-full">
+                             <Button className="rounded-full bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground">
                                 <PlusCircle className="mr-2 h-4 w-4" />
                                 Add New Block
                             </Button>
