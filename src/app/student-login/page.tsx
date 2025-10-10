@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import React from 'react';
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg role="img" viewBox="0 0 24 24" {...props}>
@@ -79,24 +80,22 @@ export default function StudentLoginPage() {
                   <span className="text-xs text-muted-foreground">OR</span>
                   <Separator className="flex-1" />
                 </div>
-                <div className="space-y-4">
-                  <div className="space-y-2 text-left">
+                <div className="space-y-2 text-left">
                     <Label htmlFor="email">Email</Label>
                     <Input
-                      id="email"
-                      type="email"
-                      placeholder="student@example.com"
-                      required
+                        id="email"
+                        type="email"
+                        placeholder="student@example.com"
+                        required
                     />
-                  </div>
-                  <div className="space-y-2 text-left">
+                </div>
+                <div className="space-y-2 text-left">
                     <Label htmlFor="password">Password</Label>
                     <Input id="password" type="password" required />
-                  </div>
-                  <Button onClick={handleLogin} className="w-full">
-                    Login with Email
-                  </Button>
                 </div>
+                <Button onClick={handleLogin} className="w-full">
+                    Login with Email
+                </Button>
                 <div className="text-center text-sm">
                   Don't have an account?{' '}
                   <Link href="/student-signup" className="underline">
