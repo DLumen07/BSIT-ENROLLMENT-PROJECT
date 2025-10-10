@@ -282,7 +282,7 @@ export default function ManageApplicationsPage() {
                         <div className="flex items-center gap-2 flex-wrap">
                             <Select value={filters.course} onValueChange={(value) => handleFilterChange('course', value)}>
                                 <SelectTrigger className="w-full sm:w-auto">
-                                    <SelectValue placeholder="Filter by course" />
+                                    <SelectValue placeholder="Course" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {courses.map(course => <SelectItem key={course} value={course}>{course === 'all' ? 'All Courses' : course}</SelectItem>)}
@@ -290,7 +290,7 @@ export default function ManageApplicationsPage() {
                             </Select>
                             <Select value={filters.year} onValueChange={(value) => handleFilterChange('year', value)}>
                                 <SelectTrigger className="w-full sm:w-auto">
-                                    <SelectValue placeholder="Filter by year" />
+                                    <SelectValue placeholder="Year" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {years.map(year => <SelectItem key={year} value={year}>{year === 'all' ? 'All Years' : `Year ${year}`}</SelectItem>)}
@@ -298,7 +298,7 @@ export default function ManageApplicationsPage() {
                             </Select>
                              <Select value={filters.status} onValueChange={(value) => handleFilterChange('status', value)}>
                                 <SelectTrigger className="w-full sm:w-auto">
-                                    <SelectValue placeholder="Filter by status" />
+                                    <SelectValue placeholder="Status" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {statuses.map(status => <SelectItem key={status} value={status}>{status === 'all' ? 'All Statuses' : status}</SelectItem>)}
