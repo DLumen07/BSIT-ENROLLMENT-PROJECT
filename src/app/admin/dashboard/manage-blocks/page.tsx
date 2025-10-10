@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { PlusCircle, MoreVertical, Edit, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     Dialog,
     DialogContent,
@@ -12,7 +11,6 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from '@/components/ui/dialog';
 import {
     AlertDialog,
@@ -38,8 +36,10 @@ type Block = {
   name: string;
 };
 
+type YearLevel = '1st-year' | '2nd-year' | '3rd-year' | '4th-year';
+
 type YearLevelBlocks = {
-  [key: string]: Block[];
+  [key in YearLevel]: Block[];
 };
 
 const initialBlocks: YearLevelBlocks = {
@@ -61,20 +61,27 @@ const initialBlocks: YearLevelBlocks = {
   ],
 };
 
+const yearLevelsConfig: {value: YearLevel, label: string}[] = [
+    { value: '1st-year', label: '1st Year' },
+    { value: '2nd-year', label: '2nd Year' },
+    { value: '3rd-year', label: '3rd Year' },
+    { value: '4th-year', label: '4th Year' },
+];
+
+
 export default function ManageBlocksPage() {
     const [blocks, setBlocks] = useState<YearLevelBlocks>(initialBlocks);
-    const [activeTab, setActiveTab] = useState('1st-year');
     const [dialogState, setDialogState] = useState<{
         isOpen: boolean;
         mode: 'add' | 'edit';
-        year: string;
+        year: YearLevel | null;
         block?: Block;
         newName: string;
-    }>({ isOpen: false, mode: 'add', year: '1st-year', newName: '' });
-    const [deleteDialog, setDeleteDialog] = useState<{isOpen: boolean, blockId: number | null}>({isOpen: false, blockId: null});
+    }>({ isOpen: false, mode: 'add', year: null, newName: '' });
+    const [deleteDialog, setDeleteDialog] = useState<{isOpen: boolean; block: Block | null, year: YearLevel | null}>({isOpen: false, block: null, year: null});
 
     const handleAddBlock = () => {
-        if (!dialogState.newName.trim()) return;
+        if (!dialogState.newName.trim() || !dialogState.year) return;
 
         const newBlock = {
             id: Date.now(),
@@ -82,54 +89,48 @@ export default function ManageBlocksPage() {
         };
         setBlocks(prev => ({
             ...prev,
-            [activeTab]: [...(prev[activeTab] || []), newBlock],
+            [dialogState.year!]: [...(prev[dialogState.year!] || []), newBlock],
         }));
 
         handleCloseDialog();
     };
 
     const handleEditBlock = () => {
-        if (!dialogState.block || !dialogState.newName.trim()) return;
+        if (!dialogState.block || !dialogState.newName.trim() || !dialogState.year) return;
 
         setBlocks(prev => {
-            const updatedBlocks = prev[activeTab].map(b => 
+            const updatedBlocks = prev[dialogState.year!].map(b => 
                 b.id === dialogState.block?.id ? { ...b, name: dialogState.newName } : b
             );
-            return { ...prev, [activeTab]: updatedBlocks };
+            return { ...prev, [dialogState.year!]: updatedBlocks };
         });
 
         handleCloseDialog();
     };
 
     const handleDeleteBlock = () => {
-        if (deleteDialog.blockId === null) return;
+        if (!deleteDialog.block || !deleteDialog.year) return;
+        
         setBlocks(prev => {
-            const updatedBlocks = prev[activeTab].filter(b => b.id !== deleteDialog.blockId);
-            return { ...prev, [activeTab]: updatedBlocks };
+            const updatedBlocks = prev[deleteDialog.year!].filter(b => b.id !== deleteDialog.block!.id);
+            return { ...prev, [deleteDialog.year!]: updatedBlocks };
         });
-        setDeleteDialog({isOpen: false, blockId: null});
+        setDeleteDialog({isOpen: false, block: null, year: null});
     };
 
-    const handleOpenDialog = (mode: 'add' | 'edit', block?: Block) => {
+    const handleOpenDialog = (mode: 'add' | 'edit', year: YearLevel, block?: Block) => {
         setDialogState({ 
             isOpen: true, 
             mode, 
-            year: activeTab, 
+            year, 
             block, 
             newName: mode === 'edit' && block ? block.name : ''
         });
     };
 
     const handleCloseDialog = () => {
-        setDialogState({ isOpen: false, mode: 'add', year: '', newName: '' });
+        setDialogState({ isOpen: false, mode: 'add', year: null, newName: '' });
     };
-
-    const yearLevels = [
-        { value: '1st-year', label: '1st Year' },
-        { value: '2nd-year', label: '2nd Year' },
-        { value: '3rd-year', label: '3rd Year' },
-        { value: '4th-year', label: '4th Year' },
-    ];
 
     return (
         <>
@@ -143,68 +144,61 @@ export default function ManageBlocksPage() {
                     </div>
                 </div>
 
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <TabsList>
-                            {yearLevels.map(yl => (
-                                <TabsTrigger key={yl.value} value={yl.value}>{yl.label}</TabsTrigger>
-                            ))}
-                        </TabsList>
-                        <Button onClick={() => handleOpenDialog('add')} className="w-full sm:w-auto">
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            Add New Block
-                        </Button>
-                    </div>
-                    {yearLevels.map(yl => (
-                         <TabsContent key={yl.value} value={yl.value} className="mt-6">
-                            <Card>
-                                <CardHeader>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {yearLevelsConfig.map(yl => (
+                        <Card key={yl.value}>
+                            <CardHeader className="flex flex-row items-center justify-between">
+                                <div className="space-y-0.5">
                                     <CardTitle>Blocks for {yl.label}</CardTitle>
                                     <CardDescription>
                                         A total of {blocks[yl.value]?.length || 0} block(s) found.
                                     </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    {blocks[yl.value]?.length > 0 ? (
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                            {blocks[yl.value].map(block => (
-                                                <Card key={block.id} className="group">
-                                                    <CardContent className="flex items-center justify-between p-4">
-                                                        <span className="font-medium">{block.name}</span>
-                                                         <DropdownMenu>
-                                                            <DropdownMenuTrigger asChild>
-                                                                <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                    <MoreVertical className="h-4 w-4 text-muted-foreground" />
-                                                                </Button>
-                                                            </DropdownMenuTrigger>
-                                                            <DropdownMenuContent align="end">
-                                                                <DropdownMenuItem onSelect={() => handleOpenDialog('edit', block)}>
-                                                                    <Edit className="mr-2 h-4 w-4" />
-                                                                    Edit
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem
-                                                                    className="text-destructive focus:bg-destructive focus:text-destructive-foreground"
-                                                                    onSelect={() => setDeleteDialog({ isOpen: true, blockId: block.id })}
-                                                                >
-                                                                    <Trash2 className="mr-2 h-4 w-4" />
-                                                                    Delete
-                                                                </DropdownMenuItem>
-                                                            </DropdownMenuContent>
-                                                        </DropdownMenu>
-                                                    </CardContent>
-                                                </Card>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="text-center py-12">
-                                            <p className="text-muted-foreground">No blocks created for this year level yet.</p>
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
-                         </TabsContent>
+                                </div>
+                                <Button size="sm" onClick={() => handleOpenDialog('add', yl.value)}>
+                                    <PlusCircle className="mr-2 h-4 w-4" />
+                                    Add Block
+                                </Button>
+                            </CardHeader>
+                            <CardContent>
+                                {blocks[yl.value]?.length > 0 ? (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        {blocks[yl.value].map(block => (
+                                            <Card key={block.id} className="group">
+                                                <CardContent className="flex items-center justify-between p-4">
+                                                    <span className="font-medium">{block.name}</span>
+                                                        <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <MoreVertical className="h-4 w-4 text-muted-foreground" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                            <DropdownMenuItem onSelect={() => handleOpenDialog('edit', yl.value, block)}>
+                                                                <Edit className="mr-2 h-4 w-4" />
+                                                                Edit
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem
+                                                                className="text-destructive focus:bg-destructive focus:text-destructive-foreground"
+                                                                onSelect={() => setDeleteDialog({ isOpen: true, block: block, year: yl.value })}
+                                                            >
+                                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                                Delete
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                </CardContent>
+                                            </Card>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-10">
+                                        <p className="text-sm text-muted-foreground">No blocks created for this year level yet.</p>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
                     ))}
-                </Tabs>
+                </div>
             </main>
 
             <Dialog open={dialogState.isOpen} onOpenChange={handleCloseDialog}>
@@ -213,39 +207,44 @@ export default function ManageBlocksPage() {
                         <DialogTitle>{dialogState.mode === 'add' ? 'Add New Block' : 'Edit Block'}</DialogTitle>
                         <DialogDescription>
                             {dialogState.mode === 'add' 
-                                ? `Enter the name for the new block in ${yearLevels.find(yl => yl.value === activeTab)?.label}.`
+                                ? `Enter the name for the new block in ${yearLevelsConfig.find(yl => yl.value === dialogState.year)?.label}.`
                                 : `Editing the block name.`}
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="block-name" className="text-right">
-                                Name
-                            </Label>
-                            <Input
-                                id="block-name"
-                                value={dialogState.newName}
-                                onChange={(e) => setDialogState(prev => ({ ...prev, newName: e.target.value }))}
-                                className="col-span-3"
-                                placeholder="e.g., BSIT 1-D"
-                            />
+                    <form id="block-form" onSubmit={(e) => {
+                         e.preventDefault();
+                         if (dialogState.mode === 'add') handleAddBlock(); else handleEditBlock();
+                    }}>
+                        <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="block-name" className="text-right">
+                                    Name
+                                </Label>
+                                <Input
+                                    id="block-name"
+                                    value={dialogState.newName}
+                                    onChange={(e) => setDialogState(prev => ({ ...prev, newName: e.target.value }))}
+                                    className="col-span-3"
+                                    placeholder="e.g., BSIT 1-D"
+                                />
+                            </div>
                         </div>
-                    </div>
+                    </form>
                     <DialogFooter>
                         <Button variant="outline" onClick={handleCloseDialog}>Cancel</Button>
-                        <Button onClick={dialogState.mode === 'add' ? handleAddBlock : handleEditBlock}>
+                        <Button type="submit" form="block-form">
                             {dialogState.mode === 'add' ? 'Add Block' : 'Save Changes'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
 
-            <AlertDialog open={deleteDialog.isOpen} onOpenChange={(open) => !open && setDeleteDialog({isOpen: false, blockId: null})}>
+            <AlertDialog open={deleteDialog.isOpen} onOpenChange={(open) => !open && setDeleteDialog({isOpen: false, block: null, year: null})}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete the block and may affect student data associated with it.
+                            This action cannot be undone. This will permanently delete the block <span className="font-semibold">{deleteDialog.block?.name}</span> and may affect student data associated with it.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
