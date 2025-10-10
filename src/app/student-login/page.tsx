@@ -71,7 +71,7 @@ export default function StudentLoginPage() {
                   <span className="text-xs text-muted-foreground">OR</span>
                   <Separator className="flex-1" />
                 </div>
-                <form className="space-y-4">
+                <form className="space-y-4" action="/student/dashboard">
                   <div className="space-y-2 text-left">
                     <Label htmlFor="email">Email</Label>
                     <Input
