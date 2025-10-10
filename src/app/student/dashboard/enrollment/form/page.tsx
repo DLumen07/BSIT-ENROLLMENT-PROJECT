@@ -76,6 +76,7 @@ const academicSchema = z.object({
 
 
 const enrollmentSchema = personalFamilySchema.merge(additionalInfoSchema).merge(academicSchema);
+type EnrollmentSchemaType = z.infer<typeof enrollmentSchema>;
 
 const blocksByYear: Record<string, { value: string; label: string }[]> = {
     "1st Year": [{ value: 'BSIT-1A', label: 'BSIT 1-A' }, { value: 'BSIT-1B', label: 'BSIT 1-B' }],
@@ -84,35 +85,35 @@ const blocksByYear: Record<string, { value: string; label: string }[]> = {
     "4th Year": [{ value: 'BSIT-4A', label: 'BSIT 4-A' }, { value: 'BSIT-4B', label: 'BSIT 4-B' }],
 };
 
-const subjectsByCourseAndYear: Record<string, Record<string, { id: string; label: string }[]>> = {
+const subjectsByCourseAndYear: Record<string, Record<string, { id: string; label: string; units: number }[]>> = {
     "BSIT": {
         "1st Year": [
-            { id: 'IT101', label: 'IT 101 - Introduction to Computing' },
-            { id: 'MATH101', label: 'MATH 101 - Calculus 1' },
-            { id: 'ENG101', label: 'ENG 101 - Purposive Communication' },
+            { id: 'IT101', label: 'IT 101 - Introduction to Computing', units: 3 },
+            { id: 'MATH101', label: 'MATH 101 - Calculus 1', units: 3 },
+            { id: 'ENG101', label: 'ENG 101 - Purposive Communication', units: 3 },
         ],
         "2nd Year": [
-            { id: 'IT201', label: 'IT 201 - Data Structures & Algorithms' },
-            { id: 'IT202', label: 'IT 202 - Web Development' },
-            { id: 'MATH201', label: 'MATH 201 - Discrete Mathematics' },
+            { id: 'IT201', label: 'IT 201 - Data Structures & Algorithms', units: 3 },
+            { id: 'IT202', label: 'IT 202 - Web Development', units: 3 },
+            { id: 'MATH201', label: 'MATH 201 - Discrete Mathematics', units: 3 },
         ],
         "3rd Year": [
-             { id: 'IT301', label: 'IT 301 - Software Engineering' },
-             { id: 'IT302', label: 'IT 302 - Database Management' },
+             { id: 'IT301', label: 'IT 301 - Software Engineering', units: 3 },
+             { id: 'IT302', label: 'IT 302 - Database Management', units: 3 },
         ],
         "4th Year": [
-            { id: 'IT401', label: 'IT 401 - Capstone Project 1' },
-            { id: 'IT402', label: 'IT 402 - Information Assurance & Security' },
+            { id: 'IT401', label: 'IT 401 - Capstone Project 1', units: 5 },
+            { id: 'IT402', label: 'IT 402 - Information Assurance & Security', units: 3 },
         ]
     },
     "ACT": {
         "1st Year": [
-            { id: 'ACT101', label: 'ACT 101 - Fundamentals of Accounting' },
-            { id: 'ACT102', label: 'ACT 102 - Business Communication' },
+            { id: 'ACT101', label: 'ACT 101 - Fundamentals of Accounting', units: 3 },
+            { id: 'ACT102', label: 'ACT 102 - Business Communication', units: 3 },
         ],
         "2nd Year": [
-             { id: 'ACT201', label: 'ACT 201 - Intermediate Accounting' },
-             { id: 'ACT202', label: 'ACT 202 - Cost Accounting' },
+             { id: 'ACT201', label: 'ACT 201 - Intermediate Accounting', units: 3 },
+             { id: 'ACT202', label: 'ACT 202 - Cost Accounting', units: 3 },
         ]
     }
 };
@@ -342,25 +343,28 @@ const Step3 = () => {
                                     return (
                                         <FormItem
                                         key={subject.id}
-                                        className="flex flex-row items-start space-x-3 space-y-0"
+                                        className="flex flex-row items-center justify-between rounded-lg border p-3"
                                         >
-                                        <FormControl>
-                                            <Checkbox
-                                            checked={field.value?.includes(subject.id)}
-                                            onCheckedChange={(checked) => {
-                                                return checked
-                                                ? field.onChange([...(field.value || []), subject.id])
-                                                : field.onChange(
-                                                    field.value?.filter(
-                                                        (value) => value !== subject.id
-                                                    )
-                                                    )
-                                            }}
-                                            />
-                                        </FormControl>
-                                        <FormLabel className="font-normal">
-                                            {subject.label}
-                                        </FormLabel>
+                                        <div className="flex items-center space-x-3">
+                                            <FormControl>
+                                                <Checkbox
+                                                checked={field.value?.includes(subject.id)}
+                                                onCheckedChange={(checked) => {
+                                                    return checked
+                                                    ? field.onChange([...(field.value || []), subject.id])
+                                                    : field.onChange(
+                                                        field.value?.filter(
+                                                            (value) => value !== subject.id
+                                                        )
+                                                        )
+                                                }}
+                                                />
+                                            </FormControl>
+                                            <FormLabel className="font-normal m-0!">
+                                                {subject.label}
+                                            </FormLabel>
+                                        </div>
+                                        <div className="text-sm text-muted-foreground">{subject.units} units</div>
                                         </FormItem>
                                     )
                                     }}
@@ -377,12 +381,101 @@ const Step3 = () => {
     );
 };
 
+const ReviewStep = ({ formData }: { formData: EnrollmentSchemaType }) => {
+    const getSubjectLabel = (subjectId: string) => {
+        for (const course in subjectsByCourseAndYear) {
+            for (const year in subjectsByCourseAndYear[course]) {
+                const subject = subjectsByCourseAndYear[course][year].find(s => s.id === subjectId);
+                if (subject) return subject.label;
+            }
+        }
+        return subjectId;
+    };
+
+    const ReviewItem = ({ label, value }: { label: string, value?: string | number | boolean | Date | null }) => (
+        value ? (
+            <div className="flex flex-col sm:flex-row sm:items-center">
+                <p className="w-full sm:w-1/3 font-medium text-muted-foreground">{label}</p>
+                <p className="w-full sm:w-2/3">{typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value instanceof Date ? format(value, "PPP") : value}</p>
+            </div>
+        ) : null
+    );
+
+    return (
+        <div className="space-y-8">
+            <div>
+                <h3 className="text-lg font-medium mb-4">Personal & Family Information</h3>
+                <div className="space-y-2">
+                    <ReviewItem label="Full Name" value={`${formData.firstName} ${formData.middleName || ''} ${formData.lastName}`} />
+                    <ReviewItem label="Email" value={formData.email} />
+                    <ReviewItem label="Phone Number" value={formData.phoneNumber} />
+                    <ReviewItem label="Birthdate" value={formData.birthdate} />
+                    <ReviewItem label="Current Address" value={formData.currentAddress} />
+                    <ReviewItem label="Permanent Address" value={formData.permanentAddress} />
+                    <ReviewItem label="Nationality" value={formData.nationality} />
+                    <ReviewItem label="Religion" value={formData.religion} />
+                    <ReviewItem label="Dialect" value={formData.dialect} />
+                    <ReviewItem label="Sex" value={formData.sex} />
+                    <ReviewItem label="Civil Status" value={formData.civilStatus} />
+                    <ReviewItem label="Father's Name" value={formData.fathersName} />
+                    <ReviewItem label="Father's Occupation" value={formData.fathersOccupation} />
+                    <ReviewItem label="Mother's Name" value={formData.mothersName} />
+                    <ReviewItem label="Mother's Occupation" value={formData.mothersOccupation} />
+                    <ReviewItem label="Guardian's Name" value={formData.guardiansName} />
+                    <ReviewItem label="Guardian's Occupation" value={formData.guardiansOccupation} />
+                    <ReviewItem label="Guardian's Address" value={formData.guardiansAddress} />
+                </div>
+            </div>
+            <div className="border-t pt-8">
+                <h3 className="text-lg font-medium mb-4">Additional & Educational Background</h3>
+                <div className="space-y-2">
+                    <ReviewItem label="Living with Family" value={formData.livingWithFamily} />
+                    <ReviewItem label="Boarding" value={formData.boarding} />
+                    <ReviewItem label="Differently Abled" value={formData.differentlyAbled} />
+                    {formData.differentlyAbled && <ReviewItem label="Disability" value={formData.disability} />}
+                    <ReviewItem label="Belong to Minority Group" value={formData.minorityGroup} />
+                    {formData.minorityGroup && <ReviewItem label="Minority Group" value={formData.minority} />}
+                    <ReviewItem label="Emergency Contact Name" value={formData.emergencyContactName} />
+                    <ReviewItem label="Emergency Contact Address" value={formData.emergencyContactAddress} />
+                    <ReviewItem label="Emergency Contact Number" value={formData.emergencyContactNumber} />
+                    <ReviewItem label="Elementary School" value={formData.elementarySchool} />
+                    <ReviewItem label="Year Graduated (Elem)" value={formData.elemYearGraduated} />
+                    <ReviewItem label="Secondary School" value={formData.secondarySchool} />
+                    <ReviewItem label="Year Graduated (Secondary)" value={formData.secondaryYearGraduated} />
+                    <ReviewItem label="Collegiate School" value={formData.collegiateSchool} />
+                    <ReviewItem label="Year Graduated (Collegiate)" value={formData.collegiateYearGraduated} />
+                </div>
+            </div>
+            <div className="border-t pt-8">
+                <h3 className="text-lg font-medium mb-4">Academic Information</h3>
+                <div className="space-y-2">
+                    <ReviewItem label="Course" value={formData.course} />
+                    <ReviewItem label="Status" value={formData.status} />
+                    <ReviewItem label="Year Level" value={formData.yearLevel} />
+                    <ReviewItem label="Block" value={formData.block} />
+                    {formData.subjects && formData.subjects.length > 0 && (
+                        <div>
+                            <p className="w-full sm:w-1/3 font-medium text-muted-foreground mb-2">Enlisted Subjects</p>
+                            <ul className="list-disc pl-5 space-y-1">
+                                {formData.subjects.map(subjectId => (
+                                    <li key={subjectId}>{getSubjectLabel(subjectId)}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 export default function EnrollmentFormPage() {
     const [currentStep, setCurrentStep] = useState(0);
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [isReviewing, setIsReviewing] = useState(false);
 
-    const methods = useForm<z.infer<typeof enrollmentSchema>>({
+    const methods = useForm<EnrollmentSchemaType>({
         resolver: zodResolver(enrollmentSchema),
         defaultValues: {
             sex: 'Male',
@@ -392,12 +485,12 @@ export default function EnrollmentFormPage() {
         }
     });
 
-    const processForm = (data: z.infer<typeof enrollmentSchema>) => {
+    const processForm = (data: EnrollmentSchemaType) => {
         console.log(data);
         setIsSubmitted(true);
     };
     
-    type FieldName = keyof z.infer<typeof enrollmentSchema>;
+    type FieldName = keyof EnrollmentSchemaType;
 
     const next = async () => {
         const fields: FieldName[][] = [
@@ -412,6 +505,11 @@ export default function EnrollmentFormPage() {
 
         if (currentStep < steps.length - 1) {
             setCurrentStep(step => step + 1);
+        } else {
+             const isValid = await methods.trigger();
+            if (isValid) {
+                setIsReviewing(true);
+            }
         }
     };
 
@@ -447,38 +545,52 @@ export default function EnrollmentFormPage() {
         <main className="flex-1 p-4 sm:p-6">
             <Card className="max-w-4xl mx-auto">
                 <CardHeader>
-                    <CardTitle>Enrollment Form</CardTitle>
-                    <CardDescription>Please fill out all the necessary fields. ({steps[currentStep].name})</CardDescription>
-                    <Progress value={(currentStep / (steps.length - 1)) * 100} className="mt-4" />
+                    <CardTitle>{isReviewing ? 'Review Your Information' : 'Enrollment Form'}</CardTitle>
+                    <CardDescription>
+                        {isReviewing 
+                            ? 'Please review your details carefully before final submission.' 
+                            : `Please fill out all the necessary fields. (${steps[currentStep].name})`
+                        }
+                    </CardDescription>
+                    {!isReviewing && <Progress value={(currentStep / (steps.length - 1)) * 100} className="mt-4" />}
                 </CardHeader>
                 <CardContent>
                     <FormProvider {...methods}>
                         <form onSubmit={methods.handleSubmit(processForm)}>
-                             {currentStep === 0 && <Step1 />}
-                             {currentStep === 1 && <Step2 />}
-                             {currentStep === 2 && <Step3 />}
+                             {isReviewing ? (
+                                <ReviewStep formData={methods.getValues()} />
+                             ) : (
+                                <>
+                                    <div style={{ display: currentStep === 0 ? 'block' : 'none' }}><Step1 /></div>
+                                    <div style={{ display: currentStep === 1 ? 'block' : 'none' }}><Step2 /></div>
+                                    <div style={{ display: currentStep === 2 ? 'block' : 'none' }}><Step3 /></div>
+                                </>
+                             )}
                         </form>
                     </FormProvider>
                 </CardContent>
                 <CardFooter>
-                    <div className="flex justify-between w-full">
-                        <Button onClick={prev} disabled={currentStep === 0} variant="outline">
-                            Previous
-                        </Button>
-                        {currentStep < steps.length - 1 ? (
-                             <Button onClick={next}>
-                                Next
+                     {isReviewing ? (
+                        <div className="flex justify-between w-full">
+                            <Button onClick={() => setIsReviewing(false)} variant="outline">
+                                Edit
                             </Button>
-                        ) : (
-                             <Button onClick={methods.handleSubmit(processForm)}>
-                                Submit
+                            <Button onClick={methods.handleSubmit(processForm)}>
+                                Confirm & Submit
                             </Button>
-                        )}
-                    </div>
+                        </div>
+                    ) : (
+                        <div className="flex justify-between w-full">
+                            <Button onClick={prev} disabled={currentStep === 0} variant="outline">
+                                Previous
+                            </Button>
+                            <Button onClick={next}>
+                                {currentStep < steps.length - 1 ? 'Next' : 'Submit'}
+                            </Button>
+                        </div>
+                    )}
                 </CardFooter>
             </Card>
         </main>
     );
 }
-
-    
