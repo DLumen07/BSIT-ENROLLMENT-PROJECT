@@ -1,12 +1,12 @@
 
 'use client';
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { ChevronRight, MoreHorizontal, CheckCircle2, XCircle, Pencil, X, ArrowLeft, RotateCw, Trash2 } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { MoreHorizontal, CheckCircle2, XCircle, Pencil, X, RotateCw, Trash2, Search, FilterX } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
     Dialog,
     DialogContent,
@@ -36,6 +36,8 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 
 const initialPendingApplications = [
     { 
@@ -156,6 +158,14 @@ export default function ManageApplicationsPage() {
   });
   const [isEnrollmentOpen, setIsEnrollmentOpen] = useState(true);
 
+  const [activeTab, setActiveTab] = useState('pending');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState({
+      course: 'all',
+      year: 'all',
+      status: 'all',
+  });
+
   const credentialLabels: { key: keyof Application['credentials']; label: string }[] = [
     { key: 'birthCertificate', label: 'Birth Certificate' },
     { key: 'grades', label: 'Form 138 / Report Card' },
@@ -164,7 +174,6 @@ export default function ManageApplicationsPage() {
   ];
 
   const handleOpenRejectionDialog = (application: Application) => {
-    setSelectedApplication(null); // Close the credentials dialog if it's open
     setRejectionDialog({ isOpen: true, application });
   };
 
@@ -187,6 +196,7 @@ export default function ManageApplicationsPage() {
     }
     setRejectedApplications(prev => [...prev, { ...application, rejectionReason: reason }]);
     handleCloseRejectionDialog();
+    setSelectedApplication(null);
   };
   
   const handleRetrieve = (application: Application) => {
@@ -199,11 +209,46 @@ export default function ManageApplicationsPage() {
     setRejectedApplications(prev => prev.filter(app => app.id !== application.id));
     setDeleteDialog({ isOpen: false, application: null });
   };
+  
+  const handleFilterChange = (filterType: keyof typeof filters, value: string) => {
+        setFilters(prev => ({ ...prev, [filterType]: value }));
+  };
+
+  const clearFilters = () => {
+      setSearchTerm('');
+      setFilters({ course: 'all', year: 'all', status: 'all' });
+  };
+
+  const filteredApplications = useMemo(() => {
+        let applications: Application[] = [];
+        if (activeTab === 'pending') applications = pendingApplications;
+        else if (activeTab === 'approved') applications = approvedApplications;
+        else if (activeTab === 'rejected') applications = rejectedApplications;
+
+        return applications.filter(app => {
+            const searchTermLower = searchTerm.toLowerCase();
+            const matchesSearch = searchTerm ? 
+                app.name.toLowerCase().includes(searchTermLower) || 
+                app.studentId.toLowerCase().includes(searchTermLower) : true;
+            
+            const matchesCourse = filters.course !== 'all' ? app.course === filters.course : true;
+            const matchesYear = filters.year !== 'all' ? app.year.toString() === filters.year : true;
+            const matchesStatus = filters.status !== 'all' ? app.status === filters.status : true;
+
+            return matchesSearch && matchesCourse && matchesYear && matchesStatus;
+        });
+    }, [activeTab, pendingApplications, approvedApplications, rejectedApplications, searchTerm, filters]);
+
+  const allApplications = [...initialPendingApplications, ...initialApprovedApplications];
+  const courses = ['all', ...Array.from(new Set(allApplications.map(app => app.course)))];
+  const years = ['all', ...Array.from(new Set(allApplications.map(app => app.year.toString())))].sort();
+  const statuses = ['all', ...Array.from(new Set(allApplications.map(app => app.status)))];
+  const isFiltered = searchTerm || filters.course !== 'all' || filters.year !== 'all' || filters.status !== 'all';
 
   return (
     <>
         <main className="flex-1 p-4 sm:p-6 space-y-6">
-             <div className="flex items-center justify-between">
+             <div className="flex items-start sm:items-center justify-between flex-col sm:flex-row gap-4">
                 <div className="space-y-0.5">
                     <h1 className="text-2xl font-bold tracking-tight">Manage Applications</h1>
                     <p className="text-muted-foreground">
@@ -221,179 +266,226 @@ export default function ManageApplicationsPage() {
                     </Label>
                 </div>
             </div>
-            <Tabs defaultValue="pending" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="pending">Pending</TabsTrigger>
-                    <TabsTrigger value="approved">Approved</TabsTrigger>
-                    <TabsTrigger value="rejected">Rejected</TabsTrigger>
-                </TabsList>
-                <TabsContent value="pending">
-                    <Card className="mt-4">
-                        <CardHeader>
-                            <CardTitle>Pending Applications</CardTitle>
-                            <CardDescription>Applications awaiting review.</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Student ID</TableHead>
-                                        <TableHead>Student Name</TableHead>
-                                        <TableHead>Course</TableHead>
-                                        <TableHead>Year</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead className="text-right">Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {pendingApplications.map((application) => (
-                                        <TableRow key={application.id}>
-                                            <TableCell>{application.studentId}</TableCell>
-                                            <TableCell className="font-medium">{application.name}</TableCell>
-                                            <TableCell>{application.course}</TableCell>
-                                            <TableCell>{application.year}</TableCell>
-                                            <TableCell>{application.status}</TableCell>
-                                            <TableCell className="text-right">
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-transparent text-muted-foreground hover:text-accent focus:text-accent">
-                                                            <span className="sr-only">Open menu</span>
-                                                            <MoreHorizontal className="h-4 w-4" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DropdownMenuItem onSelect={() => setSelectedApplication(application)}>
-                                                            View Credentials
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuSeparator />
-                                                        <DropdownMenuItem onSelect={() => handleApprove(application)}>Approve</DropdownMenuItem>
-                                                        <DropdownMenuItem onSelect={() => handleOpenRejectionDialog(application)}>
-                                                            Reject
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </TableCell>
+            <Card>
+                <CardHeader>
+                    <div className="flex flex-col md:flex-row gap-4 justify-between">
+                        <div className="relative flex-1 md:grow-0">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                type="search"
+                                placeholder="Search by name or ID..."
+                                className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <Select value={filters.course} onValueChange={(value) => handleFilterChange('course', value)}>
+                                <SelectTrigger className="w-full sm:w-auto">
+                                    <SelectValue placeholder="Filter by course" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {courses.map(course => <SelectItem key={course} value={course}>{course === 'all' ? 'All Courses' : course}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                            <Select value={filters.year} onValueChange={(value) => handleFilterChange('year', value)}>
+                                <SelectTrigger className="w-full sm:w-auto">
+                                    <SelectValue placeholder="Filter by year" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {years.map(year => <SelectItem key={year} value={year}>{year === 'all' ? 'All Years' : `Year ${year}`}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                             <Select value={filters.status} onValueChange={(value) => handleFilterChange('status', value)}>
+                                <SelectTrigger className="w-full sm:w-auto">
+                                    <SelectValue placeholder="Filter by status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {statuses.map(status => <SelectItem key={status} value={status}>{status === 'all' ? 'All Statuses' : status}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                             {isFiltered && (
+                                <Button variant="ghost" onClick={clearFilters}>
+                                    <FilterX className="mr-2 h-4 w-4" />
+                                    Clear
+                                </Button>
+                            )}
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                        <TabsList className="grid w-full grid-cols-3">
+                            <TabsTrigger value="pending">Pending</TabsTrigger>
+                            <TabsTrigger value="approved">Approved</TabsTrigger>
+                            <TabsTrigger value="rejected">Rejected</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="pending">
+                            <div className="border rounded-lg mt-4">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Student ID</TableHead>
+                                            <TableHead>Student Name</TableHead>
+                                            <TableHead>Course</TableHead>
+                                            <TableHead>Year</TableHead>
+                                            <TableHead>Status</TableHead>
+                                            <TableHead className="text-right">Actions</TableHead>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-                <TabsContent value="approved">
-                        <Card className="mt-4">
-                        <CardHeader>
-                            <CardTitle>Approved Applications</CardTitle>
-                            <CardDescription>Applications that have been approved.</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Student ID</TableHead>
-                                        <TableHead>Student Name</TableHead>
-                                        <TableHead>Course</TableHead>
-                                        <TableHead>Year</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead className="text-right">Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {approvedApplications.map((application) => (
-                                        <TableRow key={application.id}>
-                                            <TableCell>{application.studentId}</TableCell>
-                                            <TableCell className="font-medium">{application.name}</TableCell>
-                                            <TableCell>{application.course}</TableCell>
-                                            <TableCell>{application.year}</TableCell>
-                                            <TableCell>{application.status}</TableCell>
-                                            <TableCell className="text-right">
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-transparent text-muted-foreground hover:text-accent focus:text-accent">
-                                                            <span className="sr-only">Open menu</span>
-                                                            <MoreHorizontal className="h-4 w-4" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DropdownMenuItem>
-                                                            <Pencil className="mr-2 h-4 w-4" />
-                                                            Edit
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuSeparator />
-                                                        <DropdownMenuItem onSelect={() => handleOpenRejectionDialog(application)}>
-                                                            <X className="mr-2 h-4 w-4" />
-                                                            Reject
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </TableCell>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {filteredApplications.map((application) => (
+                                            <TableRow key={application.id}>
+                                                <TableCell>{application.studentId}</TableCell>
+                                                <TableCell className="font-medium">{application.name}</TableCell>
+                                                <TableCell>{application.course}</TableCell>
+                                                <TableCell>{application.year}</TableCell>
+                                                <TableCell>{application.status}</TableCell>
+                                                <TableCell className="text-right">
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-transparent text-muted-foreground hover:text-accent focus:text-accent">
+                                                                <span className="sr-only">Open menu</span>
+                                                                <MoreHorizontal className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                            <DropdownMenuItem onSelect={() => setSelectedApplication(application)}>
+                                                                View Credentials
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuSeparator />
+                                                            <DropdownMenuItem onSelect={() => handleApprove(application)}>Approve</DropdownMenuItem>
+                                                            <DropdownMenuItem onSelect={() => handleOpenRejectionDialog(application)}>
+                                                                Reject
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                                 {filteredApplications.length === 0 && (
+                                    <div className="text-center p-4 text-muted-foreground">
+                                        No pending applications match the current filters.
+                                    </div>
+                                )}
+                            </div>
+                        </TabsContent>
+                        <TabsContent value="approved">
+                             <div className="border rounded-lg mt-4">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Student ID</TableHead>
+                                            <TableHead>Student Name</TableHead>
+                                            <TableHead>Course</TableHead>
+                                            <TableHead>Year</TableHead>
+                                            <TableHead>Status</TableHead>
+                                            <TableHead className="text-right">Actions</TableHead>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-                <TabsContent value="rejected">
-                        <Card className="mt-4">
-                        <CardHeader>
-                            <CardTitle>Rejected Applications</CardTitle>
-                            <CardDescription>Applications that have been rejected.</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Student ID</TableHead>
-                                        <TableHead>Student Name</TableHead>
-                                        <TableHead>Course</TableHead>
-                                        <TableHead>Year</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Reason</TableHead>
-                                        <TableHead className="text-right">Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {rejectedApplications.map((application) => (
-                                        <TableRow key={application.id}>
-                                            <TableCell>{application.studentId}</TableCell>
-                                            <TableCell className="font-medium">{application.name}</TableCell>
-                                            <TableCell>{application.course}</TableCell>
-                                            <TableCell>{application.year}</TableCell>
-                                             <TableCell>{application.status}</TableCell>
-                                            <TableCell>{application.rejectionReason}</TableCell>
-                                            <TableCell className="text-right">
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-transparent text-muted-foreground hover:text-accent focus:text-accent">
-                                                            <span className="sr-only">Open menu</span>
-                                                            <MoreHorizontal className="h-4 w-4" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DropdownMenuItem onSelect={() => handleRetrieve(application)}>
-                                                            <RotateCw className="mr-2 h-4 w-4" />
-                                                            Retrieve
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuSeparator />
-                                                        <DropdownMenuItem
-                                                            className="text-red-600 focus:text-red-600"
-                                                            onSelect={() => setDeleteDialog({ isOpen: true, application })}
-                                                        >
-                                                            <Trash2 className="mr-2 h-4 w-4" />
-                                                            Permanently Delete
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </TableCell>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {filteredApplications.map((application) => (
+                                            <TableRow key={application.id}>
+                                                <TableCell>{application.studentId}</TableCell>
+                                                <TableCell className="font-medium">{application.name}</TableCell>
+                                                <TableCell>{application.course}</TableCell>
+                                                <TableCell>{application.year}</TableCell>
+                                                <TableCell>{application.status}</TableCell>
+                                                <TableCell className="text-right">
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-transparent text-muted-foreground hover:text-accent focus:text-accent">
+                                                                <span className="sr-only">Open menu</span>
+                                                                <MoreHorizontal className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                            <DropdownMenuItem>
+                                                                <Pencil className="mr-2 h-4 w-4" />
+                                                                Edit
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuSeparator />
+                                                            <DropdownMenuItem onSelect={() => handleOpenRejectionDialog(application)}>
+                                                                <X className="mr-2 h-4 w-4" />
+                                                                Reject
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                                {filteredApplications.length === 0 && (
+                                    <div className="text-center p-4 text-muted-foreground">
+                                        No approved applications match the current filters.
+                                    </div>
+                                )}
+                            </div>
+                        </TabsContent>
+                        <TabsContent value="rejected">
+                             <div className="border rounded-lg mt-4">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Student ID</TableHead>
+                                            <TableHead>Student Name</TableHead>
+                                            <TableHead>Course</TableHead>
+                                            <TableHead>Year</TableHead>
+                                            <TableHead>Status</TableHead>
+                                            <TableHead>Reason</TableHead>
+                                            <TableHead className="text-right">Actions</TableHead>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-            </Tabs>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {filteredApplications.map((application) => (
+                                            <TableRow key={application.id}>
+                                                <TableCell>{application.studentId}</TableCell>
+                                                <TableCell className="font-medium">{application.name}</TableCell>
+                                                <TableCell>{application.course}</TableCell>
+                                                <TableCell>{application.year}</TableCell>
+                                                 <TableCell>{application.status}</TableCell>
+                                                <TableCell>{application.rejectionReason}</TableCell>
+                                                <TableCell className="text-right">
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-transparent text-muted-foreground hover:text-accent focus:text-accent">
+                                                                <span className="sr-only">Open menu</span>
+                                                                <MoreHorizontal className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                            <DropdownMenuItem onSelect={() => handleRetrieve(application)}>
+                                                                <RotateCw className="mr-2 h-4 w-4" />
+                                                                Retrieve
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuSeparator />
+                                                            <DropdownMenuItem
+                                                                className="text-red-600 focus:text-red-600"
+                                                                onSelect={() => setDeleteDialog({ isOpen: true, application })}
+                                                            >
+                                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                                Permanently Delete
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                                {filteredApplications.length === 0 && (
+                                    <div className="text-center p-4 text-muted-foreground">
+                                        No rejected applications match the current filters.
+                                    </div>
+                                )}
+                            </div>
+                        </TabsContent>
+                    </Tabs>
+                </CardContent>
+            </Card>
         </main>
         
         {selectedApplication && (
@@ -507,5 +599,3 @@ export default function ManageApplicationsPage() {
     </>
   );
 }
-
-    
