@@ -20,6 +20,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -88,7 +89,7 @@ const initialApprovedApplications = [
         id: 4, 
         studentId: '2024-0999', 
         name: 'Emily White', 
-        course: 'BSIT', 
+        course: 'BSIT',
         year: 3, 
         status: 'Old',
         credentials: {
