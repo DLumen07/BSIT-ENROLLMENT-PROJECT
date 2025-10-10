@@ -268,8 +268,8 @@ export default function ManageApplicationsPage() {
             </div>
             <Card>
                 <CardHeader>
-                    <div className="flex flex-col md:flex-row gap-4 justify-between">
-                        <div className="relative flex-1 md:grow-0">
+                    <div className="flex flex-col md:flex-row gap-4 justify-between md:items-center">
+                        <div className="relative">
                             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
                                 type="search"
