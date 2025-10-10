@@ -279,57 +279,37 @@ export default function ManageApplicationsPage() {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
-                        <div className="flex items-center gap-2">
-                             <Popover>
-                                <PopoverTrigger asChild>
-                                <Button variant="outline" className="gap-2">
-                                    <Filter className="h-4 w-4" />
-                                    Filter
+                        <div className="flex flex-wrap items-center gap-2">
+                             <Select value={filters.course} onValueChange={(value) => handleFilterChange('course', value)}>
+                                <SelectTrigger className="w-full sm:w-auto">
+                                    <SelectValue placeholder="Course" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {courses.map(course => <SelectItem key={course} value={course}>{course === 'all' ? 'All Courses' : course}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                            <Select value={filters.year} onValueChange={(value) => handleFilterChange('year', value)}>
+                                <SelectTrigger className="w-full sm:w-auto">
+                                    <SelectValue placeholder="Year" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {years.map(year => <SelectItem key={year} value={year}>{year === 'all' ? 'All Years' : `Year ${year}`}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                            <Select value={filters.status} onValueChange={(value) => handleFilterChange('status', value)}>
+                                <SelectTrigger className="w-full sm:w-auto">
+                                    <SelectValue placeholder="Status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {statuses.map(status => <SelectItem key={status} value={status}>{status === 'all' ? 'All Statuses' : status}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                            {isFiltered && (
+                                <Button variant="ghost" onClick={clearFilters} className="h-10">
+                                    <FilterX className="mr-2 h-4 w-4" />
+                                    Clear
                                 </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-4" align="end">
-                                    <div className="grid gap-4">
-                                        <div className="space-y-2">
-                                            <h4 className="font-medium leading-none">Filters</h4>
-                                            <p className="text-sm text-muted-foreground">
-                                                Narrow down your search.
-                                            </p>
-                                        </div>
-                                        <div className="grid gap-2">
-                                            <Select value={filters.course} onValueChange={(value) => handleFilterChange('course', value)}>
-                                                <SelectTrigger className="w-full sm:w-48">
-                                                    <SelectValue placeholder="Course" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {courses.map(course => <SelectItem key={course} value={course}>{course === 'all' ? 'All Courses' : course}</SelectItem>)}
-                                                </SelectContent>
-                                            </Select>
-                                            <Select value={filters.year} onValueChange={(value) => handleFilterChange('year', value)}>
-                                                <SelectTrigger className="w-full sm:w-48">
-                                                    <SelectValue placeholder="Year" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {years.map(year => <SelectItem key={year} value={year}>{year === 'all' ? 'All Years' : `Year ${year}`}</SelectItem>)}
-                                                </SelectContent>
-                                            </Select>
-                                            <Select value={filters.status} onValueChange={(value) => handleFilterChange('status', value)}>
-                                                <SelectTrigger className="w-full sm:w-48">
-                                                    <SelectValue placeholder="Status" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {statuses.map(status => <SelectItem key={status} value={status}>{status === 'all' ? 'All Statuses' : status}</SelectItem>)}
-                                                </SelectContent>
-                                            </Select>
-                                            {isFiltered && (
-                                                <Button variant="ghost" onClick={clearFilters}>
-                                                    <FilterX className="mr-2 h-4 w-4" />
-                                                    Clear Filters
-                                                </Button>
-                                            )}
-                                        </div>
-                                    </div>
-                                </PopoverContent>
-                            </Popover>
+                            )}
                         </div>
                     </div>
                 </CardHeader>
@@ -627,3 +607,5 @@ export default function ManageApplicationsPage() {
     </>
   );
 }
+
+    
