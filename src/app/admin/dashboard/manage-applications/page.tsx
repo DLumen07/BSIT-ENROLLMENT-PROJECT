@@ -19,14 +19,12 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuLabel,
     DropdownMenuTrigger,
     DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -36,7 +34,6 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-    AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
 const initialPendingApplications = [
@@ -115,7 +112,6 @@ export default function ManageApplicationsPage() {
   ];
 
   const handleOpenRejectionDialog = (application: Application) => {
-    setSelectedApplication(null); // Close the credentials dialog if it's open
     setRejectionDialog({ isOpen: true, application });
   };
 
@@ -138,6 +134,7 @@ export default function ManageApplicationsPage() {
     }
     setRejectedApplications(prev => [...prev, { ...application, rejectionReason: reason }]);
     handleCloseRejectionDialog();
+    setSelectedApplication(null);
   };
   
   const handleRetrieve = (application: Application) => {
@@ -150,20 +147,6 @@ export default function ManageApplicationsPage() {
     setRejectedApplications(prev => prev.filter(app => app.id !== application.id));
     setDeleteDialog({ isOpen: false, application: null });
   };
-
-  const getStatusVariant = (status: string) => {
-    switch (status) {
-      case 'New':
-        return 'default';
-      case 'Old':
-        return 'secondary';
-      case 'Transferee':
-        return 'outline';
-      default:
-        return 'default';
-    }
-  }
-
 
   return (
     <>
@@ -462,9 +445,5 @@ export default function ManageApplicationsPage() {
     </>
   );
 }
-
-    
-
-    
 
     
