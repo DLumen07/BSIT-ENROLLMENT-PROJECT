@@ -66,7 +66,7 @@ const Breadcrumb = () => {
       return null;
     }
     
-    const isSchedulePath = segments[2] === 'schedule' && segments.length > 3;
+    const isSchedulePath = segments.length > 2 && segments[2] === 'schedule' && segments.length > 3;
 
     if (isSchedulePath) {
         const blockId = segments[3];
@@ -224,7 +224,7 @@ export default function AdminDashboardLayout({
                                 </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
                             <SidebarMenuSubItem>
-                                 <SidebarMenuSubButton asChild isActive={pathname === '/admin/dashboard/manage-blocks'}>
+                                 <SidebarMenuSubButton asChild isActive={pathname.startsWith('/admin/dashboard/manage-blocks') || pathname.startsWith('/admin/dashboard/schedule')}>
                                     <Link href="/admin/dashboard/manage-blocks">
                                         <LayoutGrid />
                                         <span>Manage Blocks</span>
@@ -244,9 +244,11 @@ export default function AdminDashboardLayout({
                 </Collapsible>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="#">
-                <BarChart3 />
-                Reports
+              <SidebarMenuButton asChild isActive={pathname === '/admin/dashboard/reports'}>
+                <Link href="/admin/dashboard/reports">
+                  <BarChart3 />
+                  Reports
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
              <SidebarMenuItem>
