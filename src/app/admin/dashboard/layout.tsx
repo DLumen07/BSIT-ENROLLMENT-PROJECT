@@ -16,6 +16,7 @@ import {
   BookCopy,
   Settings,
   Shield,
+  BookUser,
 } from 'lucide-react';
 import Image from 'next/image';
 import React, { useState, useEffect } from 'react';
@@ -202,6 +203,14 @@ export default function AdminDashboardLayout({
               <SidebarMenuButton href="#">
                 <BarChart3 />
                 Reports
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+             <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={pathname === '/admin/dashboard/instructors'}>
+                <Link href="/admin/dashboard/instructors">
+                  <BookUser />
+                  Instructors
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
