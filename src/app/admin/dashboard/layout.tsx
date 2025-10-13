@@ -147,9 +147,11 @@ export default function AdminDashboardLayout({
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="#">
-                <Users2 />
-                Students
+              <SidebarMenuButton asChild isActive={pathname === '/admin/dashboard/students'}>
+                <Link href="/admin/dashboard/students">
+                  <Users2 />
+                  Students
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem asChild>
