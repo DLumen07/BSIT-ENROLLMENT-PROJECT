@@ -369,5 +369,4 @@ export default function YearLevelBlocksPage() {
             </Dialog>
         </>
     );
-
-    
+}
