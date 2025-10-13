@@ -115,11 +115,11 @@ export default function StudentsPage() {
             const matchesStatus = filters.status !== 'all' ? student.status === filters.status : true;
 
             return matchesSearch && matchesCourse && matchesYear && matchesStatus;
-        });
+        }).filter(student => student.status === 'Enrolled');
     }, [students, searchTerm, filters]);
     
     const courses = ['all', ...Array.from(new Set(students.map(app => app.course)))];
-    const years = ['all', ...Array from(new Set(students.map(app => app.year.toString())))].sort();
+    const years = ['all', ...Array.from(new Set(students.map(app => app.year.toString())))].sort();
     const statuses = ['all', ...Array.from(new Set(students.map(app => app.status)))];
     
     const getStatusBadgeVariant = (status: Student['status']) => {
@@ -223,7 +223,7 @@ export default function StudentsPage() {
                                 </PopoverContent>
                             </Popover>
                         </div>
-                    </div>
+                        </div>
                     </CardHeader>
                     <CardContent>
                         <div className="border rounded-lg">
