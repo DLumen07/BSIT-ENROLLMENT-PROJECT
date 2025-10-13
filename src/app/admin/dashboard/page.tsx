@@ -5,6 +5,8 @@ import {
   ChevronRight,
   Search,
   ArrowUpRight,
+  AlertTriangle,
+  UserX,
 } from 'lucide-react';
 import React from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, PieChart, Pie, Cell, Legend, ResponsiveContainer, Tooltip } from "recharts"
@@ -59,20 +61,12 @@ const studentStatusConfig = {
     transferee: { label: 'Transferee', color: 'hsl(var(--chart-3))' },
 } satisfies ChartConfig
 
-const instructorWorkloadData = [
-    { name: 'Dr. Turing', subjects: 2 },
-    { name: 'Prof. Lovelace', subjects: 1 },
-    { name: 'Dr. Hopper', subjects: 4 },
-    { name: 'Mr. Babbage', subjects: 1 },
-    { name: 'Prof. Curie', subjects: 3 },
+const schedulingIssues = [
+    { id: 1, block: 'BSIT 3-C', subject: 'MATH 301', type: 'No Instructor', details: 'Subject has no assigned instructor.', priority: 'high' },
+    { id: 2, block: 'BSIT 1-A', subject: 'IT-101', type: 'Conflict', details: 'Dr. Alan Turing has a time conflict with a class in BSIT 1-B.', priority: 'high' },
+    { id: 3, block: 'BSIT 4-A', subject: 'PE 104', type: 'No Instructor', details: 'Subject has no assigned instructor.', priority: 'low' },
+    { id: 4, block: 'BSIT 2-B', subject: 'IT 201', type: 'Conflict', details: 'Prof. Ada Lovelace has a time conflict with a class in BSIT 2-A.', priority: 'high' },
 ];
-
-const instructorWorkloadConfig = {
-  subjects: {
-    label: "Subjects",
-    color: "hsl(var(--primary))",
-  },
-} satisfies ChartConfig;
 
 
 export default function AdminDashboardPage() {
@@ -183,36 +177,47 @@ export default function AdminDashboardPage() {
                 </ChartContainer>
               </CardContent>
             </Card>
-            <Card className="lg:col-span-3">
-                <CardHeader className="flex flex-row items-center">
-                    <div className="grid gap-2">
-                        <CardTitle>Instructor Workload</CardTitle>
-                        <CardDescription>
-                            Number of subjects assigned to each instructor.
-                        </CardDescription>
-                    </div>
-                    <Button asChild size="sm" className="ml-auto gap-1">
-                        <Link href="/admin/dashboard/instructors">
-                        Manage Instructors
-                        <ArrowUpRight className="h-4 w-4" />
-                        </Link>
-                    </Button>
+             <Card className="lg:col-span-3">
+                <CardHeader>
+                    <CardTitle>Scheduling Health</CardTitle>
+                    <CardDescription>
+                        A summary of current scheduling issues that need attention.
+                    </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <ChartContainer config={instructorWorkloadConfig} className="min-h-[250px] w-full">
-                        <ResponsiveContainer width="100%" height={250}>
-                            <BarChart data={instructorWorkloadData} layout="vertical" margin={{ left: 10, right: 30 }}>
-                                <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                                <XAxis type="number" allowDecimals={false} />
-                                <YAxis dataKey="name" type="category" width={100} tickLine={false} axisLine={false} />
-                                <Tooltip
-                                    cursor={{ fill: 'hsl(var(--muted))' }}
-                                    content={<ChartTooltipContent indicator="line" />}
-                                />
-                                <Bar dataKey="subjects" fill="var(--color-subjects)" radius={[0, 4, 4, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </ChartContainer>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Block</TableHead>
+                                <TableHead>Subject</TableHead>
+                                <TableHead>Issue Type</TableHead>
+                                <TableHead>Details</TableHead>
+                                <TableHead className="text-right">Action</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {schedulingIssues.map((issue) => (
+                                <TableRow key={issue.id} className={issue.priority === 'high' ? 'bg-destructive/10 hover:bg-destructive/20' : ''}>
+                                    <TableCell className="font-medium">{issue.block}</TableCell>
+                                    <TableCell>{issue.subject}</TableCell>
+                                    <TableCell>
+                                        <Badge variant={issue.type === 'Conflict' ? 'destructive' : 'secondary'}>
+                                            {issue.type === 'Conflict' ? <AlertTriangle className="mr-1 h-3 w-3" /> : <UserX className="mr-1 h-3 w-3" />}
+                                            {issue.type}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell>{issue.details}</TableCell>
+                                    <TableCell className="text-right">
+                                        <Button asChild variant="outline" size="sm">
+                                            <Link href={`/admin/dashboard/schedule/${encodeURIComponent(issue.block)}`}>
+                                                View Schedule
+                                            </Link>
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
                 </CardContent>
             </Card>
           </div>
