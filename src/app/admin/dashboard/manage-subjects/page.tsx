@@ -140,7 +140,7 @@ export default function ManageSubjectsPage() {
                     <h1 className="text-2xl font-bold tracking-tight">Manage Subjects</h1>
                     <p className="text-muted-foreground">Add, edit, or remove subjects for each year level.</p>
                 </div>
-                 <Button onClick={openAddDialog}>
+                 <Button onClick={openAddDialog} className="rounded-full">
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Add Subject
                 </Button>
