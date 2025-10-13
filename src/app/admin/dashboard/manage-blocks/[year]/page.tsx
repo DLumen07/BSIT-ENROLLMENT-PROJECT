@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, MoreHorizontal, Trash2, Pencil, Calendar } from 'lucide-react';
+import { PlusCircle, MoreHorizontal, Trash2, Pencil, Calendar, Users } from 'lucide-react';
 import {
     Dialog,
     DialogContent,
@@ -36,6 +36,8 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
 
 const yearLevelMap: Record<string, string> = {
     '1st-year': '1st Year',
@@ -58,6 +60,13 @@ type Block = {
     specialization?: string;
 };
 
+const mockStudents = [
+    { id: '2024-001', name: 'Alice Johnson', avatar: 'https://picsum.photos/seed/aj/40/40' },
+    { id: '2024-002', name: 'Bob Williams', avatar: 'https://picsum.photos/seed/bw/40/40' },
+    { id: '2024-003', name: 'Charlie Brown', avatar: 'https://picsum.photos/seed/cb/40/40' },
+    { id: '2024-004', name: 'Diana Miller', avatar: 'https://picsum.photos/seed/dm/40/40' },
+];
+
 
 export default function YearLevelBlocksPage() {
     const params = useParams();
@@ -72,6 +81,7 @@ export default function YearLevelBlocksPage() {
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [isViewStudentsOpen, setIsViewStudentsOpen] = useState(false);
     const [selectedBlock, setSelectedBlock] = useState<Block | null>(null);
     const [blockName, setBlockName] = useState('');
     const [blockCapacity, setBlockCapacity] = useState('');
@@ -124,6 +134,11 @@ export default function YearLevelBlocksPage() {
     const openDeleteDialog = (block: Block) => {
         setSelectedBlock(block);
         setIsDeleteDialogOpen(true);
+    };
+
+     const openViewStudentsDialog = (block: Block) => {
+        setSelectedBlock(block);
+        setIsViewStudentsOpen(true);
     };
     
     const getBlockDisplayName = (block: Block) => {
@@ -222,6 +237,9 @@ export default function YearLevelBlocksPage() {
                                                         </Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem onSelect={() => openViewStudentsDialog(block)}>
+                                                            <Users className="mr-2 h-4 w-4" /> View Students
+                                                        </DropdownMenuItem>
                                                         <DropdownMenuItem asChild>
                                                             <Link href={`/admin/dashboard/schedule/${encodeURIComponent(block.name)}`}>
                                                                 <Calendar className="mr-2 h-4 w-4" /> Manage Schedule
@@ -309,8 +327,47 @@ export default function YearLevelBlocksPage() {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            <Dialog open={isViewStudentsOpen} onOpenChange={setIsViewStudentsOpen}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Students in {selectedBlock ? getBlockDisplayName(selectedBlock) : ''}</DialogTitle>
+                         <DialogDescription>
+                            List of all students enrolled in this block.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="max-h-[60vh] overflow-y-auto">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Student</TableHead>
+                                    <TableHead>Student ID</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {mockStudents.map(student => (
+                                    <TableRow key={student.id}>
+                                        <TableCell>
+                                            <div className="flex items-center gap-3">
+                                                <Avatar className="h-8 w-8">
+                                                    <AvatarImage src={student.avatar} alt={student.name} />
+                                                    <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
+                                                </Avatar>
+                                                <span className="font-medium">{student.name}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>{student.id}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+                     <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsViewStudentsOpen(false)}>Close</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     );
-}
 
     
