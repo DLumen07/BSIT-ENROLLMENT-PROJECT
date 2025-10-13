@@ -216,11 +216,11 @@ export default function SchedulePage() {
         if (!subjectToEdit) return;
 
         const formData = new FormData(e.currentTarget);
-        const selectedSubjectId = formData.get('subject') as string;
+        const selectedSubjectId = subjectToEdit.code;
         const selectedSubject = allAvailableSubjects.find(s => s.id === selectedSubjectId);
-
+        
         if (!selectedSubject) {
-            toast({ variant: "destructive", title: "Invalid Subject", description: "Please select a valid subject." });
+            toast({ variant: "destructive", title: "Invalid Subject", description: "An error occurred with the subject being edited." });
             return;
         }
 
@@ -267,7 +267,9 @@ export default function SchedulePage() {
 
     const handleDeleteSubject = () => {
         if (subjectToDelete) {
-            setSubjects(subjects.filter(s => s.id !== subjectToDelete.id));
+            const updatedSubjects = subjects.filter(s => s.id !== subjectToDelete.id);
+            setSubjects(updatedSubjects);
+            mockAllSchedules[blockId] = updatedSubjects;
             setIsDeleteDialogOpen(false);
             setSubjectToDelete(null);
             toast({
@@ -466,15 +468,12 @@ export default function SchedulePage() {
                     <form id="edit-subject-form" onSubmit={handleEditSubject}>
                         <div className="grid gap-4 py-4">
                              <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="edit-subject" className="text-right">Subject</Label>
-                                <Select name="subject" defaultValue={subjectToEdit?.code} required>
-                                    <SelectTrigger className="col-span-3">
-                                        <SelectValue placeholder="Select a subject" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {allAvailableSubjects.map(sub => <SelectItem key={sub.id} value={sub.id}>{sub.label}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
+                                <Label htmlFor="edit-subject-display" className="text-right">Subject</Label>
+                                <div className="col-span-3 h-10 flex items-center">
+                                    <p id="edit-subject-display" className="text-sm font-medium">
+                                        {subjectToEdit?.description}
+                                    </p>
+                                </div>
                             </div>
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="edit-instructor" className="text-right">Instructor</Label>
@@ -546,3 +545,5 @@ export default function SchedulePage() {
         </main>
     );
 }
+
+    
