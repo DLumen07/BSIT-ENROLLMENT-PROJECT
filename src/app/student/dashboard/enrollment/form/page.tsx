@@ -306,12 +306,12 @@ const Step3 = () => {
                     <FormItem><FormLabel>Course</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger className="rounded-xl"><SelectValue placeholder="Select course" /></SelectTrigger></FormControl><SelectContent className="rounded-xl"><SelectItem value="BSIT">BSIT</SelectItem><SelectItem value="ACT">ACT</SelectItem></SelectContent></Select><FormMessage /></FormItem>
                 )} />
                 <FormField name="status" render={({ field }) => (
-                    <FormItem><FormLabel>Status</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger className="rounded-xl"><SelectValue placeholder="Select status" /></SelectTrigger></FormControl><SelectContent className="rounded-xl"><SelectItem value="New">New</SelectItem><SelectItem value="Old">Old</SelectItem><SelectItem value="Transferee">Transferee</SelectItem></SelectContent></Select><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Status</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value} disabled><FormControl><SelectTrigger className="rounded-xl"><SelectValue placeholder="Select status" /></SelectTrigger></FormControl><SelectContent className="rounded-xl"><SelectItem value="New">New</SelectItem><SelectItem value="Old">Old</SelectItem><SelectItem value="Transferee">Transferee</SelectItem></SelectContent></Select><FormMessage /></FormItem>
                 )} />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField name="yearLevel" render={({ field }) => (
-                    <FormItem><FormLabel>Year Level</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger className="rounded-xl"><SelectValue placeholder="Select year level" /></SelectTrigger></FormControl><SelectContent className="rounded-xl"><SelectItem value="1st Year">1st Year</SelectItem><SelectItem value="2nd Year">2nd Year</SelectItem><SelectItem value="3rd Year">3rd Year</SelectItem><SelectItem value="4th Year">4th Year</SelectItem></SelectContent></Select><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Year Level</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value} disabled><FormControl><SelectTrigger className="rounded-xl"><SelectValue placeholder="Select year level" /></SelectTrigger></FormControl><SelectContent className="rounded-xl"><SelectItem value="1st Year">1st Year</SelectItem><SelectItem value="2nd Year">2nd Year</SelectItem><SelectItem value="3rd Year">3rd Year</SelectItem><SelectItem value="4th Year">4th Year</SelectItem></SelectContent></Select><FormMessage /></FormItem>
                 )} />
                 {selectedYear && (
                      <FormField name="block" render={({ field }) => (
@@ -480,7 +480,8 @@ export default function EnrollmentFormPage() {
         defaultValues: {
             sex: 'Male',
             civilStatus: 'Single',
-            status: 'New',
+            status: 'Old',
+            yearLevel: '2nd Year',
             subjects: [],
         }
     });
@@ -514,6 +515,10 @@ export default function EnrollmentFormPage() {
     };
 
     const prev = () => {
+        if (isReviewing) {
+            setIsReviewing(false);
+            return;
+        }
         if (currentStep > 0) {
             setCurrentStep(step => step - 1);
         }
@@ -585,7 +590,7 @@ export default function EnrollmentFormPage() {
                                 Previous
                             </Button>
                             <Button onClick={next} className="rounded-xl">
-                                {currentStep < steps.length - 1 ? 'Next' : 'Submit'}
+                                {currentStep < steps.length - 1 ? 'Next' : 'Review'}
                             </Button>
                         </div>
                     )}
@@ -594,3 +599,5 @@ export default function EnrollmentFormPage() {
         </main>
     );
 }
+
+    
