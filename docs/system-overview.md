@@ -6,14 +6,15 @@ This document provides a high-level overview of the architecture and core logic 
 
 The application is built using a centralized state management pattern powered by **React Context**. Instead of each component managing its own data independently, the application's state is held in a central location and distributed to the components that need it.
 
-This is achieved through two primary "providers":
+This is achieved through three primary "providers":
 
--   **`AdminProvider`** (`src/app/admin/context/admin-context.tsx`): Manages all data for the administrator portal. This includes lists of students, instructors, applications, blocks, subjects, and schedules.
+-   **`AdminProvider`** (`src/app/admin/context/admin-context.tsx`): Manages all data for the administrator portal. This includes lists of students, instructors, applications, blocks, subjects, and schedules. It also tracks the `currentUser` to enable role-based access.
 -   **`StudentProvider`** (`src/app/student/context/student-context.tsx`): Manages all data for the student portal, including the student's personal information, academic records, and class schedule.
+-   **`InstructorProvider`** (`src/app/instructor/context/instructor-context.tsx`): Manages all data for the instructor portal. It dynamically loads the schedule, classes, and personal information for the logged-in instructor.
 
 ### How It Works
 
-1.  **The Provider**: A component (e.g., `AdminProvider`) wraps a major section of the app (like the entire admin dashboard). It initializes and holds all the relevant data in a React state.
+1.  **The Provider**: A component (e.g., `AdminProvider`) wraps a major section of the app. It initializes and holds all the relevant data in a React state.
 2.  **The Hook**: A custom hook (e.g., `useAdmin()`) is provided. Any component nested within the provider can call this hook to get direct access to the shared data and functions to update that data.
 3.  **Updating State**: When a component needs to change data (like approving an application), it calls a setter function (e.g., `setAdminData`) exposed by the hook. This updates the central state, and React automatically re-renders any component that uses that piece of data, ensuring the entire UI stays in sync.
 
@@ -21,12 +22,50 @@ This pattern keeps our components clean and focused on presentation, while the l
 
 ## Data Management & Mock Data
 
-All the data for this application is currently mocked (simulated) and located directly within the context files:
+All the data for this application is currently mocked (simulated) and located directly within the `AdminProvider` context file at `src/app/admin/context/admin-context.tsx`. This includes data for students, instructors, administrators, subjects, and more.
 
--   Admin data is initialized in `src/app/admin/context/admin-context.tsx`.
--   Student data is initialized in `src/app/student/context/student-context.tsx`.
+This makes it easy to quickly see the data structure and modify it for testing purposes. In a production scenario, the `useEffect` hook within the provider files would be used to fetch this data from a backend API, as outlined in the "Connecting to a Backend" section below.
 
-This makes it easy to quickly see the data structure and modify it for testing purposes. In a production scenario, the `useEffect` hook within these provider files would be used to fetch this data from a backend API, as outlined in the "Connecting to a Backend" section below.
+## Unified Staff Login & Role-Based Access
+
+To streamline access for all staff members, the system uses a single login portal for both administrators and instructors, located at `/admin-login`.
+
+### Login Logic
+
+When a user logs in with their email and password:
+1.  The system first checks if the email exists in the `adminUsers` list. If a match is found, the `currentUser` state in the `AdminProvider` is set, and the user is redirected to the Admin Dashboard.
+2.  If no admin account is found, it then checks the `instructors` list. If a match is found, the user is redirected to the Instructor Dashboard with their email as a query parameter, which the `InstructorProvider` uses to load the correct data.
+3.  If no account is found, a login error is displayed.
+
+### Administrator Roles & Privileges
+
+The admin portal features a role-based access control (RBAC) system to manage permissions. The `currentUser`'s role determines which parts of the dashboard are visible and accessible.
+
+-   **Super Admin**:
+    -   Unrestricted access to all modules.
+    -   Can view and manage the **Administrators** page to create, edit, and delete other admin accounts.
+
+-   **Admin**:
+    -   Access to all modules **except** the "Administrators" page.
+    -   Can manage students, instructors, enrollment, subjects, and schedules.
+
+-   **Moderator**:
+    -   Has restricted, view-oriented access.
+    -   **Cannot** access the "Administrators" or "Instructors" pages.
+    -   Can view student data and schedules but has limited editing capabilities.
+
+## Instructor Portal
+
+The system includes a dedicated portal for instructors, providing them with the tools they need to manage their classes and students.
+
+### Key Features:
+
+-   **Personalized Dashboard**: Upon logging in, instructors see a summary of their schedule for the current day and an overview of the classes they are handling.
+-   **"My Schedule" Page**: A full, calendar-style view of their weekly teaching schedule, showing all assigned classes, times, and locations.
+-   **"My Classes" Page**: This is the core of the instructor portal. For each class, an instructor can:
+    -   View a complete roster of enrolled students.
+    -   Input and update final grades for each student.
+-   **Grade Management**: Grades submitted by instructors are saved directly into the main `grades` object within the `AdminContext`. This ensures that the academic records are always up-to-date and seamlessly integrated with the prerequisite validation system used during enrollment.
 
 ## Dynamic Validation Logic
 
@@ -57,11 +96,11 @@ This system ensures that all enrollment decisions are guided by the student's ac
 
 ## Connecting to a Backend
 
-To connect this application to a real backend (e.g., a database or an external API), you only need to modify the two provider files.
+To connect this application to a real backend (e.g., a database or an external API), you only need to modify the provider files (`AdminProvider`, `StudentProvider`, and `InstructorProvider`).
 
 ### Step-by-Step Integration Guide
 
-Here’s how you would connect the `AdminProvider` to your backend. The same principles apply to the `StudentProvider`.
+Here’s how you would connect the `AdminProvider` to your backend. The same principles apply to the other providers.
 
 #### 1. Locate the Admin Context File
 
