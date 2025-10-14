@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -78,6 +78,12 @@ function LoginForm() {
 }
 
 export default function StudentLoginPage() {
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
   return (
     <div className={cn(
         "dark",
@@ -86,7 +92,7 @@ export default function StudentLoginPage() {
     )}>
       <main className="flex-1 flex flex-col items-center justify-center p-4">
         <div className="w-full max-w-md relative">
-          <Button asChild variant="ghost" size="icon" className="absolute top-4 left-4 hover:text-primary">
+          <Button asChild variant="ghost" size="icon" className="absolute top-4 left-4 hover:text-foreground">
             <Link href="/">
               <ArrowLeft />
               <span className="sr-only">Back to Home</span>
@@ -114,7 +120,7 @@ export default function StudentLoginPage() {
                   <span className="text-xs text-muted-foreground">OR</span>
                   <Separator className="flex-1" />
                 </div>
-                <LoginForm />
+                {isClient && <LoginForm />}
                 <div className="text-center text-sm">
                   Don't have an account?{' '}
                   <Link href="/student-signup" className="underline">
