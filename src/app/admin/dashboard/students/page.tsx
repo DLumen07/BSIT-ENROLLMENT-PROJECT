@@ -6,6 +6,8 @@ import {
   Card,
   CardContent,
   CardHeader,
+  CardTitle,
+  CardDescription
 } from '@/components/ui/card';
 import {
   Table,
@@ -141,7 +143,10 @@ export default function StudentsPage() {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
-                        <div className="flex flex-wrap items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-4">
+                           <div className="text-sm text-muted-foreground">
+                                {isFiltered ? `${filteredStudents.length} of ${students.filter(s => s.status === 'Enrolled').length} students shown` : `Total Students: ${filteredStudents.length}`}
+                            </div>
                             <Popover>
                                 <PopoverTrigger asChild>
                                     <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-accent rounded-xl">
