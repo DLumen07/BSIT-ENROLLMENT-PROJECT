@@ -59,7 +59,7 @@ export default function ManageApplicationsPage() {
       isOpen: false,
       application: null,
   });
-  const [isEnrollmentOpen, setIsEnrollmentOpen] = useState(true);
+  const [isAddStudentDialogOpen, setIsAddStudentDialogOpen] = useState(false);
 
   const [activeTab, setActiveTab] = useState('pending');
   const [searchTerm, setSearchTerm] = useState('');
@@ -227,6 +227,31 @@ export default function ManageApplicationsPage() {
     setApplicationToEnroll(null);
   };
 
+  const handleAddStudent = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const newApplication: Application = {
+        id: Date.now(),
+        studentId: formData.get('studentId') as string,
+        name: formData.get('name') as string,
+        course: formData.get('course') as 'BSIT' | 'ACT',
+        year: parseInt(formData.get('year') as string, 10),
+        status: formData.get('status') as 'New' | 'Old' | 'Transferee',
+        credentials: {
+            birthCertificate: true,
+            grades: true,
+            goodMoral: true,
+            registrationForm: true,
+        },
+    };
+    adminData.addApplication(newApplication);
+    setIsAddStudentDialogOpen(false);
+    toast({
+      title: "Application Added",
+      description: `${newApplication.name} has been added to the pending applications.`,
+    });
+  };
+
   const filteredApplications = useMemo(() => {
         let applications: Application[] = [];
         if (activeTab === 'pending') applications = pendingApplications;
@@ -264,17 +289,70 @@ export default function ManageApplicationsPage() {
                         Review, approve, and reject applications for enrollment.
                     </p>
                 </div>
-                 <div className="flex items-center space-x-2">
-                    <Switch 
-                        id="enrollment-status" 
-                        checked={isEnrollmentOpen} 
-                        onCheckedChange={setIsEnrollmentOpen}
-                        className="data-[state=checked]:bg-accent"
-                    />
-                    <Label htmlFor="enrollment-status" className="text-sm font-medium">
-                        {isEnrollmentOpen ? 'Enrollment Open' : 'Enrollment Closed'}
-                    </Label>
-                </div>
+                 <Dialog open={isAddStudentDialogOpen} onOpenChange={setIsAddStudentDialogOpen}>
+                    <DialogTrigger asChild>
+                        <Button className="rounded-xl">
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Add Student
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Add New Student Application</DialogTitle>
+                            <DialogDescription>
+                                Manually add a new student application to the pending list.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <form id="add-student-form" onSubmit={handleAddStudent}>
+                            <div className="space-y-4 py-2">
+                                <div className="space-y-2">
+                                    <Label htmlFor="studentId">Student ID</Label>
+                                    <Input id="studentId" name="studentId" required placeholder="e.g., 24-00-0000" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="name">Full Name</Label>
+                                    <Input id="name" name="name" required placeholder="e.g., Juan Dela Cruz" />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="course">Course</Label>
+                                        <Select name="course" required>
+                                            <SelectTrigger><SelectValue placeholder="Select Course" /></SelectTrigger>
+                                            <SelectContent><SelectItem value="BSIT">BSIT</SelectItem><SelectItem value="ACT">ACT</SelectItem></SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="year">Year Level</Label>
+                                        <Select name="year" required>
+                                            <SelectTrigger><SelectValue placeholder="Select Year" /></SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="1">1st Year</SelectItem>
+                                                <SelectItem value="2">2nd Year</SelectItem>
+                                                <SelectItem value="3">3rd Year</SelectItem>
+                                                <SelectItem value="4">4th Year</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="status">Student Status</Label>
+                                     <Select name="status" required>
+                                        <SelectTrigger><SelectValue placeholder="Select Status" /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="New">New</SelectItem>
+                                            <SelectItem value="Old">Old</SelectItem>
+                                            <SelectItem value="Transferee">Transferee</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        </form>
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setIsAddStudentDialogOpen(false)}>Cancel</Button>
+                            <Button type="submit" form="add-student-form">Add Application</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
             <Card>
                 <CardHeader>
