@@ -1,3 +1,4 @@
+
 'use client';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
@@ -30,7 +31,10 @@ export default function Home() {
           <h1 className="text-4xl font-bold tracking-tight text-foreground">
             BSIT Enrollment System
           </h1>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-xs">
+          <p className="text-lg text-muted-foreground max-w-md">
+            Seamless, simple, and secure enrollment for the new academic year.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-xs pt-4">
             <Button asChild size="lg" className="rounded-full">
               <Link href="/student-login">
                 <User />
