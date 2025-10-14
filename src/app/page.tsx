@@ -6,6 +6,51 @@ import Link from 'next/link';
 import { User, UserCog } from 'lucide-react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { cn } from '@/lib/utils';
+import { useState, useEffect } from 'react';
+
+const AnimatedSubtitle = () => {
+  const subtitles = ["Seamless, simple, and secure enrollment for the new academic year."];
+  const [currentSubtitle, setCurrentSubtitle] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [loopNum, setLoopNum] = useState(0);
+  const [typingSpeed, setTypingSpeed] = useState(150);
+
+  useEffect(() => {
+    const handleTyping = () => {
+      const i = loopNum % subtitles.length;
+      const fullTxt = subtitles[i];
+
+      if (isDeleting) {
+        setCurrentSubtitle(fullTxt.substring(0, currentSubtitle.length - 1));
+        setTypingSpeed(75);
+      } else {
+        setCurrentSubtitle(fullTxt.substring(0, currentSubtitle.length + 1));
+        setTypingSpeed(150);
+      }
+
+      if (!isDeleting && currentSubtitle === fullTxt) {
+        setTimeout(() => setIsDeleting(true), 2000);
+      } else if (isDeleting && currentSubtitle === '') {
+        setIsDeleting(false);
+        setLoopNum(loopNum + 1);
+      }
+    };
+
+    const ticker = setTimeout(() => {
+      handleTyping();
+    }, typingSpeed);
+
+    return () => clearTimeout(ticker);
+  }, [currentSubtitle, isDeleting, loopNum, subtitles, typingSpeed]);
+
+  return (
+    <p className="text-md text-muted-foreground max-w-md font-mono h-12">
+      {currentSubtitle}
+      <span className="animate-pulse">|</span>
+    </p>
+  );
+};
+
 
 export default function Home() {
   const schoolLogo = PlaceHolderImages.find(p => p.id === 'school-logo');
@@ -31,9 +76,7 @@ export default function Home() {
           <h1 className="text-4xl font-bold tracking-tight text-foreground">
             BSIT Enrollment System
           </h1>
-          <p className="text-md text-muted-foreground max-w-md font-mono">
-            Seamless, simple, and secure enrollment for the new academic year.
-          </p>
+          <AnimatedSubtitle />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-xs pt-4">
             <Button asChild size="lg" className="rounded-full">
               <Link href="/student-login">
