@@ -167,7 +167,7 @@ export default function StudentsPage() {
                 student.studentId.toLowerCase().includes(searchTermLower) ||
                 student.email.toLowerCase().includes(searchTermLower) : true;
             
-            const matchesCourse = filters.course !== 'all' ? student.course === filters.course : true;
+            const matchesCourse = filters.course !== 'all' ? student.course === student.course : true;
             const matchesYear = filters.year !== 'all' ? student.year.toString() === filters.year : true;
             const matchesStatus = filters.status !== 'all' ? student.status === filters.status : true;
 
@@ -328,7 +328,7 @@ export default function StudentsPage() {
                                         <div className="space-y-2">
                                             <Label>Course</Label>
                                             <Select value={filters.course} onValueChange={(value) => handleFilterChange('course', value)}>
-                                                <SelectTrigger className="focus:border-accent focus:ring-accent">
+                                                <SelectTrigger>
                                                     <SelectValue placeholder="All Courses" />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -339,7 +339,7 @@ export default function StudentsPage() {
                                          <div className="space-y-2">
                                             <Label>Year</Label>
                                             <Select value={filters.year} onValueChange={(value) => handleFilterChange('year', value)}>
-                                                <SelectTrigger className="focus:border-accent focus:ring-accent">
+                                                <SelectTrigger>
                                                     <SelectValue placeholder="All Years" />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -350,7 +350,7 @@ export default function StudentsPage() {
                                         <div className="space-y-2">
                                             <Label>Status</Label>
                                             <Select value={filters.status} onValueChange={(value) => handleFilterChange('status', value)}>
-                                                <SelectTrigger className="focus:border-accent focus:ring-accent">
+                                                <SelectTrigger>
                                                     <SelectValue placeholder="All Statuses" />
                                                 </SelectTrigger>
                                                 <SelectContent>
