@@ -522,7 +522,7 @@ export default function SchedulePage() {
             <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                         <AlertDialogDescription>
                             This action cannot be undone. This will permanently delete the schedule for <span className="font-semibold">{subjectToDelete?.code}</span>.
                         </AlertDialogDescription>
@@ -535,5 +535,6 @@ export default function SchedulePage() {
             </AlertDialog>
         </main>
     );
+}
 
     
