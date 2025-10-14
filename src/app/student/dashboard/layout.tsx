@@ -8,7 +8,8 @@ import {
   User,
   CalendarCheck2,
   GraduationCap,
-  FileSignature
+  FileSignature,
+  ClipboardList
 } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
@@ -95,6 +96,14 @@ export default function StudentDashboardLayout({
                 <Link href="/student/dashboard/grades">
                   <GraduationCap />
                   Grades
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+             <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={pathname === '/student/dashboard/records'}>
+                <Link href="/student/dashboard/records">
+                  <ClipboardList />
+                  Records
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
