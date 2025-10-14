@@ -1,7 +1,7 @@
 
 'use client';
 import React, { useState, useMemo } from 'react';
-import { MoreHorizontal, Search, Filter, FilterX, Pencil, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Search, Filter, FilterX, Trash2 } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -24,14 +24,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -59,51 +51,14 @@ export default function StudentsPage() {
         year: 'all',
     });
 
-    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
-
-    // State for add/edit form
-    const [studentName, setStudentName] = useState('');
-    const [studentEmail, setStudentEmail] = useState('');
-    const [studentId, setStudentId] = useState('');
-    const [studentCourse, setStudentCourse] = useState<'BSIT' | 'ACT'>('BSIT');
-    const [studentYear, setStudentYear] = useState(1);
-
-    const openEditDialog = (student: Student) => {
-        setSelectedStudent(student);
-        setStudentName(student.name);
-        setStudentEmail(student.email);
-        setStudentId(student.studentId);
-        setStudentCourse(student.course);
-        setStudentYear(student.year);
-        setIsEditDialogOpen(true);
-    };
 
     const openDeleteDialog = (student: Student) => {
         setSelectedStudent(student);
         setIsDeleteDialogOpen(true);
     };
     
-     const handleEditStudent = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        if (!selectedStudent) return;
-        const updatedStudent = {
-            ...selectedStudent,
-            name: studentName,
-            email: studentEmail,
-            studentId,
-            course: studentCourse,
-            year: studentYear,
-        };
-        setAdminData(prev => ({
-            ...prev,
-            students: prev.students.map(s => s.id === selectedStudent.id ? updatedStudent : s)
-        }));
-        setIsEditDialogOpen(false);
-        setSelectedStudent(null);
-    };
-
      const handleDeleteStudent = () => {
         if (!selectedStudent) return;
         setAdminData(prev => ({
@@ -270,9 +225,7 @@ export default function StudentsPage() {
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
                                                         <DropdownMenuItem>View Profile</DropdownMenuItem>
-                                                        <DropdownMenuItem onSelect={() => openEditDialog(student)}>
-                                                            <Pencil className="mr-2 h-4 w-4" /> Edit
-                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem>Claim ORF</DropdownMenuItem>
                                                         <DropdownMenuSeparator />
                                                         <DropdownMenuItem
                                                             className="text-destructive focus:bg-destructive focus:text-destructive-foreground"
@@ -298,68 +251,6 @@ export default function StudentsPage() {
                 </Card>
             </main>
 
-            {/* Edit Dialog */}
-            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-                <DialogContent className="rounded-xl">
-                    <DialogHeader>
-                        <DialogTitle>Edit Student</DialogTitle>
-                        <DialogDescription>
-                            Update the details for {selectedStudent?.name}.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <form id="student-form" onSubmit={handleEditStudent}>
-                        <div className="space-y-4 py-2">
-                             <div className="space-y-2">
-                                <Label htmlFor="studentName">Full Name</Label>
-                                <Input id="studentName" value={studentName} onChange={(e) => setStudentName(e.target.value)} required className="rounded-xl" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="studentEmail">Email Address</Label>
-                                <Input id="studentEmail" type="email" value={studentEmail} onChange={(e) => setStudentEmail(e.target.value)} required className="rounded-xl" />
-                            </div>
-                             <div className="space-y-2">
-                                <Label htmlFor="studentIdForm">Student ID</Label>
-                                <Input id="studentIdForm" value={studentId} onChange={(e) => setStudentId(e.target.value)} required className="rounded-xl" />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="studentCourse">Course</Label>
-                                    <Select value={studentCourse} onValueChange={(v) => setStudentCourse(v as 'BSIT' | 'ACT')}>
-                                        <SelectTrigger id="studentCourse" className="rounded-xl">
-                                            <SelectValue placeholder="Select course" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="BSIT">BSIT</SelectItem>
-                                            <SelectItem value="ACT">ACT</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="studentYear">Year Level</Label>
-                                    <Select value={studentYear.toString()} onValueChange={(v) => setStudentYear(parseInt(v, 10))}>
-                                        <SelectTrigger id="studentYear" className="rounded-xl">
-                                            <SelectValue placeholder="Select year" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="1">1st Year</SelectItem>
-                                            <SelectItem value="2">2nd Year</SelectItem>
-                                            <SelectItem value="3">3rd Year</SelectItem>
-                                            <SelectItem value="4">4th Year</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} className="rounded-xl">Cancel</Button>
-                        <Button type="submit" form="student-form" className="rounded-xl">
-                            Save Changes
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-
             <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                 <AlertDialogContent className="rounded-xl">
                     <AlertDialogHeader>
@@ -382,5 +273,3 @@ export default function StudentsPage() {
         </>
     );
 }
-
-    
