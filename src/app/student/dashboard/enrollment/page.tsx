@@ -72,7 +72,7 @@ export default function EnrollmentPage() {
                     <div className="flex items-center gap-4">
                         <CheckCircle className="h-8 w-8 text-green-500" />
                         <div>
-                            <CardTitle>Successfully Enrolled</CardTitle>
+                            <CardTitle>Enrolled</CardTitle>
                             <CardDescription>
                                 You are officially enrolled for the Academic Year 2024-2025, 1st Semester.
                             </CardDescription>
