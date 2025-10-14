@@ -22,8 +22,8 @@ export default function Home() {
             <Image
               src={schoolLogo.imageUrl}
               alt={schoolLogo.description}
-              width={300}
-              height={300}
+              width={400}
+              height={400}
               data-ai-hint={schoolLogo.imageHint}
               className="rounded-full"
             />
