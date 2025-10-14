@@ -39,9 +39,9 @@ const reportData = {
                 { level: "4th Year", students: 170, fill: 'var(--color-4th-year)' },
             ],
             masterList: [
-                { id: '2024-1001', name: 'John Doe', course: 'BSIT', year: 1, status: 'New' },
-                { id: '2023-2002', name: 'Jane Smith', course: 'BSIT', year: 2, status: 'Old' },
-                { id: '2024-1003', name: 'Peter Jones', course: 'ACT', year: 1, status: 'Transferee' },
+                { id: '24-01-0001', name: 'John Doe', course: 'BSIT', year: 1, status: 'New' },
+                { id: '23-01-0002', name: 'Jane Smith', course: 'BSIT', year: 2, status: 'Old' },
+                { id: '24-01-0003', name: 'Peter Jones', course: 'ACT', year: 1, status: 'Transferee' },
             ]
         }
     }
@@ -237,3 +237,5 @@ export default function ReportsPage() {
         </>
     );
 }
+
+    

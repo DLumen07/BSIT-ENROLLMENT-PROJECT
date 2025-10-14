@@ -30,11 +30,11 @@ import { useStudent } from '@/app/student/context/student-context';
 
 
 const mockClassmates = [
-    { id: '2022-0234', name: 'Bob Williams', avatar: 'https://picsum.photos/seed/bw-student/40/40' },
-    { id: '2022-0456', name: 'Samantha Green', avatar: 'https://picsum.photos/seed/sg-student/40/40' },
-    { id: '2022-0789', name: 'Michael Chen', avatar: 'https://picsum.photos/seed/mc-student/40/40' },
-    { id: '2022-1111', name: 'Emily Davis', avatar: 'https://picsum.photos/seed/ed-student/40/40' },
-     { id: '2022-0001', name: 'You', avatar: 'https://picsum.photos/seed/student-avatar/40/40' },
+    { id: '22-01-0234', name: 'Bob Williams', avatar: 'https://picsum.photos/seed/bw-student/40/40' },
+    { id: '22-01-0456', name: 'Samantha Green', avatar: 'https://picsum.photos/seed/sg-student/40/40' },
+    { id: '22-01-0789', name: 'Michael Chen', avatar: 'https://picsum.photos/seed/mc-student/40/40' },
+    { id: '22-01-1111', name: 'Emily Davis', avatar: 'https://picsum.photos/seed/ed-student/40/40' },
+     { id: '22-01-0001', name: 'You', avatar: 'https://picsum.photos/seed/student-avatar/40/40' },
 ];
 
 const profileCompletionData = [{ name: 'Completed', value: 75, fill: 'hsl(var(--primary))' }, { name: 'Remaining', value: 25, fill: 'hsl(var(--muted))' }];
@@ -277,3 +277,5 @@ export default function StudentDashboardPage() {
     </main>
   );
 }
+
+    

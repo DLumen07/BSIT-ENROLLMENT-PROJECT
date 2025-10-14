@@ -31,7 +31,7 @@ const studentData = {
         permanentAddress: '456 Provincial Rd, Cebu City, Cebu',
     },
     academic: {
-        studentId: '2022-0001',
+        studentId: '22-01-0001',
         course: 'BS in Information Technology',
         yearLevel: '2nd Year',
         block: 'BSIT 2-A',
@@ -206,3 +206,5 @@ export default function StudentSettingsPage() {
         </main>
     );
 }
+
+    

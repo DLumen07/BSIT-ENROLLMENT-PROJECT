@@ -42,7 +42,7 @@ import {
 const initialPendingApplications = [
     { 
         id: 1, 
-        studentId: '2024-1001', 
+        studentId: '24-01-0001', 
         name: 'John Doe', 
         course: 'BSIT', 
         year: 2, 
@@ -56,7 +56,7 @@ const initialPendingApplications = [
     },
     { 
         id: 2, 
-        studentId: '2024-1002', 
+        studentId: '24-01-0002', 
         name: 'Jane Smith', 
         course: 'ACT', 
         year: 1, 
@@ -70,7 +70,7 @@ const initialPendingApplications = [
     },
     { 
         id: 3, 
-        studentId: '2024-1003', 
+        studentId: '24-01-0003', 
         name: 'Peter Jones', 
         course: 'BSIT', 
         year: 1, 
@@ -471,6 +471,8 @@ export default function ManageApplicationsPage() {
     </>
   );
 }
+
+    
 
     
 

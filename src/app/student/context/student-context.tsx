@@ -1,3 +1,4 @@
+
 'use client';
 import React, { createContext, useContext, useState } from 'react';
 
@@ -43,7 +44,7 @@ const mockStudentData = {
         collegiateSchool: 'Previous University (if transferee)',
     },
     academic: {
-        studentId: '2022-0001',
+        studentId: '22-01-0001',
         course: 'BS in Information Technology',
         yearLevel: '2nd Year',
         block: 'BSIT 2-A',
@@ -95,3 +96,5 @@ export const useStudent = (): StudentContextType => {
   }
   return context;
 };
+
+    
