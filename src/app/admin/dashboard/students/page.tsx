@@ -172,7 +172,7 @@ export default function StudentsPage() {
                     </div>
                 </div>
 
-                <Card>
+                <Card className="rounded-xl">
                     <CardHeader>
                        <div className="flex flex-col md:flex-row gap-4 justify-between md:items-center">
                          <div className="relative flex-1 md:grow-0">
@@ -180,7 +180,7 @@ export default function StudentsPage() {
                             <Input
                                 type="search"
                                 placeholder="Search by name, ID, or email..."
-                                className="w-full rounded-lg bg-background pl-8 md:w-[250px] lg:w-[300px]"
+                                className="w-full rounded-xl bg-background pl-8 md:w-[250px] lg:w-[300px]"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
@@ -316,7 +316,7 @@ export default function StudentsPage() {
 
             {/* Edit Dialog */}
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-                <DialogContent>
+                <DialogContent className="rounded-xl">
                     <DialogHeader>
                         <DialogTitle>Edit Student</DialogTitle>
                         <DialogDescription>
@@ -327,21 +327,21 @@ export default function StudentsPage() {
                         <div className="space-y-4 py-2">
                              <div className="space-y-2">
                                 <Label htmlFor="studentName">Full Name</Label>
-                                <Input id="studentName" value={studentName} onChange={(e) => setStudentName(e.target.value)} required />
+                                <Input id="studentName" value={studentName} onChange={(e) => setStudentName(e.target.value)} required className="rounded-xl" />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="studentEmail">Email Address</Label>
-                                <Input id="studentEmail" type="email" value={studentEmail} onChange={(e) => setStudentEmail(e.target.value)} required />
+                                <Input id="studentEmail" type="email" value={studentEmail} onChange={(e) => setStudentEmail(e.target.value)} required className="rounded-xl" />
                             </div>
                              <div className="space-y-2">
                                 <Label htmlFor="studentIdForm">Student ID</Label>
-                                <Input id="studentIdForm" value={studentId} onChange={(e) => setStudentId(e.target.value)} required />
+                                <Input id="studentIdForm" value={studentId} onChange={(e) => setStudentId(e.target.value)} required className="rounded-xl" />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="studentCourse">Course</Label>
                                     <Select value={studentCourse} onValueChange={(v) => setStudentCourse(v as 'BSIT' | 'ACT')}>
-                                        <SelectTrigger id="studentCourse">
+                                        <SelectTrigger id="studentCourse" className="rounded-xl">
                                             <SelectValue placeholder="Select course" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -353,7 +353,7 @@ export default function StudentsPage() {
                                 <div className="space-y-2">
                                     <Label htmlFor="studentYear">Year Level</Label>
                                     <Select value={studentYear.toString()} onValueChange={(v) => setStudentYear(parseInt(v, 10))}>
-                                        <SelectTrigger id="studentYear">
+                                        <SelectTrigger id="studentYear" className="rounded-xl">
                                             <SelectValue placeholder="Select year" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -368,8 +368,8 @@ export default function StudentsPage() {
                         </div>
                     </form>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
-                        <Button type="submit" form="student-form">
+                        <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} className="rounded-xl">Cancel</Button>
+                        <Button type="submit" form="student-form" className="rounded-xl">
                             Save Changes
                         </Button>
                     </DialogFooter>
@@ -377,7 +377,7 @@ export default function StudentsPage() {
             </Dialog>
 
             <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-                <AlertDialogContent>
+                <AlertDialogContent className="rounded-xl">
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                         <AlertDialogDescription>
@@ -385,9 +385,9 @@ export default function StudentsPage() {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
                         <AlertDialogAction
-                            className="bg-destructive hover:bg-destructive/90"
+                            className="bg-destructive hover:bg-destructive/90 rounded-xl"
                             onClick={handleDeleteStudent}
                         >
                             Delete
