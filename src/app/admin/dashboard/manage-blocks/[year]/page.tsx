@@ -38,7 +38,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAdmin, Block, mockStudents } from '../../../context/admin-context';
-
+import { useToast } from '@/hooks/use-toast';
 
 const yearLevelMap: Record<string, string> = {
     '1st-year': '1st Year',
@@ -48,7 +48,6 @@ const yearLevelMap: Record<string, string> = {
 };
 
 const specializations = [
-    { value: 'none', label: 'None' },
     { value: 'AP', label: 'Application Programming (AP)' },
     { value: 'DD', label: 'Digital Design (DD)' },
 ];
@@ -56,10 +55,12 @@ const specializations = [
 
 export default function YearLevelBlocksPage() {
     const params = useParams();
+    const { toast } = useToast();
     const { adminData, setAdminData } = useAdmin();
     const year = params.year as '1st-year' | '2nd-year' | '3rd-year' | '4th-year';
     const yearLabel = yearLevelMap[year] || 'Unknown Year';
     const isUpperYear = year === '3rd-year' || year === '4th-year';
+    const course = isUpperYear ? 'BSIT' : 'ACT';
 
     const blocksForYear = adminData.blocks.filter(b => b.year === year);
     
@@ -70,49 +71,63 @@ export default function YearLevelBlocksPage() {
     const [selectedBlock, setSelectedBlock] = useState<Block | null>(null);
     const [blockName, setBlockName] = useState('');
     const [blockCapacity, setBlockCapacity] = useState('');
-    const [blockSpecialization, setBlockSpecialization] = useState('none');
+    const [blockSpecialization, setBlockSpecialization] = useState(isUpperYear ? 'AP' : undefined);
     const [deleteInput, setDeleteInput] = useState('');
 
      useEffect(() => {
         setBlockName('');
         setBlockCapacity('');
-        setBlockSpecialization('none');
-    }, [isAddDialogOpen, isEditDialogOpen]);
+        setBlockSpecialization(isUpperYear ? 'AP' : undefined);
+    }, [isAddDialogOpen, isEditDialogOpen, isUpperYear]);
 
     const handleAddBlock = () => {
-        if (blockName && blockCapacity) {
-            const newBlock: Block = {
-                id: Date.now(),
-                name: blockName,
-                capacity: parseInt(blockCapacity, 10),
-                enrolled: 0,
-                year,
-                specialization: isUpperYear && blockSpecialization !== 'none' ? blockSpecialization : undefined,
-            };
-            setAdminData(prev => ({
-                ...prev, 
-                blocks: [...prev.blocks, newBlock],
-                schedules: { ...prev.schedules, [newBlock.name]: [] }
-            }));
-            setIsAddDialogOpen(false);
+        if (!blockName || !blockCapacity) {
+             toast({ variant: 'destructive', title: 'Missing Fields', description: 'Block Name and Capacity are required.' });
+             return;
         }
+
+        if (isUpperYear && !blockSpecialization) {
+             toast({ variant: 'destructive', title: 'Missing Fields', description: 'Specialization is required for 3rd and 4th year.' });
+             return;
+        }
+
+        const newBlock: Block = {
+            id: Date.now(),
+            name: `${course} ${blockName}`,
+            capacity: parseInt(blockCapacity, 10),
+            enrolled: 0,
+            year,
+            course,
+            specialization: isUpperYear ? (blockSpecialization as 'AP' | 'DD') : undefined,
+        };
+        setAdminData(prev => ({
+            ...prev, 
+            blocks: [...prev.blocks, newBlock],
+            schedules: { ...prev.schedules, [newBlock.name]: [] }
+        }));
+        setIsAddDialogOpen(false);
     };
 
     const handleEditBlock = () => {
-        if (selectedBlock && blockName && blockCapacity) {
-            const updatedBlock = { 
-                ...selectedBlock, 
-                name: blockName, 
-                capacity: parseInt(blockCapacity, 10), 
-                specialization: isUpperYear && blockSpecialization !== 'none' ? blockSpecialization : undefined 
-            };
-            setAdminData(prev => ({
-                ...prev,
-                blocks: prev.blocks.map(b => b.id === selectedBlock.id ? updatedBlock : b)
-            }));
-            setIsEditDialogOpen(false);
-            setSelectedBlock(null);
+        if (!selectedBlock || !blockName || !blockCapacity) return;
+
+         if (isUpperYear && !blockSpecialization) {
+             toast({ variant: 'destructive', title: 'Missing Fields', description: 'Specialization is required for 3rd and 4th year.' });
+             return;
         }
+
+        const updatedBlock = { 
+            ...selectedBlock, 
+            name: blockName.startsWith(course) ? blockName : `${course} ${blockName}`,
+            capacity: parseInt(blockCapacity, 10), 
+            specialization: isUpperYear ? (blockSpecialization as 'AP' | 'DD') : undefined 
+        };
+        setAdminData(prev => ({
+            ...prev,
+            blocks: prev.blocks.map(b => b.id === selectedBlock.id ? updatedBlock : b)
+        }));
+        setIsEditDialogOpen(false);
+        setSelectedBlock(null);
     };
     
     const handleDeleteBlock = () => {
@@ -125,9 +140,9 @@ export default function YearLevelBlocksPage() {
 
     const openEditDialog = (block: Block) => {
         setSelectedBlock(block);
-        setBlockName(block.name);
+        setBlockName(block.name.replace(`${block.course} `, ''));
         setBlockCapacity(block.capacity.toString());
-        setBlockSpecialization(block.specialization || 'none');
+        setBlockSpecialization(block.specialization || (isUpperYear ? 'AP' : undefined));
         setIsEditDialogOpen(true);
     };
 
@@ -152,7 +167,7 @@ export default function YearLevelBlocksPage() {
             <main className="flex-1 p-4 sm:p-6 space-y-6">
                 <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                        <h1 className="text-2xl font-bold tracking-tight">Manage {yearLabel} Blocks</h1>
+                        <h1 className="text-2xl font-bold tracking-tight">Manage {course} {yearLabel} Blocks</h1>
                         <p className="text-muted-foreground">
                             Add, edit, and view blocks for {yearLabel}.
                         </p>
@@ -168,13 +183,13 @@ export default function YearLevelBlocksPage() {
                             <DialogHeader>
                                 <DialogTitle>Add New Block</DialogTitle>
                                 <DialogDescription>
-                                    Enter the name and capacity for the new block.
+                                    Enter the name and capacity for the new block. The course prefix "{course}" will be added automatically.
                                 </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4 py-2">
                                 <div className="space-y-2">
-                                    <Label htmlFor="block-name">Block Name</Label>
-                                    <Input id="block-name" value={blockName} onChange={e => setBlockName(e.target.value)} placeholder="e.g., BSIT 1-A" />
+                                    <Label htmlFor="block-name">Block Section</Label>
+                                    <Input id="block-name" value={blockName} onChange={e => setBlockName(e.target.value)} placeholder="e.g., 1-A" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="block-capacity">Capacity</Label>
@@ -284,7 +299,7 @@ export default function YearLevelBlocksPage() {
                     </DialogHeader>
                     <div className="space-y-4 py-2">
                         <div className="space-y-2">
-                            <Label htmlFor="edit-block-name">Block Name</Label>
+                            <Label htmlFor="edit-block-name">Block Section</Label>
                             <Input id="edit-block-name" value={blockName} onChange={e => setBlockName(e.target.value)} />
                         </div>
                         <div className="space-y-2">

@@ -167,7 +167,9 @@ export default function ManageApplicationsPage() {
         else if (foundStudent.year === 2) yearKey = '2nd-year';
         else if (foundStudent.year === 3) yearKey = '3rd-year';
         else if (foundStudent.year === 4) yearKey = '4th-year';
-        return blocks.filter(b => b.year === yearKey);
+        
+        const courseForYear = (foundStudent.year <= 2) ? 'ACT' : 'BSIT';
+        return blocks.filter(b => b.year === yearKey && b.course === courseForYear);
     }, [blocks, foundStudent]);
 
     const availableSubjectsForDirectEnroll = useMemo(() => {
@@ -193,10 +195,12 @@ export default function ManageApplicationsPage() {
     if (!applicationToEnroll) return [];
     let yearKey: '1st-year' | '2nd-year' | '3rd-year' | '4th-year' = '1st-year';
     if (applicationToEnroll.year === 1) yearKey = '1st-year';
-    if (applicationToEnroll.year === 2) yearKey = '2nd-year';
-    if (applicationToEnroll.year === 3) yearKey = '3rd-year';
-    if (applicationToEnroll.year === 4) yearKey = '4th-year';
-    return blocks.filter(b => b.year === yearKey);
+    else if (applicationToEnroll.year === 2) yearKey = '2nd-year';
+    else if (applicationToEnroll.year === 3) yearKey = '3rd-year';
+    else if (applicationToEnroll.year === 4) yearKey = '4th-year';
+
+    const courseForYear = (applicationToEnroll.year <= 2) ? 'ACT' : 'BSIT';
+    return blocks.filter(b => b.year === yearKey && b.course === courseForYear);
   }, [blocks, applicationToEnroll]);
 
   const availableSubjectsForEnrollment = useMemo(() => {

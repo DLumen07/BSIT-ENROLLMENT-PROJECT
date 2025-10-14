@@ -9,19 +9,19 @@ import { Badge } from '@/components/ui/badge';
 
 type YearLevel = '1st-year' | '2nd-year' | '3rd-year' | '4th-year';
 
-const yearLevelsConfig: {value: YearLevel, label: string, description: string}[] = [
-    { value: '1st-year', label: '1st Year', description: 'Manage sections for 1st year student for first semester.' },
-    { value: '2nd-year', label: '2nd Year', description: 'Manage sections for 2nd year student for first semester.' },
-    { value: '3rd-year', label: '3rd Year', description: 'Manage sections for 3rd year student for first semester.' },
-    { value: '4th-year', label: '4th Year', description: 'Manage sections for 4th year student for first semester.' },
+const yearLevelsConfig: {value: YearLevel, label: string, course: string, description: string}[] = [
+    { value: '1st-year', label: '1st Year', course: 'ACT', description: 'Manage sections for 1st year ACT students.' },
+    { value: '2nd-year', label: '2nd Year', course: 'ACT', description: 'Manage sections for 2nd year ACT students.' },
+    { value: '3rd-year', label: '3rd Year', course: 'BSIT', description: 'Manage sections for 3rd year BSIT students.' },
+    { value: '4th-year', label: '4th Year', course: 'BSIT', description: 'Manage sections for 4th year BSIT students.' },
 ];
 
 const recentBlocks = [
-    { name: 'BSIT 1-A', yearLevel: '1st Year', dateCreated: '2024-07-28' },
-    { name: 'BSIT 3-C', yearLevel: '3rd Year', dateCreated: '2024-07-27' },
-    { name: 'BSIT 2-B', yearLevel: '2nd Year', dateCreated: '2024-07-27' },
-    { name: 'BSIT 4-A', yearLevel: '4th Year', dateCreated: '2024-07-26' },
-    { name: 'BSIT 1-B', yearLevel: '1st Year', dateCreated: '2024-07-26' },
+    { name: 'BSIT 3-A (AP)', yearLevel: '3rd Year', dateCreated: '2024-07-28' },
+    { name: 'ACT 1-A', yearLevel: '1st Year', dateCreated: '2024-07-28' },
+    { name: 'ACT 2-B', yearLevel: '2nd Year', dateCreated: '2024-07-27' },
+    { name: 'BSIT 4-A (AP)', yearLevel: '4th Year', dateCreated: '2024-07-26' },
+    { name: 'ACT 1-B', yearLevel: '1st Year', dateCreated: '2024-07-26' },
 ];
 
 
@@ -40,9 +40,9 @@ export default function ManageBlocksPage() {
                     {yearLevelsConfig.map(yl => (
                        <Link href={`/admin/dashboard/manage-blocks/${yl.value}`} key={yl.value}>
                             <Card className="hover:border-primary transition-colors hover:bg-primary/5">
-                                <CardHeader className="flex flex-row items-center justify-between">
+                                <CardHeader className="flex flex-row items-start justify-between">
                                     <div className="space-y-1.5">
-                                        <CardTitle>{yl.label}</CardTitle>
+                                        <CardTitle>{yl.label} ({yl.course})</CardTitle>
                                         <CardDescription>
                                            {yl.description}
                                         </CardDescription>

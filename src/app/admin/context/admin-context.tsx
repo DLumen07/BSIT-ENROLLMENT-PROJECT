@@ -7,16 +7,16 @@ import { Subject as ScheduleSubject } from '../dashboard/schedule/[blockId]/page
 
 // --- Data from manage-applications ---
 const initialPendingApplications = [
-    { id: 1, studentId: '24-00-0001', name: 'John Doe', course: 'BSIT', year: 2, status: 'Old', credentials: { birthCertificate: true, grades: true, goodMoral: false, registrationForm: true }},
+    { id: 1, studentId: '24-00-0001', name: 'John Doe', course: 'BSIT', year: 3, status: 'Old', credentials: { birthCertificate: true, grades: true, goodMoral: false, registrationForm: true }},
     { id: 2, studentId: '24-00-0002', name: 'Jane Smith', course: 'ACT', year: 1, status: 'New', credentials: { birthCertificate: true, grades: false, goodMoral: true, registrationForm: false }},
-    { id: 3, studentId: '24-00-0003', name: 'Peter Jones', course: 'BSIT', year: 1, status: 'Transferee', credentials: { birthCertificate: true, grades: true, goodMoral: true, registrationForm: true }},
+    { id: 3, studentId: '24-00-0003', name: 'Peter Jones', course: 'BSIT', year: 3, status: 'Transferee', credentials: { birthCertificate: true, grades: true, goodMoral: true, registrationForm: true }},
 ];
 const initialApprovedApplications = [
     { id: 4, studentId: '23-00-0999', name: 'Emily White', course: 'BSIT', year: 3, status: 'Old', credentials: { birthCertificate: true, grades: true, goodMoral: true, registrationForm: true }},
     { id: 5, studentId: '22-00-0998', name: 'Chris Green', course: 'ACT', year: 2, status: 'Old', credentials: { birthCertificate: true, grades: true, goodMoral: true, registrationForm: true }},
 ];
 const initialRejectedApplications = [
-     { id: 6, studentId: '24-00-0997', name: 'Michael Brown', course: 'BSIT', year: 1, status: 'New', credentials: { birthCertificate: false, grades: true, goodMoral: true, registrationForm: true }, rejectionReason: 'Incomplete or missing documents.'},
+     { id: 6, studentId: '24-00-0997', name: 'Michael Brown', course: 'ACT', year: 1, status: 'New', credentials: { birthCertificate: false, grades: true, goodMoral: true, registrationForm: true }, rejectionReason: 'Incomplete or missing documents.'},
 ];
 export type Application = typeof initialPendingApplications[0] & { rejectionReason?: string };
 export const rejectionReasons = [
@@ -38,16 +38,17 @@ export type Block = {
     name: string;
     capacity: number;
     enrolled: number;
-    specialization?: string;
+    course: 'ACT' | 'BSIT';
+    specialization?: 'AP' | 'DD';
     year: '1st-year' | '2nd-year' | '3rd-year' | '4th-year';
 };
 const initialBlocks: Block[] = [
-    { id: 1, name: `BSIT 1-A`, capacity: 40, enrolled: 38, year: '1st-year' },
-    { id: 2, name: `BSIT 1-B`, capacity: 40, enrolled: 35, year: '1st-year' },
-    { id: 3, name: `BSIT 2-A`, capacity: 40, enrolled: 32, year: '2nd-year' },
-    { id: 4, name: `BSIT 3-A`, capacity: 40, enrolled: 28, specialization: 'AP', year: '3rd-year' },
-    { id: 5, name: `BSIT 3-B`, capacity: 40, enrolled: 30, specialization: 'DD', year: '3rd-year' },
-    { id: 6, name: `BSIT 4-A`, capacity: 40, enrolled: 25, specialization: 'AP', year: '4th-year' },
+    { id: 1, name: `ACT 1-A`, capacity: 40, enrolled: 38, course: 'ACT', year: '1st-year' },
+    { id: 2, name: `ACT 1-B`, capacity: 40, enrolled: 35, course: 'ACT', year: '1st-year' },
+    { id: 3, name: `ACT 2-A`, capacity: 40, enrolled: 32, course: 'ACT', year: '2nd-year' },
+    { id: 4, name: `BSIT 3-A`, capacity: 40, enrolled: 28, course: 'BSIT', specialization: 'AP', year: '3rd-year' },
+    { id: 5, name: `BSIT 3-B`, capacity: 40, enrolled: 30, course: 'BSIT', specialization: 'DD', year: '3rd-year' },
+    { id: 6, name: `BSIT 4-A`, capacity: 40, enrolled: 25, course: 'BSIT', specialization: 'AP', year: '4th-year' },
 ];
 export const mockStudents = [
     { id: '24-00-0004', name: 'Alice Johnson', avatar: 'https://picsum.photos/seed/aj/40/40' },
@@ -82,9 +83,9 @@ const initialScheduleSubjects: ScheduleSubject[] = [
     { id: 2, code: 'MATH 101', description: 'Calculus I', day: 'Tuesday', startTime: '13:00', endTime: '14:30', instructor: 'Prof. Ada Lovelace', color: 'bg-green-200/50 dark:bg-green-800/50 border-green-400' },
 ];
 const initialSchedules: Record<string, ScheduleSubject[]> = {
-    "BSIT 1-A": initialScheduleSubjects,
-    "BSIT 1-B": [{ id: 10, code: 'IT 101', description: 'Intro to Computing', day: 'Tuesday', startTime: '09:00', endTime: '10:30', instructor: 'Dr. Grace Hopper', color: 'bg-blue-200/50 dark:bg-blue-800/50 border-blue-400' }],
-    "BSIT 2-A": [{ id: 20, code: 'IT 201', description: 'Data Structures', day: 'Monday', startTime: '09:00', endTime: '10:30', instructor: 'Prof. Ada Lovelace', color: 'bg-green-200/50 dark:bg-green-800/50 border-green-400' }]
+    "ACT 1-A": initialScheduleSubjects,
+    "ACT 1-B": [{ id: 10, code: 'IT 101', description: 'Intro to Computing', day: 'Tuesday', startTime: '09:00', endTime: '10:30', instructor: 'Dr. Grace Hopper', color: 'bg-blue-200/50 dark:bg-blue-800/50 border-blue-400' }],
+    "ACT 2-A": [{ id: 20, code: 'IT 201', description: 'Data Structures', day: 'Monday', startTime: '09:00', endTime: '10:30', instructor: 'Prof. Ada Lovelace', color: 'bg-green-200/50 dark:bg-green-800/50 border-green-400' }]
 };
 
 // --- Student Data ---
@@ -106,7 +107,7 @@ const initialStudentsList: Student[] = [
     { id: 1, studentId: '21-00-0123', name: 'Alice Johnson', avatar: 'https://picsum.photos/seed/aj-student/40/40', email: 'alice.j@student.example.com', course: 'BSIT', year: 4, status: 'Enrolled', sex: 'Female', phoneNumber: '09123456789' },
     { id: 2, studentId: '22-00-0234', name: 'Bob Williams', avatar: 'https://picsum.photos/seed/bw-student/40/40', email: 'bob.w@student.example.com', course: 'BSIT', year: 3, status: 'Enrolled', sex: 'Male', phoneNumber: '09123456780' },
     { id: 3, studentId: '23-00-0345', name: 'Charlie Brown', avatar: 'https://picsum.photos/seed/cb-student/40/40', email: 'charlie.b@student.example.com', course: 'ACT', year: 2, status: 'Enrolled', sex: 'Male', phoneNumber: '09123456781' },
-    { id: 4, studentId: '23-00-0456', name: 'David Wilson', avatar: 'https://picsum.photos/seed/dw-student/40/40', email: 'david.w@student.example.com', course: 'BSIT', year: 2, status: 'Not Enrolled', sex: 'Male', phoneNumber: '09123456782' },
+    { id: 4, studentId: '23-00-0456', name: 'David Wilson', avatar: 'https://picsum.photos/seed/dw-student/40/40', email: 'david.w@student.example.com', course: 'ACT', year: 2, status: 'Not Enrolled', sex: 'Male', phoneNumber: '09123456782' },
 ];
 
 const initialEnrolledApplications: Application[] = [];
