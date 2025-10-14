@@ -39,6 +39,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { useToast } from '@/hooks/use-toast';
 
 export default function StudentDashboardLayout({
   children,
@@ -47,6 +48,7 @@ export default function StudentDashboardLayout({
 }) {
   const pathname = usePathname();
   const schoolLogo = PlaceHolderImages.find(p => p.id === 'school-logo-sm');
+  const { toast } = useToast();
 
   return (
     <StudentProvider>
@@ -174,7 +176,7 @@ export default function StudentDashboardLayout({
                   <DropdownMenuItem asChild>
                     <Link href="/student/dashboard/settings">Settings</Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>Support</DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => toast({ title: 'Feature in progress', description: 'Support page is not yet implemented.' })}>Support</DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link href="/">Logout</Link>

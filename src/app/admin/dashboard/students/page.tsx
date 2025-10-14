@@ -1,4 +1,5 @@
 
+
 'use client';
 import React, { useState, useMemo } from 'react';
 import { MoreHorizontal, Search, Filter, FilterX, Trash2 } from 'lucide-react';
@@ -42,10 +43,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useAdmin, Student } from '../../context/admin-context';
+import { useToast } from '@/hooks/use-toast';
 
 export default function StudentsPage() {
     const { adminData, setAdminData } = useAdmin();
     const { students } = adminData;
+    const { toast } = useToast();
     
     const [searchTerm, setSearchTerm] = useState('');
     const [filters, setFilters] = useState({
@@ -231,8 +234,8 @@ export default function StudentsPage() {
                                                         </Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
-                                                        <DropdownMenuItem>View Profile</DropdownMenuItem>
-                                                        <DropdownMenuItem>Claim ORF</DropdownMenuItem>
+                                                        <DropdownMenuItem onSelect={() => toast({ title: 'Feature in progress', description: 'Viewing student profiles is not yet implemented.' })}>View Profile</DropdownMenuItem>
+                                                        <DropdownMenuItem onSelect={() => toast({ title: 'Feature in progress', description: 'Claiming ORF is not yet implemented.' })}>Claim ORF</DropdownMenuItem>
                                                         <DropdownMenuSeparator />
                                                         <DropdownMenuItem
                                                             className="text-destructive focus:bg-destructive focus:text-destructive-foreground"

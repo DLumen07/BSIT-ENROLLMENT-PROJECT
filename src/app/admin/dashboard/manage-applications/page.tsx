@@ -655,10 +655,11 @@ export default function ManageApplicationsPage() {
                 </CardHeader>
                 <CardContent>
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                        <TabsList className="grid w-full grid-cols-3 rounded-xl">
+                        <TabsList className="grid w-full grid-cols-4 rounded-xl">
                             <TabsTrigger value="pending" className="rounded-lg">Pending</TabsTrigger>
                             <TabsTrigger value="approved" className="rounded-lg">Approved</TabsTrigger>
                             <TabsTrigger value="rejected" className="rounded-lg">Rejected</TabsTrigger>
+                            <TabsTrigger value="enrolled" className="rounded-lg">Enrolled</TabsTrigger>
                         </TabsList>
                         <TabsContent value="pending">
                             <div className="border rounded-lg mt-4">
@@ -746,7 +747,7 @@ export default function ManageApplicationsPage() {
                                                                 <UserPlus className="mr-2 h-4 w-4" />
                                                                 Enroll Student
                                                             </DropdownMenuItem>
-                                                            <DropdownMenuItem>
+                                                            <DropdownMenuItem onSelect={() => toast({ title: 'Feature in progress', description: 'Editing approved applications is not yet implemented.' })}>
                                                                 <Pencil className="mr-2 h-4 w-4" />
                                                                 Edit
                                                             </DropdownMenuItem>
@@ -827,6 +828,44 @@ export default function ManageApplicationsPage() {
                                 {filteredApplications.length === 0 && (
                                     <div className="text-center p-4 text-muted-foreground">
                                         No rejected applications match the current filters.
+                                    </div>
+                                )}
+                            </div>
+                        </TabsContent>
+                         <TabsContent value="enrolled">
+                             <div className="border rounded-lg mt-4">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Student ID</TableHead>
+                                            <TableHead>Student Name</TableHead>
+                                            <TableHead>Course</TableHead>
+                                            <TableHead>Year</TableHead>
+                                            <TableHead>Type</TableHead>
+                                            <TableHead className="text-right">Status</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {filteredApplications.map((application) => (
+                                            <TableRow key={application.id}>
+                                                <TableCell>{application.studentId}</TableCell>
+                                                <TableCell className="font-medium">{application.name}</TableCell>
+                                                <TableCell>{application.course}</TableCell>
+                                                <TableCell>{application.year}</TableCell>
+                                                <TableCell>{application.status}</TableCell>
+                                                <TableCell className="text-right">
+                                                    <div className="flex items-center justify-end gap-2 text-green-600">
+                                                        <BadgeCheck className="h-4 w-4" />
+                                                        <span>Enrolled</span>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                                {filteredApplications.length === 0 && (
+                                    <div className="text-center p-4 text-muted-foreground">
+                                        No enrolled students match the current filters.
                                     </div>
                                 )}
                             </div>
@@ -1079,3 +1118,4 @@ export default function ManageApplicationsPage() {
     
 
     
+

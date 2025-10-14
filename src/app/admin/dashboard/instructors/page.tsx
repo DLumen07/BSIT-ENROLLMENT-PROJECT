@@ -1,4 +1,5 @@
 
+
 'use client';
 import React, { useState } from 'react';
 import {
@@ -277,7 +278,7 @@ export default function InstructorsPage() {
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
-                                                     <DropdownMenuItem>
+                                                     <DropdownMenuItem onSelect={() => toast({ title: 'Feature in progress', description: 'Viewing instructor schedules is not yet implemented.' })}>
                                                         <Calendar className="mr-2 h-4 w-4" />
                                                         View Schedule
                                                     </DropdownMenuItem>

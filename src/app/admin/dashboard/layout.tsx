@@ -1,4 +1,5 @@
 
+
 'use client';
 import Link from 'next/link';
 import {
@@ -52,6 +53,7 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { useAdmin } from '../context/admin-context';
+import { useToast } from '@/hooks/use-toast';
 
 const Breadcrumb = () => {
     const pathname = usePathname();
@@ -155,6 +157,7 @@ export default function AdminDashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { toast } = useToast();
   const schoolLogo = PlaceHolderImages.find(p => p.id === 'school-logo-sm');
   const isEnrollmentPath = pathname.startsWith('/admin/dashboard/manage-');
   const [isEnrollmentOpen, setIsEnrollmentOpen] = React.useState(isEnrollmentPath);
@@ -344,7 +347,7 @@ export default function AdminDashboardLayout({
                   <DropdownMenuItem asChild>
                     <Link href="/admin/dashboard/settings">Settings</Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>Support</DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => toast({ title: 'Feature in progress', description: 'Support page is not yet implemented.' })}>Support</DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link href="/">Logout</Link>
