@@ -2,7 +2,7 @@
 
 'use client';
 import React, { useState, useMemo, useEffect } from 'react';
-import { MoreHorizontal, CheckCircle2, XCircle, Pencil, X, RotateCw, Trash2, Search, FilterX, Filter, PlusCircle, UserPlus, AlertTriangle, BadgeCheck } from 'lucide-react';
+import { MoreHorizontal, CheckCircle2, XCircle, Pencil, X, RotateCw, Trash2, Search, FilterX, Filter, PlusCircle, UserPlus, AlertTriangle, BadgeCheck, FileText } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -59,6 +59,7 @@ export default function ManageApplicationsPage() {
   const { toast } = useToast();
 
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+    const [isReviewFormOpen, setIsReviewFormOpen] = useState(false);
   const [rejectionDialog, setRejectionDialog] = useState<{ isOpen: boolean; application: Application | null }>({
     isOpen: false,
     application: null,
@@ -396,6 +397,15 @@ export default function ManageApplicationsPage() {
         </TooltipProvider>
     );
 };
+
+const ReviewField = ({ label, value }: { label: string, value?: string | null }) => (
+    value ? (
+        <div className="flex justify-between text-sm py-1">
+            <span className="text-muted-foreground">{label}</span>
+            <span className="font-medium text-right">{value}</span>
+        </div>
+    ) : null
+);
 
   return (
     <>
@@ -821,7 +831,7 @@ export default function ManageApplicationsPage() {
         
         {selectedApplication && (
             <Dialog open={!!selectedApplication} onOpenChange={(open) => !open && setSelectedApplication(null)}>
-                <DialogContent className="sm:max-w-[425px] rounded-xl">
+                <DialogContent className="sm:max-w-md rounded-xl">
                     <DialogHeader>
                         <DialogTitle>Student Credentials</DialogTitle>
                         <DialogDescription>Review the submitted documents for this applicant.</DialogDescription>
@@ -851,10 +861,17 @@ export default function ManageApplicationsPage() {
                             {credentialLabels.map(({ key, label }) => (
                                 <div key={key} className="flex items-center justify-between">
                                     <span className="text-sm">{label}</span>
-                                    {selectedApplication.credentials[key] ? (
-                                        <CheckCircle2 className="h-5 w-5 text-green-500" />
+                                     {key === 'registrationForm' && selectedApplication.credentials[key] ? (
+                                        <Button variant="secondary" size="sm" className="h-7 rounded-md" onClick={() => setIsReviewFormOpen(true)}>
+                                            <FileText className="h-3 w-3 mr-2" />
+                                            View Form
+                                        </Button>
                                     ) : (
-                                        <XCircle className="h-5 w-5 text-red-500" />
+                                         selectedApplication.credentials[key] ? (
+                                            <CheckCircle2 className="h-5 w-5 text-green-500" />
+                                        ) : (
+                                            <XCircle className="h-5 w-5 text-red-500" />
+                                        )
                                     )}
                                 </div>
                             ))}
@@ -871,6 +888,45 @@ export default function ManageApplicationsPage() {
                                 handleApprove(selectedApplication);
                             }
                         }}>Approve</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        )}
+        
+        {isReviewFormOpen && selectedApplication && (
+             <Dialog open={isReviewFormOpen} onOpenChange={setIsReviewFormOpen}>
+                <DialogContent className="sm:max-w-2xl rounded-xl">
+                    <DialogHeader>
+                        <DialogTitle>Review Submitted Form</DialogTitle>
+                        <DialogDescription>
+                            This is the information submitted by {selectedApplication.name}.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="max-h-[70vh] overflow-y-auto p-1 pr-4">
+                        <div className="space-y-6">
+                            <div>
+                                <h4 className="font-semibold mb-2">Personal Information</h4>
+                                <div className="border rounded-lg p-4 space-y-1">
+                                    <ReviewField label="Name" value={selectedApplication.name} />
+                                    <ReviewField label="Email" value={`${selectedApplication.name.toLowerCase().replace(' ', '.')}@example.com`} />
+                                    <ReviewField label="Sex" value="Male" />
+                                    <ReviewField label="Phone" value="09123456789" />
+                                    <ReviewField label="Birthdate" value="January 1, 2004" />
+                                </div>
+                            </div>
+                             <div>
+                                <h4 className="font-semibold mb-2">Academic Information</h4>
+                                <div className="border rounded-lg p-4 space-y-1">
+                                    <ReviewField label="Course" value={selectedApplication.course} />
+                                    <ReviewField label="Year Level" value={`${selectedApplication.year}`} />
+                                    <ReviewField label="Student Type" value={selectedApplication.status} />
+                                    <ReviewField label="Block" value={selectedApplication.block} />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsReviewFormOpen(false)} className="rounded-xl">Close</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -1051,3 +1107,4 @@ export default function ManageApplicationsPage() {
     </>
   );
 }
+
