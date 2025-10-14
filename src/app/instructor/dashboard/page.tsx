@@ -5,9 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { BookOpen, Users } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { useSearchParams } from 'next/navigation';
 
 export default function InstructorDashboardPage() {
     const { instructorData } = useInstructor();
+    const searchParams = useSearchParams();
+    const emailQuery = searchParams.toString();
+
+    if (!instructorData) return null;
+
     const { personal, schedule, classes } = instructorData;
 
     const formatTime = (timeStr: string) => {
@@ -59,7 +65,7 @@ export default function InstructorDashboardPage() {
                     </CardContent>
                     <CardFooter>
                          <Button asChild variant="outline" className="w-full">
-                            <Link href="/instructor/dashboard/schedule">View Full Schedule</Link>
+                            <Link href={`/instructor/dashboard/schedule?${emailQuery}`}>View Full Schedule</Link>
                         </Button>
                     </CardFooter>
                 </Card>
@@ -70,7 +76,7 @@ export default function InstructorDashboardPage() {
                     </CardHeader>
                      <CardContent className="space-y-4">
                         {classes.map((c) => (
-                            <div key={c.subjectCode} className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
+                            <div key={`${c.subjectCode}-${c.block}`} className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
                                 <div>
                                     <p className="font-semibold">{c.subjectCode} - {c.block}</p>
                                     <p className="text-xs text-muted-foreground">{c.subjectDescription}</p>
@@ -84,7 +90,7 @@ export default function InstructorDashboardPage() {
                     </CardContent>
                     <CardFooter>
                          <Button asChild variant="outline" className="w-full">
-                            <Link href="/instructor/dashboard/classes">Manage Classes</Link>
+                            <Link href={`/instructor/dashboard/classes?${emailQuery}`}>Manage Classes</Link>
                         </Button>
                     </CardFooter>
                 </Card>

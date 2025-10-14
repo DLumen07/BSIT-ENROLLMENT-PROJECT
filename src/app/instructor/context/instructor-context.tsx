@@ -1,52 +1,116 @@
 
 'use client';
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAdmin } from '@/app/admin/context/admin-context';
+import type { Subject as ScheduleSubject } from '@/app/admin/dashboard/schedule/[blockId]/page';
+import type { Student, Subject } from '@/app/admin/context/admin-context';
+import { useSearchParams } from 'next/navigation';
 
-// For now, we can pull some data from the admin context to simulate a logged-in instructor
-// In a real app, this would be fetched from an API based on the logged-in user
-
-const mockInstructorData = {
-    personal: {
-        id: 1,
-        name: 'Dr. Alan Turing',
-        email: 'alan.turing@university.edu',
-        avatar: 'https://picsum.photos/seed/at-avatar/128/128',
-    },
-    schedule: [
-        { id: 1, code: 'IT 101', description: 'Intro to Computing', day: 'Monday', startTime: '09:00', endTime: '10:30', block: 'BSIT 1-A', color: 'bg-blue-200/50 dark:bg-blue-800/50 border-blue-400' },
-        { id: 2, code: 'IT 201', description: 'Data Structures', day: 'Monday', startTime: '10:30', endTime: '12:00', block: 'BSIT 2-A', color: 'bg-green-200/50 dark:bg-green-800/50 border-green-400' },
-    ],
-    classes: [
-        {
-            block: 'BSIT 1-A',
-            subjectCode: 'IT 101',
-            subjectDescription: 'Intro to Computing',
-            studentCount: 38,
-        },
-        {
-            block: 'BSIT 2-A',
-            subjectCode: 'IT 201',
-            subjectDescription: 'Data Structures',
-            studentCount: 32,
-        },
-    ]
+type InstructorPersonal = {
+    id: number;
+    name: string;
+    email: string;
+    avatar: string;
 };
 
-type InstructorDataType = typeof mockInstructorData;
+type InstructorClass = {
+    block: string;
+    subjectCode: string;
+    subjectDescription: string;
+    studentCount: number;
+};
+
+type Grade = { subjectCode: string; grade: number; };
+type StudentGrades = { [studentId: string]: Grade[] };
+
+type InstructorDataType = {
+    personal: InstructorPersonal;
+    schedule: (ScheduleSubject & { block: string })[];
+    classes: InstructorClass[];
+    grades: StudentGrades;
+};
 
 interface InstructorContextType {
-  instructorData: InstructorDataType;
-  setInstructorData: React.Dispatch<React.SetStateAction<InstructorDataType>>;
+  instructorData: InstructorDataType | null;
+  setInstructorData: React.Dispatch<React.SetStateAction<InstructorDataType | null>>;
+  updateStudentGrade: (studentId: string, subjectCode: string, grade: number) => void;
 }
 
 const InstructorContext = createContext<InstructorContextType | undefined>(undefined);
 
 export const InstructorProvider = ({ children }: { children: React.ReactNode }) => {
-  const [instructorData, setInstructorData] = useState<InstructorDataType>(mockInstructorData);
+  const { adminData, setAdminData } = useAdmin();
+  const [instructorData, setInstructorData] = useState<InstructorDataType | null>(null);
+  const searchParams = useSearchParams();
+  const instructorEmail = searchParams.get('email');
+
+  useEffect(() => {
+    if (adminData && instructorEmail) {
+      const currentInstructor = adminData.instructors.find(inst => inst.email === instructorEmail);
+      if (currentInstructor) {
+        const instructorSchedule: (ScheduleSubject & { block: string })[] = [];
+        const instructorClasses: InstructorClass[] = [];
+
+        for (const blockName in adminData.schedules) {
+            const blockSchedule = adminData.schedules[blockName];
+            const subjectsInBlock = blockSchedule.filter(sub => sub.instructor === currentInstructor.name);
+            
+            subjectsInBlock.forEach(sub => {
+                instructorSchedule.push({ ...sub, block: blockName });
+            });
+
+            if (subjectsInBlock.length > 0) {
+                 const uniqueSubjects = [...new Map(subjectsInBlock.map(item => [item.code, item])).values()];
+                 uniqueSubjects.forEach(subject => {
+                    instructorClasses.push({
+                        block: blockName,
+                        subjectCode: subject.code,
+                        subjectDescription: subject.description,
+                        studentCount: adminData.students.filter(s => s.block === blockName).length,
+                    });
+                 });
+            }
+        }
+
+        setInstructorData({
+            personal: {
+                id: currentInstructor.id,
+                name: currentInstructor.name,
+                email: currentInstructor.email,
+                avatar: currentInstructor.avatar,
+            },
+            schedule: instructorSchedule,
+            classes: instructorClasses,
+            grades: adminData.grades,
+        });
+      }
+    }
+  }, [adminData, instructorEmail]);
+
+  const updateStudentGrade = (studentId: string, subjectCode: string, grade: number) => {
+    setAdminData(prevAdminData => {
+        const newGrades = { ...prevAdminData.grades };
+        const studentGrades = newGrades[studentId] ? [...newGrades[studentId]] : [];
+        const gradeIndex = studentGrades.findIndex(g => g.subjectCode === subjectCode);
+
+        if (gradeIndex > -1) {
+            studentGrades[gradeIndex] = { subjectCode, grade };
+        } else {
+            studentGrades.push({ subjectCode, grade });
+        }
+        newGrades[studentId] = studentGrades;
+        
+        return { ...prevAdminData, grades: newGrades };
+    });
+  };
+
+  if (!instructorData) {
+    // You can return a loading spinner here
+    return <div>Loading instructor data...</div>;
+  }
 
   return (
-    <InstructorContext.Provider value={{ instructorData, setInstructorData }}>
+    <InstructorContext.Provider value={{ instructorData, setInstructorData, updateStudentGrade }}>
       {children}
     </InstructorContext.Provider>
   );

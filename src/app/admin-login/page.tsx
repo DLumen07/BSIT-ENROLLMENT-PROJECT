@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -30,7 +30,8 @@ export default function StaffLoginPage() {
     if (isAdmin) {
       router.push('/admin/dashboard');
     } else if (isInstructor) {
-      router.push('/instructor/dashboard');
+      // Pass the instructor's email to the dashboard. In a real app, this would be a session.
+      router.push(`/instructor/dashboard?email=${encodeURIComponent(email)}`);
     } else {
       toast({
         variant: 'destructive',

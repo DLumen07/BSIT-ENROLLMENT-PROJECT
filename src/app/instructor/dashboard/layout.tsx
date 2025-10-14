@@ -5,16 +5,14 @@ import {
   Bell,
   Home,
   LogOut,
-  Users2,
-  CalendarCheck2,
   Settings,
-  BookCopy
+  BookCopy,
+  CalendarCheck2,
 } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams, Suspense } from 'next/navigation';
 import { InstructorProvider, useInstructor } from '@/app/instructor/context/instructor-context';
-
 import {
   SidebarProvider,
   Sidebar,
@@ -39,9 +37,10 @@ import {
 import { ThemeToggle } from '@/components/theme-toggle';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
-
 function Header() {
     const { instructorData } = useInstructor();
+    if (!instructorData) return null;
+
     return (
          <header className="flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6">
             <SidebarTrigger className="md:hidden"/>
@@ -74,7 +73,7 @@ function Header() {
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href="/instructor/dashboard/settings">Settings</Link>
+                    <Link href={`/instructor/dashboard/settings?${useSearchParams().toString()}`}>Settings</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem>Support</DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -88,87 +87,97 @@ function Header() {
     )
 }
 
+function InstructorLayoutContent({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const schoolLogo = PlaceHolderImages.find(p => p.id === 'school-logo-sm');
+  const emailQuery = searchParams.toString();
+
+  return (
+    <SidebarProvider>
+      <Sidebar>
+        <SidebarHeader>
+          <div className="flex items-center gap-2">
+            {schoolLogo && (
+                <Image
+                src={schoolLogo.imageUrl}
+                alt={schoolLogo.description}
+                width={60}
+                height={60}
+                data-ai-hint={schoolLogo.imageHint}
+                className="rounded-full"
+                />
+            )}
+            <span className="font-semibold text-lg">Instructor Portal</span>
+          </div>
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={pathname === '/instructor/dashboard'}>
+                <Link href={`/instructor/dashboard?${emailQuery}`}>
+                  <Home />
+                  Dashboard
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={pathname.startsWith('/instructor/dashboard/schedule')}>
+                <Link href={`/instructor/dashboard/schedule?${emailQuery}`}>
+                  <CalendarCheck2 />
+                  My Schedule
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={pathname.startsWith('/instructor/dashboard/classes')}>
+                <Link href={`/instructor/dashboard/classes?${emailQuery}`}>
+                  <BookCopy />
+                  My Classes
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={pathname === '/instructor/dashboard/settings'}>
+                <Link href={`/instructor/dashboard/settings?${emailQuery}`}>
+                  <Settings />
+                  Settings
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarContent>
+        <SidebarFooter>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link href="/">
+                  <LogOut />
+                  Logout
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
+      </Sidebar>
+      <SidebarInset>
+        <Header />
+        {children}
+      </SidebarInset>
+    </SidebarProvider>
+  );
+}
+
 export default function InstructorDashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
-  const schoolLogo = PlaceHolderImages.find(p => p.id === 'school-logo-sm');
-
   return (
-    <InstructorProvider>
-      <SidebarProvider>
-        <Sidebar>
-          <SidebarHeader>
-            <div className="flex items-center gap-2">
-              {schoolLogo && (
-                  <Image
-                  src={schoolLogo.imageUrl}
-                  alt={schoolLogo.description}
-                  width={60}
-                  height={60}
-                  data-ai-hint={schoolLogo.imageHint}
-                  className="rounded-full"
-                  />
-              )}
-              <span className="font-semibold text-lg">Instructor Portal</span>
-            </div>
-          </SidebarHeader>
-          <SidebarContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === '/instructor/dashboard'}>
-                  <Link href="/instructor/dashboard">
-                    <Home />
-                    Dashboard
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname.startsWith('/instructor/dashboard/schedule')}>
-                  <Link href="/instructor/dashboard/schedule">
-                    <CalendarCheck2 />
-                    My Schedule
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === '/instructor/dashboard/classes'}>
-                  <Link href="/instructor/dashboard/classes">
-                    <BookCopy />
-                    My Classes
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === '/instructor/dashboard/settings'}>
-                  <Link href="/instructor/dashboard/settings">
-                    <Settings />
-                    Settings
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarContent>
-          <SidebarFooter>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/">
-                    <LogOut />
-                    Logout
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarFooter>
-        </Sidebar>
-        <SidebarInset>
-          <Header />
-          {children}
-        </SidebarInset>
-      </SidebarProvider>
-    </InstructorProvider>
+    <Suspense fallback={<div>Loading...</div>}>
+      <InstructorProvider>
+        <InstructorLayoutContent>{children}</InstructorLayoutContent>
+      </InstructorProvider>
+    </Suspense>
   );
 }
