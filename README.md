@@ -1,48 +1,76 @@
-# Firebase Studio
 
-This is a NextJS starter in Firebase Studio.
+# BSIT Enrollment System Overview
 
-To get started, take a look at src/app/page.tsx.
+This document provides a high-level overview of the architecture and core logic powering the BSIT Enrollment System application.
 
-## Connecting to a Backend
+## Core Architecture: React Context for State Management
 
-This application uses a centralized state management pattern via React Context to make connecting to a backend straightforward. All data for the student and admin portals is managed through dedicated "providers."
+The application is built using a centralized state management pattern powered by **React Context**. Instead of each component managing its own data independently, the application's state is held in a central location and distributed to the components that need it.
 
--   **Student Data**: Managed by `StudentProvider` in `src/app/student/context/student-context.tsx`.
--   **Admin Data**: Managed by `AdminProvider` in `src/app/admin/context/admin-context.tsx`.
+This is achieved through two primary "providers":
 
-To connect your backend (e.g., a PHP API), you only need to modify these two provider files.
+-   **`AdminProvider`** (`src/app/admin/context/admin-context.tsx`): Manages all data for the administrator portal. This includes lists of students, instructors, applications, blocks, subjects, and schedules.
+-   **`StudentProvider`** (`src/app/student/context/student-context.tsx`): Manages all data for the student portal, including the student's personal information, academic records, and class schedule.
 
 ### How It Works
 
-1.  **The Provider**: Wraps a section of the app (like the entire student or admin dashboard). It fetches and holds the data in a React state.
-2.  **The Hook**: A custom hook (`useStudent()` or `useAdmin()`) allows any component within the provider to easily access the shared data.
-3.  **Updating State**: The provider also exposes a setter function (e.g., `setStudentData`) that components can use to update the central state. All components using that data will automatically re-render with the new information.
+1.  **The Provider**: A component (e.g., `AdminProvider`) wraps a major section of the app (like the entire admin dashboard). It initializes and holds all the relevant data in a React state.
+2.  **The Hook**: A custom hook (e.g., `useAdmin()`) is provided. Any component nested within the provider can call this hook to get direct access to the shared data and functions to update that data.
+3.  **Updating State**: When a component needs to change data (like approving an application), it calls a setter function (e.g., `setAdminData`) exposed by the hook. This updates the central state, and React automatically re-renders any component that uses that piece of data, ensuring the entire UI stays in sync.
+
+This pattern keeps our components clean and focused on presentation, while the logic for data management is centralized and predictable.
+
+## Data Management & Mock Data
+
+All the data for this application is currently mocked (simulated) and located directly within the context files:
+
+-   Admin data is initialized in `src/app/admin/context/admin-context.tsx`.
+-   Student data is initialized in `src/app/student/context/student-context.tsx`.
+
+This makes it easy to quickly see the data structure and modify it for testing purposes. In a production scenario, the `useEffect` hook within these provider files would be used to fetch this data from a backend API, as outlined in the "Connecting to a Backend" section below.
+
+## Dynamic Validation Logic
+
+To make the enrollment process more robust, the system includes dynamic validation to check for academic prerequisites and unit completion. This logic is primarily managed within `src/app/admin/context/admin-context.tsx`.
+
+### Key Components:
+
+1.  **`grades` Data**: A new `grades` object has been added to the mock data. This object serves as the official academic record, mapping each student's ID to the subjects they've taken and the final grades they received.
+
+2.  **`getCompletedSubjects(studentId)` Function**: This is the core of the validation system. When provided with a student's ID, this function:
+    -   Retrieves the student's full grade history.
+    -   Filters for subjects where the grade is **3.0 or better** (a passing grade).
+    -   Returns a list of subjects the student has successfully completed, along with the units for each.
+
+### How It's Used:
+
+This validation logic is integrated into key parts of the admin dashboard:
+
+-   **Subject Enlistment (Direct Enroll & Schedule Management)**: When an admin attempts to enlist a student in a subject, the system calls `getCompletedSubjects()` to check their academic record. If a subject has a prerequisite, the system verifies it has been met. If not, the subject is disabled in the UI, and a tooltip explains which prerequisite is missing. This prevents invalid enrollments.
+
+-   **Unit Calculation**: In the "Direct Enroll" workflow, the total number of units a student has earned is calculated and displayed. This gives the admin immediate insight into the student's academic progress and helps determine their eligibility for a specific year level.
+
+This system ensures that all enrollment decisions are guided by the student's actual academic performance, reducing errors and ensuring a smooth progression.
 
 ---
 
+## Connecting to a Backend
+
+To connect this application to a real backend (e.g., a database or an external API), you only need to modify the two provider files.
+
 ### Step-by-Step Integration Guide
 
-Here’s how to connect the `AdminProvider` to your backend. The same principles apply to the `StudentProvider`.
+Here’s how you would connect the `AdminProvider` to your backend. The same principles apply to the `StudentProvider`.
 
 #### 1. Locate the Admin Context File
 
 Open `src/app/admin/context/admin-context.tsx`.
 
-You will see the `AdminProvider` component, which currently initializes its state with `mockAdminData`:
-
-```tsx
-// src/app/admin/context/admin-context.tsx
-
-export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
-  const [adminData, setAdminData] = useState<AdminDataType>(mockAdminData);
-  // ...
-};
-```
+You will see the `AdminProvider` component, which currently initializes its state with `mockAdminData`.
 
 #### 2. Fetch Initial Data from Your API
 
-Replace the mock data with a `useEffect` hook to fetch data from your API when the component first loads. You should also add loading and error states.
+Replace the mock data initialization with a `useEffect` hook to fetch data from your API when the component first loads. You should also add loading and error states.
 
 **Example:**
 
@@ -86,38 +114,19 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     return <div>Error: {error}</div>;
   }
 
-  // Note: You might need to adjust child components to handle `adminData` potentially being `null`
-  // or ensure you provide a default empty state.
   return (
     <AdminContext.Provider value={{ adminData: adminData!, setAdminData }}>
       {children}
     </AdminContext.Provider>
   );
 };
-
-// ... (rest of the file)
 ```
 
 #### 3. Handle Data Mutations (Create, Update, Delete)
 
-In the components, instead of just calling `setAdminData`, you would first make an API call to your backend. After a successful response, you update the local state using `setAdminData`.
+When performing actions that change data, you would first make an API call to your backend. After a successful response, you update the local state using `setAdminData` to reflect the change in the UI.
 
-**Example:** Let's look at the `handleDeleteUser` function in `src/app/admin/dashboard/administrators/page.tsx`.
-
-**Before (Client-side only):**
-
-```tsx
-const handleDeleteUser = () => {
-    if (!selectedUser) return;
-    setAdminData(prev => ({
-        ...prev,
-        adminUsers: prev.adminUsers.filter(u => u.id !== selectedUser.id)
-    }));
-    // ...
-};
-```
-
-**After (Connected to a backend):**
+**Example (Deleting a User):**
 
 ```tsx
 const handleDeleteUser = async () => {
@@ -139,16 +148,11 @@ const handleDeleteUser = async () => {
             adminUsers: prev.adminUsers.filter(u => u.id !== selectedUser.id)
         }));
 
-        // Close dialogs, etc.
-        setIsDeleteDialogOpen(false);
-        setSelectedUser(null);
-
     } catch (error) {
-        // Handle any errors, e.g., show a toast notification
         console.error("Failed to delete user:", error);
         alert("Could not delete user. Please try again.");
     }
 };
 ```
 
-By following this pattern, you can systematically connect every part of the application to your backend while keeping the UI components clean and decoupled from the data-fetching logic.
+By following this pattern, you can systematically connect the application to a live backend while keeping the UI components clean and decoupled from the data-fetching logic.
