@@ -62,6 +62,7 @@ export type Subject = {
     code: string;
     description: string;
     units: number;
+    prerequisite?: string;
 };
 export type YearLevelSubjects = Record<string, Subject[]>;
 const initialSubjects: YearLevelSubjects = {
@@ -69,7 +70,9 @@ const initialSubjects: YearLevelSubjects = {
         { id: 101, code: 'IT 101', description: 'Introduction to Computing', units: 3 },
         { id: 102, code: 'MATH 101', description: 'Calculus 1', units: 3 },
     ],
-    '2nd-year': [ { id: 201, code: 'IT 201', description: 'Data Structures & Algorithms', units: 3 }, ],
+    '2nd-year': [ 
+        { id: 201, code: 'IT 201', description: 'Data Structures & Algorithms', units: 3, prerequisite: 'IT 101' }, 
+    ],
     '3rd-year': [], '4th-year': [],
 };
 

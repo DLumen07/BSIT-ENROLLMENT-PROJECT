@@ -1,6 +1,6 @@
 
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -33,6 +33,7 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useAdmin, Subject, YearLevelSubjects } from '../../context/admin-context';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
 const yearLevels = [
@@ -55,6 +56,24 @@ export default function ManageSubjectsPage() {
     const [currentSubject, setCurrentSubject] = useState<Subject | null>(null);
     const [deleteInput, setDeleteInput] = useState('');
 
+    const prerequisiteOptions = useMemo(() => {
+        const options: Subject[] = [];
+        const activeYearIndex = yearLevels.findIndex(yl => yl.value === activeTab);
+        
+        for (let i = 0; i <= activeYearIndex; i++) {
+            const yearKey = yearLevels[i].value;
+            options.push(...(subjects[yearKey] || []));
+        }
+        
+        // Exclude the subject being edited from its own prerequisite list
+        if (currentSubject) {
+            return options.filter(s => s.id !== currentSubject.id);
+        }
+
+        return options;
+    }, [subjects, activeTab, currentSubject]);
+
+
     const openAddDialog = () => {
         setCurrentSubject(null);
         setIsAddDialogOpen(true);
@@ -74,11 +93,13 @@ export default function ManageSubjectsPage() {
     const handleAddSubject = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
+        const prerequisite = formData.get('prerequisite') as string;
         const newSubject: Subject = {
             id: Date.now(),
             code: formData.get('code') as string,
             description: formData.get('description') as string,
             units: parseInt(formData.get('units') as string, 10),
+            prerequisite: prerequisite !== 'none' ? prerequisite : undefined,
         };
         setAdminData(prev => ({
             ...prev,
@@ -94,11 +115,13 @@ export default function ManageSubjectsPage() {
         e.preventDefault();
         if (!currentSubject) return;
         const formData = new FormData(e.currentTarget);
+        const prerequisite = formData.get('prerequisite') as string;
         const updatedSubject = {
             ...currentSubject,
             code: formData.get('code') as string,
             description: formData.get('description') as string,
             units: parseInt(formData.get('units') as string, 10),
+            prerequisite: prerequisite !== 'none' ? prerequisite : undefined,
         };
         setAdminData(prev => ({
             ...prev,
@@ -158,6 +181,7 @@ export default function ManageSubjectsPage() {
                                                 <TableHead>Subject Code</TableHead>
                                                 <TableHead>Description</TableHead>
                                                 <TableHead>Units</TableHead>
+                                                <TableHead>Prerequisite</TableHead>
                                                 <TableHead className="text-right">Actions</TableHead>
                                             </TableRow>
                                         </TableHeader>
@@ -168,6 +192,7 @@ export default function ManageSubjectsPage() {
                                                         <TableCell className="font-medium">{subject.code}</TableCell>
                                                         <TableCell>{subject.description}</TableCell>
                                                         <TableCell>{subject.units}</TableCell>
+                                                        <TableCell>{subject.prerequisite || 'None'}</TableCell>
                                                         <TableCell className="text-right">
                                                             <DropdownMenu>
                                                                 <DropdownMenuTrigger asChild>
@@ -193,7 +218,7 @@ export default function ManageSubjectsPage() {
                                                 ))
                                             ) : (
                                                 <TableRow>
-                                                    <TableCell colSpan={4} className="text-center h-24">
+                                                    <TableCell colSpan={5} className="text-center h-24">
                                                         No subjects created for this year level.
                                                     </TableCell>
                                                 </TableRow>
@@ -230,6 +255,22 @@ export default function ManageSubjectsPage() {
                             <Label htmlFor="units">Units</Label>
                             <Input id="units" name="units" type="number" placeholder="e.g., 3" required />
                         </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="prerequisite">Prerequisite</Label>
+                            <Select name="prerequisite" defaultValue="none">
+                                <SelectTrigger id="prerequisite">
+                                    <SelectValue placeholder="Select a prerequisite" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="none">None</SelectItem>
+                                    {prerequisiteOptions.map(sub => (
+                                        <SelectItem key={sub.id} value={sub.code}>
+                                            {sub.code} - {sub.description}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
                 </form>
                 <DialogFooter>
@@ -258,6 +299,22 @@ export default function ManageSubjectsPage() {
                          <div className="space-y-2">
                             <Label htmlFor="edit-units">Units</Label>
                             <Input id="edit-units" name="units" type="number" defaultValue={currentSubject?.units} required />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="edit-prerequisite">Prerequisite</Label>
+                            <Select name="prerequisite" defaultValue={currentSubject?.prerequisite || 'none'}>
+                                <SelectTrigger id="edit-prerequisite">
+                                    <SelectValue placeholder="Select a prerequisite" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="none">None</SelectItem>
+                                    {prerequisiteOptions.map(sub => (
+                                        <SelectItem key={sub.id} value={sub.code}>
+                                            {sub.code} - {sub.description}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
                 </form>
