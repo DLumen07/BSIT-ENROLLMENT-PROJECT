@@ -298,7 +298,7 @@ export default function SchedulePage() {
                                 <div className="grid grid-cols-4 items-center gap-4">
                                     <Label htmlFor="subject" className="text-right">Subject</Label>
                                     <Select name="subject" required>
-                                        <SelectTrigger className="col-span-3">
+                                        <SelectTrigger className="col-span-3 rounded-xl">
                                             <SelectValue placeholder="Select a subject" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -309,7 +309,7 @@ export default function SchedulePage() {
                                 <div className="grid grid-cols-4 items-center gap-4">
                                     <Label htmlFor="instructor" className="text-right">Instructor</Label>
                                      <Select name="instructor">
-                                        <SelectTrigger className="col-span-3">
+                                        <SelectTrigger className="col-span-3 rounded-xl">
                                             <SelectValue placeholder="Select an instructor (optional)" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -320,7 +320,7 @@ export default function SchedulePage() {
                                 <div className="grid grid-cols-4 items-center gap-4">
                                     <Label htmlFor="day" className="text-right">Day</Label>
                                     <Select name="day" required>
-                                        <SelectTrigger className="col-span-3">
+                                        <SelectTrigger className="col-span-3 rounded-xl">
                                             <SelectValue placeholder="Select a day" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -331,7 +331,7 @@ export default function SchedulePage() {
                                  <div className="grid grid-cols-4 items-center gap-4">
                                     <Label htmlFor="startTime" className="text-right">Start Time</Label>
                                     <Select name="startTime" required>
-                                        <SelectTrigger className="col-span-3">
+                                        <SelectTrigger className="col-span-3 rounded-xl">
                                             <SelectValue placeholder="Select start time" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -342,7 +342,7 @@ export default function SchedulePage() {
                                  <div className="grid grid-cols-4 items-center gap-4">
                                     <Label htmlFor="endTime" className="text-right">End Time</Label>
                                     <Select name="endTime" required>
-                                        <SelectTrigger className="col-span-3">
+                                        <SelectTrigger className="col-span-3 rounded-xl">
                                             <SelectValue placeholder="Select end time" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -469,7 +469,7 @@ export default function SchedulePage() {
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="edit-instructor" className="text-right">Instructor</Label>
                                 <Select name="instructor" defaultValue={subjectToEdit?.instructor}>
-                                    <SelectTrigger className="col-span-3">
+                                    <SelectTrigger className="col-span-3 rounded-xl">
                                         <SelectValue placeholder="Select an instructor (optional)" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -480,7 +480,7 @@ export default function SchedulePage() {
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="edit-day" className="text-right">Day</Label>
                                 <Select name="day" defaultValue={subjectToEdit?.day} required>
-                                    <SelectTrigger className="col-span-3">
+                                    <SelectTrigger className="col-span-3 rounded-xl">
                                         <SelectValue placeholder="Select a day" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -491,7 +491,7 @@ export default function SchedulePage() {
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="edit-startTime" className="text-right">Start Time</Label>
                                 <Select name="startTime" defaultValue={subjectToEdit?.startTime} required>
-                                    <SelectTrigger className="col-span-3">
+                                    <SelectTrigger className="col-span-3 rounded-xl">
                                         <SelectValue placeholder="Select start time" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -502,7 +502,7 @@ export default function SchedulePage() {
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="edit-endTime" className="text-right">End Time</Label>
                                 <Select name="endTime" defaultValue={subjectToEdit?.endTime} required>
-                                    <SelectTrigger className="col-span-3">
+                                    <SelectTrigger className="col-span-3 rounded-xl">
                                         <SelectValue placeholder="Select end time" />
                                     </SelectTrigger>
                                     <SelectContent>
