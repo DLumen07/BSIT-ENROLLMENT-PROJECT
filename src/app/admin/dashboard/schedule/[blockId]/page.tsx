@@ -195,7 +195,7 @@ export default function SchedulePage() {
         setAdminData(prev => ({...prev, schedules: newSchedules}));
         setIsAddDialogOpen(false);
          toast({
-            title: "Subject Added",
+            title: "Schedule Added",
             description: `${newSubject.code} has been added to the schedule for ${blockId}.`,
         });
     };
@@ -240,7 +240,7 @@ export default function SchedulePage() {
         setIsEditDialogOpen(false);
         setSubjectToEdit(null);
         toast({
-            title: "Subject Updated",
+            title: "Schedule Updated",
             description: `${updatedSubject.code} has been updated.`,
         });
     };
@@ -264,7 +264,7 @@ export default function SchedulePage() {
             setIsDeleteDialogOpen(false);
             setSubjectToDelete(null);
             toast({
-                title: "Subject Removed",
+                title: "Schedule Removed",
                 description: `${subjectToDelete.code} has been removed from the schedule.`,
             });
         }
@@ -283,14 +283,14 @@ export default function SchedulePage() {
                     <DialogTrigger asChild>
                         <Button>
                             <PlusCircle className="mr-2 h-4 w-4" />
-                            Add Subject
+                            Add Schedule
                         </Button>
                     </DialogTrigger>
                     <DialogContent>
                         <DialogHeader>
-                            <DialogTitle>Add New Subject</DialogTitle>
+                            <DialogTitle>Add New Schedule</DialogTitle>
                             <DialogDescription>
-                                Enter the details for the new subject.
+                                Enter the details for the new schedule.
                             </DialogDescription>
                         </DialogHeader>
                         <form id="add-subject-form" onSubmit={handleAddSubject}>
@@ -354,7 +354,7 @@ export default function SchedulePage() {
                         </form>
                         <DialogFooter>
                             <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-                            <Button type="submit" form="add-subject-form">Create Subject</Button>
+                            <Button type="submit" form="add-subject-form">Create Schedule</Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
@@ -451,7 +451,7 @@ export default function SchedulePage() {
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Edit Subject</DialogTitle>
+                        <DialogTitle>Edit Schedule</DialogTitle>
                         <DialogDescription>
                             Update the details for {subjectToEdit?.code}.
                         </DialogDescription>
@@ -524,7 +524,7 @@ export default function SchedulePage() {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete the subject <span className="font-semibold">{subjectToDelete?.code}</span> from the schedule.
+                            This action cannot be undone. This will permanently delete the schedule for <span className="font-semibold">{subjectToDelete?.code}</span>.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -535,4 +535,5 @@ export default function SchedulePage() {
             </AlertDialog>
         </main>
     );
-}
+
+    
