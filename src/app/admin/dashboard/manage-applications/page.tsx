@@ -446,7 +446,7 @@ export default function ManageApplicationsPage() {
                                         </div>
                                     )}
                                 </div>
-                                <DialogFooter className="justify-between">
+                                <DialogFooter className="sm:justify-start">
                                     <Button variant="outline" onClick={() => setDirectEnrollStep(1)} className="rounded-xl">Back</Button>
                                     <Button onClick={() => setDirectEnrollStep(3)} className="rounded-xl">Review</Button>
                                 </DialogFooter>
