@@ -80,13 +80,13 @@ export default function StudentsPage() {
 
     const availableBlocks = useMemo(() => {
         if (!enrollYearLevel) return [];
-        const yearKey = `${enrollYearLevel.toLowerCase().replace(' ', '-')}-year`;
+        const yearKey = `${enrollYearLevel.toString()}-year`;
         return blocks.filter(b => b.year === yearKey);
     }, [blocks, enrollYearLevel]);
 
     const availableSubjects = useMemo(() => {
         if (!enrollYearLevel) return [];
-        const yearKey = `${enrollYearLevel.toLowerCase().replace(' ', '-')}-year`;
+        const yearKey = `${enrollYearLevel.toString()}-year`;
         return yearLevelSubjects[yearKey] || [];
     }, [yearLevelSubjects, enrollYearLevel]);
     
@@ -247,7 +247,7 @@ export default function StudentsPage() {
                                                 <div className="grid grid-cols-2 gap-4 mt-4">
                                                     <div className="space-y-2">
                                                         <Label htmlFor="year-level">Year Level</Label>
-                                                        <Input id="year-level" value={enrollYearLevel} disabled />
+                                                        <Input id="year-level" value={`${enrollYearLevel}${enrollYearLevel === '1' ? 'st' : enrollYearLevel === '2' ? 'nd' : enrollYearLevel === '3' ? 'rd' : 'th'} Year`} disabled />
                                                     </div>
                                                     <div className="space-y-2">
                                                         <Label htmlFor="block">Block</Label>
@@ -318,7 +318,7 @@ export default function StudentsPage() {
                         <div className="flex flex-wrap items-center gap-2">
                             <Popover>
                                 <PopoverTrigger asChild>
-                                    <Button variant="ghost" className="gap-2 hover:bg-transparent hover:text-accent focus:text-accent">
+                                    <Button variant="outline" className="gap-2 text-muted-foreground border-dashed hover:border-accent hover:text-accent focus:text-accent focus:border-accent">
                                         <Filter className="h-4 w-4" />
                                         Filter
                                     </Button>
