@@ -81,7 +81,7 @@ export default function StudentLoginPage() {
               <span className="sr-only">Back to Home</span>
             </Link>
           </Button>
-          <Card className="shadow-[0_8px_16px_-4px_hsl(var(--primary)/0.3),0_-8px_16px_-4px_hsl(var(--accent)/0.3)]">
+          <Card className="shadow-[0_8px_16px_-4px_hsl(var(--primary)/0.3),0_-8px_16px_-4px_hsl(var(--accent)/0.3)] rounded-2xl hover:border-primary transition-colors">
             <CardHeader className="text-center">
               <CardTitle className="text-2xl">Student Login</CardTitle>
               <CardDescription>
@@ -90,11 +90,11 @@ export default function StudentLoginPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <Button variant="outline" className="w-full hover:bg-transparent hover:border-accent hover:shadow-[0_0_8px_hsl(var(--accent)/0.5)] transition-shadow">
+                <Button variant="outline" className="w-full rounded-xl hover:bg-transparent hover:border-primary hover:shadow-[0_0_8px_hsl(var(--primary)/0.5)] transition-shadow">
                   <GoogleIcon className="mr-2 h-5 w-5" />
                   Sign in with Google
                 </Button>
-                <Button variant="outline" className="w-full hover:bg-transparent hover:border-accent hover:shadow-[0_0_8px_hsl(var(--accent)/0.5)] transition-shadow">
+                <Button variant="outline" className="w-full rounded-xl hover:bg-transparent hover:border-primary hover:shadow-[0_0_8px_hsl(var(--primary)/0.5)] transition-shadow">
                   <FacebookIcon className="mr-2 h-5 w-5 text-[#1877F2]" />
                   Sign in with Facebook
                 </Button>
