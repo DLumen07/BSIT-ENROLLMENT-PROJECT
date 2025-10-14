@@ -202,7 +202,7 @@ export default function ManageApplicationsPage() {
                                         <div className="space-y-2">
                                             <Label>Course</Label>
                                             <Select value={filters.course} onValueChange={(value) => handleFilterChange('course', value)}>
-                                                <SelectTrigger>
+                                                <SelectTrigger className="focus:ring-0 focus:ring-offset-0">
                                                     <SelectValue placeholder="All Courses" />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -213,7 +213,7 @@ export default function ManageApplicationsPage() {
                                          <div className="space-y-2">
                                             <Label>Year</Label>
                                             <Select value={filters.year} onValueChange={(value) => handleFilterChange('year', value)}>
-                                                <SelectTrigger>
+                                                <SelectTrigger className="focus:ring-0 focus:ring-offset-0">
                                                     <SelectValue placeholder="All Years" />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -224,7 +224,7 @@ export default function ManageApplicationsPage() {
                                          <div className="space-y-2">
                                             <Label>Status</Label>
                                             <Select value={filters.status} onValueChange={(value) => handleFilterChange('status', value)}>
-                                                <SelectTrigger>
+                                                <SelectTrigger className="focus:ring-0 focus:ring-offset-0">
                                                     <SelectValue placeholder="All Statuses" />
                                                 </SelectTrigger>
                                                 <SelectContent>
