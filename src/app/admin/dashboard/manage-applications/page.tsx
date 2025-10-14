@@ -348,9 +348,9 @@ export default function ManageApplicationsPage() {
                         Review, approve, and reject applications for enrollment.
                     </p>
                 </div>
-                 <Dialog open={isDirectEnrollOpen} onOpenChange={resetDirectEnroll}>
+                 <Dialog open={isDirectEnrollOpen} onOpenChange={setIsDirectEnrollOpen}>
                     <DialogTrigger asChild>
-                        <Button className="rounded-full" onClick={() => setIsDirectEnrollOpen(true)}>
+                        <Button className="rounded-full">
                             <PlusCircle className="mr-2 h-4 w-4" />
                             Direct Enroll Student
                         </Button>
@@ -907,6 +907,8 @@ export default function ManageApplicationsPage() {
     </>
   );
 }
+
+    
 
     
 
