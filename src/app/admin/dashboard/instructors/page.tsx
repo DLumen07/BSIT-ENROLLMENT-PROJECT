@@ -93,7 +93,7 @@ const MultiSelectSubject = ({ selectedSubjects, onSelectionChange }: { selectedS
     return (
          <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full justify-between">
+                <Button variant="outline" className="w-full justify-between rounded-xl">
                     <span>{selectedSubjects.length > 0 ? `${selectedSubjects.length} selected` : 'Select subjects'}</span>
                     <ChevronDown className="h-4 w-4" />
                 </Button>
@@ -306,7 +306,7 @@ export default function InstructorsPage() {
 
             {/* Add Dialog */}
              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                <DialogContent>
+                <DialogContent className="rounded-xl">
                     <DialogHeader>
                         <DialogTitle>Add New Instructor</DialogTitle>
                         <DialogDescription>
@@ -317,19 +317,19 @@ export default function InstructorsPage() {
                         <div className="space-y-4 py-2">
                             <div className="space-y-2">
                                 <Label htmlFor="name">Full Name</Label>
-                                <Input id="name" name="name" value={name} onChange={(e) => setName(e.target.value)} required />
+                                <Input id="name" name="name" value={name} onChange={(e) => setName(e.target.value)} required className="rounded-xl"/>
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email Address</Label>
-                                <Input id="email" name="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                                <Input id="email" name="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="rounded-xl"/>
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="password">Password</Label>
-                                <Input id="password" name="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                                <Input id="password" name="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="rounded-xl"/>
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="confirmPassword">Confirm Password</Label>
-                                <Input id="confirmPassword" name="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+                                <Input id="confirmPassword" name="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="rounded-xl"/>
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="subjects">Subjects Handled</Label>
@@ -338,8 +338,8 @@ export default function InstructorsPage() {
                         </div>
                     </form>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-                        <Button type="submit" form="add-instructor-form">Create Account</Button>
+                        <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} className="rounded-xl">Cancel</Button>
+                        <Button type="submit" form="add-instructor-form" className="rounded-xl">Create Account</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -409,5 +409,7 @@ export default function InstructorsPage() {
         </>
     );
 }
+
+    
 
     
