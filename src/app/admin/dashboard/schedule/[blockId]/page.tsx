@@ -353,8 +353,8 @@ export default function SchedulePage() {
                             </div>
                         </form>
                         <DialogFooter>
-                            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-                            <Button type="submit" form="add-subject-form">Create Schedule</Button>
+                            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} className="rounded-xl">Cancel</Button>
+                            <Button type="submit" form="add-subject-form" className="rounded-xl">Create Schedule</Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
@@ -513,8 +513,8 @@ export default function SchedulePage() {
                         </div>
                     </form>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
-                        <Button type="submit" form="edit-subject-form">Save Changes</Button>
+                        <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} className="rounded-xl">Cancel</Button>
+                        <Button type="submit" form="edit-subject-form" className="rounded-xl">Save Changes</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
