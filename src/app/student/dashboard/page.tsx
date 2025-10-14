@@ -27,7 +27,7 @@ export default function StudentDashboardPage() {
                 <AlertTitle>Important Notice</AlertTitle>
                 <AlertDescription className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     You are not yet officially enrolled for the current academic year. Please proceed to the enrollment page to complete the process.
-                    <Button asChild variant="accent" className="mt-2 sm:mt-0 rounded-lg">
+                    <Button asChild variant="accent" className="mt-2 sm:mt-0 rounded-xl">
                         <Link href="/student/dashboard/enrollment">Go to Enrollment</Link>
                     </Button>
                 </AlertDescription>
