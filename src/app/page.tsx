@@ -105,13 +105,13 @@ export default function Home() {
           </h1>
           <AnimatedSubtitle />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-xs pt-4">
-            <Button asChild size="lg" className="rounded-full transition-shadow duration-300 hover:shadow-[0_0_20px_hsl(var(--primary)/0.8)]">
+             <Button asChild variant="outline" size="lg" className="rounded-full border-primary text-primary hover:bg-transparent hover:text-primary hover:border-primary">
               <Link href="/student-login">
                 <User />
                 Students
               </Link>
             </Button>
-            <Button asChild variant="accent" size="lg" className="rounded-full transition-shadow duration-300 hover:shadow-[0_0_20px_hsl(var(--accent)/0.8)]">
+             <Button asChild variant="outline" size="lg" className="rounded-full border-accent text-accent hover:bg-transparent hover:text-accent hover:border-accent">
               <Link href="/admin-login">
                 <UserCog />
                 Administrator
