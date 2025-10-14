@@ -32,13 +32,13 @@ export default function Home() {
             BSIT Enrollment System
           </h1>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-xs">
-            <Button asChild size="lg">
+            <Button asChild size="lg" className="rounded-full">
               <Link href="/student-login">
                 <User />
                 Students
               </Link>
             </Button>
-            <Button asChild variant="accent" size="lg">
+            <Button asChild variant="accent" size="lg" className="rounded-full">
               <Link href="/admin-login">
                 <UserCog />
                 Administrator
