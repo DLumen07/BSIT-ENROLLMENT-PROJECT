@@ -192,17 +192,17 @@ export default function ManageApplicationsPage() {
                         <div className="flex flex-wrap items-center gap-2">
                             <Popover>
                                 <PopoverTrigger asChild>
-                                    <Button variant="outline" className="gap-2 text-muted-foreground border-dashed hover:border-accent hover:text-accent focus:text-accent focus:border-accent focus:ring-accent">
+                                    <Button variant="outline" className="gap-2 text-muted-foreground border-dashed hover:border-accent hover:text-accent focus:text-accent focus:border-accent focus:ring-accent rounded-xl">
                                         <Filter className="h-4 w-4" />
                                         Filter
                                     </Button>
                                 </PopoverTrigger>
-                                <PopoverContent className="w-auto p-4" align="end">
+                                <PopoverContent className="w-auto p-4 rounded-xl" align="end">
                                     <div className="grid grid-cols-1 gap-4">
                                         <div className="space-y-2">
                                             <Label>Course</Label>
                                             <Select value={filters.course} onValueChange={(value) => handleFilterChange('course', value)}>
-                                                <SelectTrigger className="focus:ring-0 focus:ring-offset-0">
+                                                <SelectTrigger className="focus:ring-0 focus:ring-offset-0 rounded-xl">
                                                     <SelectValue placeholder="All Courses" />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -213,7 +213,7 @@ export default function ManageApplicationsPage() {
                                          <div className="space-y-2">
                                             <Label>Year</Label>
                                             <Select value={filters.year} onValueChange={(value) => handleFilterChange('year', value)}>
-                                                <SelectTrigger className="focus:ring-0 focus:ring-offset-0">
+                                                <SelectTrigger className="focus:ring-0 focus:ring-offset-0 rounded-xl">
                                                     <SelectValue placeholder="All Years" />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -224,7 +224,7 @@ export default function ManageApplicationsPage() {
                                          <div className="space-y-2">
                                             <Label>Status</Label>
                                             <Select value={filters.status} onValueChange={(value) => handleFilterChange('status', value)}>
-                                                <SelectTrigger className="focus:ring-0 focus:ring-offset-0">
+                                                <SelectTrigger className="focus:ring-0 focus:ring-offset-0 rounded-xl">
                                                     <SelectValue placeholder="All Statuses" />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -233,7 +233,7 @@ export default function ManageApplicationsPage() {
                                             </Select>
                                         </div>
                                         {isFiltered && (
-                                            <Button variant="ghost" onClick={clearFilters} className="h-10 justify-center">
+                                            <Button variant="ghost" onClick={clearFilters} className="h-10 justify-center rounded-xl">
                                                 <FilterX className="mr-2 h-4 w-4" />
                                                 Clear Filters
                                             </Button>
@@ -545,3 +545,5 @@ export default function ManageApplicationsPage() {
     </>
   );
 }
+
+    
