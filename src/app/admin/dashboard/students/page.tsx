@@ -75,6 +75,47 @@ export default function StudentsPage() {
         setSelectedStudent(student);
         setIsDeleteDialogOpen(true);
     };
+
+    const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        const studentData = {
+            studentId: formData.get('studentId') as string,
+            name: formData.get('name') as string,
+            email: formData.get('email') as string,
+            course: formData.get('course') as 'BSIT' | 'ACT',
+            year: parseInt(formData.get('year') as string, 10),
+            status: formData.get('status') as 'Enrolled' | 'Not Enrolled' | 'Graduated',
+        };
+
+        if (selectedStudent) { // Editing
+            const updatedStudent = { ...selectedStudent, ...studentData };
+            setAdminData(prev => ({
+                ...prev,
+                students: prev.students.map(s => s.id === selectedStudent.id ? updatedStudent : s)
+            }));
+        } else { // Adding
+            const newStudent: Student = {
+                id: Date.now(),
+                avatar: `https://picsum.photos/seed/${Date.now()}/40/40`,
+                ...studentData,
+            };
+            setAdminData(prev => ({ ...prev, students: [...prev.students, newStudent] }));
+        }
+
+        setIsAddEditDialogOpen(false);
+        setSelectedStudent(null);
+    };
+
+     const handleDeleteStudent = () => {
+        if (!selectedStudent) return;
+        setAdminData(prev => ({
+            ...prev,
+            students: prev.students.filter(s => s.id !== selectedStudent.id),
+        }));
+        setIsDeleteDialogOpen(false);
+        setSelectedStudent(null);
+    };
     
     const handleFilterChange = (filterType: keyof typeof filters, value: string) => {
         setFilters(prev => ({ ...prev, [filterType]: value }));
@@ -129,14 +170,87 @@ export default function StudentsPage() {
                             Manage and view all student records in the system.
                         </p>
                     </div>
-                     <Dialog>
+                     <Dialog open={isAddEditDialogOpen} onOpenChange={(isOpen) => {
+                        setIsAddEditDialogOpen(isOpen);
+                        if (!isOpen) setSelectedStudent(null);
+                     }}>
                         <DialogTrigger asChild>
                             <Button className="rounded-full">
                                 <PlusCircle className="mr-2 h-4 w-4" />
                                 Add Student
                             </Button>
                         </DialogTrigger>
-                        {/* Add/Edit Dialog content will go here */}
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>{selectedStudent ? 'Edit Student' : 'Add New Student'}</DialogTitle>
+                                <DialogDescription>
+                                    {selectedStudent ? 'Update the details for this student.' : 'Enter the details for the new student.'}
+                                </DialogDescription>
+                            </DialogHeader>
+                            <form id="student-form" onSubmit={handleFormSubmit}>
+                                <div className="space-y-4 py-2">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="name">Full Name</Label>
+                                            <Input id="name" name="name" defaultValue={selectedStudent?.name} required />
+                                        </div>
+                                         <div className="space-y-2">
+                                            <Label htmlFor="studentId">Student ID</Label>
+                                            <Input id="studentId" name="studentId" defaultValue={selectedStudent?.studentId} required />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="email">Email</Label>
+                                        <Input id="email" name="email" type="email" defaultValue={selectedStudent?.email} required />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="course">Course</Label>
+                                            <Select name="course" defaultValue={selectedStudent?.course} required>
+                                                <SelectTrigger id="course">
+                                                    <SelectValue placeholder="Select course" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="BSIT">BSIT</SelectItem>
+                                                    <SelectItem value="ACT">ACT</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="year">Year Level</Label>
+                                            <Select name="year" defaultValue={selectedStudent?.year.toString()} required>
+                                                <SelectTrigger id="year">
+                                                    <SelectValue placeholder="Select year" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="1">1st Year</SelectItem>
+                                                    <SelectItem value="2">2nd Year</SelectItem>
+                                                    <SelectItem value="3">3rd Year</SelectItem>
+                                                    <SelectItem value="4">4th Year</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                     <div className="space-y-2">
+                                        <Label htmlFor="status">Status</Label>
+                                        <Select name="status" defaultValue={selectedStudent?.status} required>
+                                            <SelectTrigger id="status">
+                                                <SelectValue placeholder="Select status" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="Enrolled">Enrolled</SelectItem>
+                                                <SelectItem value="Not Enrolled">Not Enrolled</SelectItem>
+                                                <SelectItem value="Graduated">Graduated</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                            </form>
+                             <DialogFooter>
+                                <Button variant="outline" onClick={() => setIsAddEditDialogOpen(false)}>Cancel</Button>
+                                <Button type="submit" form="student-form">{selectedStudent ? 'Save Changes' : 'Add Student'}</Button>
+                            </DialogFooter>
+                        </DialogContent>
                     </Dialog>
                 </div>
 
@@ -270,6 +384,28 @@ export default function StudentsPage() {
                     </CardContent>
                 </Card>
             </main>
+
+            <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                             This will permanently delete the record for <span className="font-semibold">{selectedStudent?.name}</span>. This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            className="bg-destructive hover:bg-destructive/90"
+                            onClick={handleDeleteStudent}
+                        >
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     );
 }
+
+    
