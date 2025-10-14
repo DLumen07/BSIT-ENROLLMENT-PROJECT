@@ -123,7 +123,6 @@ const mockAdminData = {
     subjects: initialSubjects,
     schedules: initialSchedules,
     students: initialStudentsList,
-    addApplication: (newApp: Application) => {}
 };
 
 type AdminDataType = typeof mockAdminData;
@@ -136,15 +135,7 @@ interface AdminContextType {
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
 export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
-  const [adminData, setAdminData] = useState<AdminDataType>({
-      ...mockAdminData,
-      addApplication: (newApp: Application) => {
-          setAdminData(prev => ({
-              ...prev,
-              pendingApplications: [...prev.pendingApplications, newApp]
-          }))
-      }
-  });
+  const [adminData, setAdminData] = useState<AdminDataType>(mockAdminData);
 
   return (
     <AdminContext.Provider value={{ adminData, setAdminData }}>
@@ -160,3 +151,5 @@ export const useAdmin = (): AdminContextType => {
   }
   return context;
 };
+
+    

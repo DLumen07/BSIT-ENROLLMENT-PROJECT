@@ -59,7 +59,7 @@ export default function ManageApplicationsPage() {
       isOpen: false,
       application: null,
   });
-  const [isAddStudentDialogOpen, setIsAddStudentDialogOpen] = useState(false);
+    const [isDirectEnrollOpen, setIsDirectEnrollOpen] = useState(false);
   const [deleteInput, setDeleteInput] = useState('');
 
   const [activeTab, setActiveTab] = useState('pending');
@@ -76,31 +76,112 @@ export default function ManageApplicationsPage() {
   const [enrollBlock, setEnrollBlock] = useState('');
   const [enlistedSubjects, setEnlistedSubjects] = useState<Subject[]>([]);
 
+    // Direct Enroll State
+    const [directEnrollStep, setDirectEnrollStep] = useState(1);
+    const [directEnrollSearchId, setDirectEnrollSearchId] = useState('');
+    const [foundStudent, setFoundStudent] = useState<Student | null>(null);
+    const [directEnrollBlock, setDirectEnrollBlock] = useState('');
+    const [directEnlistedSubjects, setDirectEnlistedSubjects] = useState<Subject[]>([]);
+    
+    const handleDirectEnrollSearch = () => {
+        const student = students.find(s => s.studentId === directEnrollSearchId && s.status !== 'Enrolled');
+        if (student) {
+            setFoundStudent(student);
+            setDirectEnrollStep(2);
+        } else {
+            toast({
+                variant: 'destructive',
+                title: 'Student Not Found',
+                description: 'No unenrolled student found with that ID. Please check the ID or their enrollment status.',
+            });
+        }
+    };
+
+    const resetDirectEnroll = () => {
+        setIsDirectEnrollOpen(false);
+        setTimeout(() => {
+            setDirectEnrollStep(1);
+            setDirectEnrollSearchId('');
+            setFoundStudent(null);
+            setDirectEnrollBlock('');
+            setDirectEnlistedSubjects([]);
+        }, 300);
+    };
+
+    const handleDirectEnrollSubmit = () => {
+        if (!foundStudent || !directEnrollBlock) {
+            toast({ variant: 'destructive', title: 'Missing Information', description: 'Please select a block.' });
+            return;
+        }
+        
+        const updatedStudent: Student = {
+            ...foundStudent,
+            status: 'Enrolled',
+            block: directEnrollBlock,
+            enlistedSubjects: directEnlistedSubjects,
+        };
+
+        setAdminData(prev => {
+            const updatedStudents = prev.students.map(s => s.id === updatedStudent.id ? updatedStudent : s);
+            const updatedBlocks = prev.blocks.map(b => 
+                b.name === directEnrollBlock ? { ...b, enrolled: b.enrolled + 1 } : b
+            );
+            return {
+                ...prev,
+                students: updatedStudents,
+                blocks: updatedBlocks,
+            };
+        });
+
+        toast({
+            title: 'Enrollment Successful',
+            description: `${foundStudent.name} has been directly enrolled in block ${directEnrollBlock}.`,
+        });
+        
+        resetDirectEnroll();
+    };
+
+     const availableBlocksForDirectEnroll = useMemo(() => {
+        if (!foundStudent) return [];
+        let yearKey: '1st-year' | '2nd-year' | '3rd-year' | '4th-year' = '1st-year';
+        if (foundStudent.year === 1) yearKey = '1st-year';
+        else if (foundStudent.year === 2) yearKey = '2nd-year';
+        else if (foundStudent.year === 3) yearKey = '3rd-year';
+        else if (foundStudent.year === 4) yearKey = '4th-year';
+        return blocks.filter(b => b.year === yearKey);
+    }, [blocks, foundStudent]);
+
+    const availableSubjectsForDirectEnroll = useMemo(() => {
+        if (!foundStudent) return [];
+        let yearKey: '1st-year' | '2nd-year' | '3rd-year' | '4th-year' = '1st-year';
+        if (foundStudent.year === 1) yearKey = '1st-year';
+        else if (foundStudent.year === 2) yearKey = '2nd-year';
+        else if (foundStudent.year === 3) yearKey = '3rd-year';
+        else if (foundStudent.year === 4) yearKey = '4th-year';
+        return yearLevelSubjects[yearKey] || [];
+    }, [yearLevelSubjects, foundStudent]);
+
+
   const availableBlocksForEnrollment = useMemo(() => {
     if (!applicationToEnroll) return [];
-    const yearKey = `${applicationToEnroll.year.toString()}-year`;
-    const correctedYearKey = yearKey.replace('st-year', '-year').replace('nd-year', '-year').replace('rd-year', '-year').replace('th-year', '-year');
-    const finalKey = `${applicationToEnroll.year}${['st', 'nd', 'rd'][applicationToEnroll.year-1] || 'th'}-year`;
-
-    let foundYear: '1st-year' | '2nd-year' | '3rd-year' | '4th-year' = '1st-year';
-    if (applicationToEnroll.year === 1) foundYear = '1st-year';
-    if (applicationToEnroll.year === 2) foundYear = '2nd-year';
-    if (applicationToEnroll.year === 3) foundYear = '3rd-year';
-    if (applicationToEnroll.year === 4) foundYear = '4th-year';
-
-    return blocks.filter(b => b.year === foundYear);
+    let yearKey: '1st-year' | '2nd-year' | '3rd-year' | '4th-year' = '1st-year';
+    if (applicationToEnroll.year === 1) yearKey = '1st-year';
+    if (applicationToEnroll.year === 2) yearKey = '2nd-year';
+    if (applicationToEnroll.year === 3) yearKey = '3rd-year';
+    if (applicationToEnroll.year === 4) yearKey = '4th-year';
+    return blocks.filter(b => b.year === yearKey);
   }, [blocks, applicationToEnroll]);
 
   const availableSubjectsForEnrollment = useMemo(() => {
     if (!applicationToEnroll) return [];
     
-    let foundYear: '1st-year' | '2nd-year' | '3rd-year' | '4th-year' = '1st-year';
-    if (applicationToEnroll.year === 1) foundYear = '1st-year';
-    if (applicationToEnroll.year === 2) foundYear = '2nd-year';
-    if (applicationToEnroll.year === 3) foundYear = '3rd-year';
-    if (applicationToEnroll.year === 4) foundYear = '4th-year';
+    let yearKey: '1st-year' | '2nd-year' | '3rd-year' | '4th-year' = '1st-year';
+    if (applicationToEnroll.year === 1) yearKey = '1st-year';
+    if (applicationToEnroll.year === 2) yearKey = '2nd-year';
+    if (applicationToEnroll.year === 3) yearKey = '3rd-year';
+    if (applicationToEnroll.year === 4) yearKey = '4th-year';
 
-    return yearLevelSubjects[foundYear] || [];
+    return yearLevelSubjects[yearKey] || [];
   }, [yearLevelSubjects, applicationToEnroll]);
 
   const openEnrollDialog = (application: Application) => {
@@ -229,30 +310,6 @@ export default function ManageApplicationsPage() {
     setApplicationToEnroll(null);
   };
 
-  const handleAddStudent = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const newApplication: Application = {
-        id: Date.now(),
-        studentId: formData.get('studentId') as string,
-        name: formData.get('name') as string,
-        course: formData.get('course') as 'BSIT' | 'ACT',
-        year: parseInt(formData.get('year') as string, 10),
-        status: formData.get('status') as 'New' | 'Old' | 'Transferee',
-        credentials: {
-            birthCertificate: true,
-            grades: true,
-            goodMoral: true,
-            registrationForm: true,
-        },
-    };
-    adminData.addApplication(newApplication);
-    setIsAddStudentDialogOpen(false);
-    toast({
-      title: "Application Added",
-      description: `${newApplication.name} has been added to the pending applications.`,
-    });
-  };
 
   const filteredApplications = useMemo(() => {
         let applications: Application[] = [];
@@ -291,68 +348,102 @@ export default function ManageApplicationsPage() {
                         Review, approve, and reject applications for enrollment.
                     </p>
                 </div>
-                 <Dialog open={isAddStudentDialogOpen} onOpenChange={setIsAddStudentDialogOpen}>
+                 <Dialog open={isDirectEnrollOpen} onOpenChange={resetDirectEnroll}>
                     <DialogTrigger asChild>
-                        <Button className="rounded-full">
+                        <Button className="rounded-full" onClick={() => setIsDirectEnrollOpen(true)}>
                             <PlusCircle className="mr-2 h-4 w-4" />
-                            Add Student
+                            Direct Enroll Student
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="rounded-xl">
-                        <DialogHeader>
-                            <DialogTitle>Add New Student Application</DialogTitle>
-                            <DialogDescription>
-                                Manually enter the details for a new student application.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <form id="add-student-form" onSubmit={handleAddStudent}>
-                            <div className="space-y-4 py-2">
-                                <div className="space-y-2">
-                                    <Label htmlFor="studentId">Student ID</Label>
-                                    <Input id="studentId" name="studentId" required className="rounded-xl" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="name">Full Name</Label>
-                                    <Input id="name" name="name" required className="rounded-xl" />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
+                    <DialogContent className="rounded-xl sm:max-w-lg">
+                        {directEnrollStep === 1 && (
+                            <>
+                                <DialogHeader>
+                                    <DialogTitle>Direct Enrollment: Find Student</DialogTitle>
+                                    <DialogDescription>
+                                        Enter the Student ID of the student you want to enroll. Only unenrolled students can be found.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4 py-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="course">Course</Label>
-                                        <Select name="course" required>
-                                            <SelectTrigger className="rounded-xl"><SelectValue placeholder="Select course" /></SelectTrigger>
-                                            <SelectContent className="rounded-xl"><SelectItem value="BSIT">BSIT</SelectItem><SelectItem value="ACT">ACT</SelectItem></SelectContent>
-                                        </Select>
+                                        <Label htmlFor="studentId-search">Student ID</Label>
+                                        <Input
+                                            id="studentId-search"
+                                            value={directEnrollSearchId}
+                                            onChange={(e) => setDirectEnrollSearchId(e.target.value)}
+                                            className="rounded-xl"
+                                            placeholder="e.g., 23-00-0456"
+                                        />
+                                    </div>
+                                </div>
+                                <DialogFooter>
+                                    <Button variant="outline" onClick={resetDirectEnroll} className="rounded-xl">Cancel</Button>
+                                    <Button onClick={handleDirectEnrollSearch} className="rounded-xl">Find Student</Button>
+                                </DialogFooter>
+                            </>
+                        )}
+                        {directEnrollStep === 2 && foundStudent && (
+                            <>
+                                <DialogHeader>
+                                    <DialogTitle>Direct Enrollment: Assign Block & Subjects</DialogTitle>
+                                    <DialogDescription>
+                                        Assign a block and subjects for {foundStudent.name}.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4 py-2 max-h-[60vh] overflow-y-auto pr-4">
+                                    <div className="flex items-center gap-4 p-4 border rounded-xl bg-secondary/50">
+                                        <Avatar>
+                                            <AvatarImage src={foundStudent.avatar} alt={foundStudent.name} />
+                                            <AvatarFallback>{foundStudent.name.charAt(0)}</AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <p className="font-semibold">{foundStudent.name}</p>
+                                            <p className="text-sm text-muted-foreground">{foundStudent.course} - {foundStudent.year} Year</p>
+                                        </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="year">Year Level</Label>
-                                        <Select name="year" required>
-                                            <SelectTrigger className="rounded-xl"><SelectValue placeholder="Select year" /></SelectTrigger>
+                                        <Label htmlFor="block">Block</Label>
+                                        <Select value={directEnrollBlock} onValueChange={setDirectEnrollBlock} required>
+                                            <SelectTrigger id="block" className="rounded-xl"><SelectValue placeholder="Select a block" /></SelectTrigger>
                                             <SelectContent className="rounded-xl">
-                                                <SelectItem value="1">1st Year</SelectItem>
-                                                <SelectItem value="2">2nd Year</SelectItem>
-                                                <SelectItem value="3">3rd Year</SelectItem>
-                                                <SelectItem value="4">4th Year</SelectItem>
+                                                {availableBlocksForDirectEnroll.map(b => (
+                                                    <SelectItem key={b.id} value={b.name}>{b.name}</SelectItem>
+                                                ))}
                                             </SelectContent>
                                         </Select>
                                     </div>
+                                    {directEnrollBlock && availableSubjectsForDirectEnroll.length > 0 && (
+                                        <div className="space-y-3 mt-4 pt-4 border-t">
+                                            <h4 className="font-medium">Enlist Subjects</h4>
+                                            <div className="space-y-2">
+                                                {availableSubjectsForDirectEnroll.map(subject => (
+                                                    <div key={subject.id} className="flex items-center space-x-2 p-2 border rounded-md">
+                                                        <Checkbox
+                                                            id={`dir-sub-${subject.id}`}
+                                                            onCheckedChange={(checked) => {
+                                                                if (checked) {
+                                                                    setDirectEnlistedSubjects(prev => [...prev, subject]);
+                                                                } else {
+                                                                    setDirectEnlistedSubjects(prev => prev.filter(s => s.id !== subject.id));
+                                                                }
+                                                            }}
+                                                        />
+                                                        <Label htmlFor={`dir-sub-${subject.id}`} className="flex-1 font-normal">
+                                                            {subject.code} - {subject.description}
+                                                        </Label>
+                                                        <span className="text-xs text-muted-foreground">{subject.units} units</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-                                 <div className="space-y-2">
-                                    <Label htmlFor="status">Status</Label>
-                                    <Select name="status" required>
-                                        <SelectTrigger className="rounded-xl"><SelectValue placeholder="Select status" /></SelectTrigger>
-                                        <SelectContent className="rounded-xl">
-                                            <SelectItem value="New">New</SelectItem>
-                                            <SelectItem value="Old">Old</SelectItem>
-                                            <SelectItem value="Transferee">Transferee</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-                        </form>
-                        <DialogFooter>
-                            <Button variant="outline" onClick={() => setIsAddStudentDialogOpen(false)} className="rounded-xl">Cancel</Button>
-                            <Button type="submit" form="add-student-form" className="rounded-xl">Add Application</Button>
-                        </DialogFooter>
+                                <DialogFooter>
+                                    <Button variant="outline" onClick={() => setDirectEnrollStep(1)} className="rounded-xl">Back</Button>
+                                    <Button onClick={handleDirectEnrollSubmit} className="rounded-xl">Confirm Enrollment</Button>
+                                </DialogFooter>
+                            </>
+                        )}
                     </DialogContent>
                 </Dialog>
             </div>
@@ -816,5 +907,7 @@ export default function ManageApplicationsPage() {
     </>
   );
 }
+
+    
 
     
