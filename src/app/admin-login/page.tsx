@@ -6,13 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useAdmin } from '@/app/admin/context/admin-context';
 
-export default function StaffLoginPage() {
+
+function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
   const { adminData } = useAdmin();
@@ -42,6 +43,45 @@ export default function StaffLoginPage() {
   };
 
   return (
+    <form className="space-y-4">
+      <div className="space-y-2 text-left">
+        <Label htmlFor="email">Email</Label>
+        <Input
+          id="email"
+          type="email"
+          placeholder="staff@example.com"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="rounded-xl hover:border-accent focus-visible:ring-accent hover:shadow-[0_0_8px_hsl(var(--accent)/0.5)] focus-visible:shadow-[0_0_8px_hsl(var(--accent)/0.5)] transition-all"
+        />
+      </div>
+      <div className="space-y-2 text-left">
+        <Label htmlFor="password">Password</Label>
+        <Input 
+          id="password" 
+          type="password" 
+          required 
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="rounded-xl hover:border-accent focus-visible:ring-accent hover:shadow-[0_0_8px_hsl(var(--accent)/0.5)] focus-visible:shadow-[0_0_8px_hsl(var(--accent)/0.5)] transition-all"
+        />
+      </div>
+      <Button onClick={handleLogin} className="w-full rounded-xl hover:shadow-[0_0_8px_hsl(var(--accent)/0.5)] transition-shadow" variant="accent">
+        Login
+      </Button>
+    </form>
+  )
+}
+
+export default function StaffLoginPage() {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  return (
     <div className={cn(
         "dark",
         "flex flex-col min-h-screen bg-background",
@@ -63,34 +103,7 @@ export default function StaffLoginPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form className="space-y-4">
-                <div className="space-y-2 text-left">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="staff@example.com"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="rounded-xl hover:border-accent focus-visible:ring-accent hover:shadow-[0_0_8px_hsl(var(--accent)/0.5)] focus-visible:shadow-[0_0_8px_hsl(var(--accent)/0.5)] transition-all"
-                  />
-                </div>
-                <div className="space-y-2 text-left">
-                  <Label htmlFor="password">Password</Label>
-                  <Input 
-                    id="password" 
-                    type="password" 
-                    required 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="rounded-xl hover:border-accent focus-visible:ring-accent hover:shadow-[0_0_8px_hsl(var(--accent)/0.5)] focus-visible:shadow-[0_0_8px_hsl(var(--accent)/0.5)] transition-all"
-                  />
-                </div>
-                <Button onClick={handleLogin} className="w-full rounded-xl hover:shadow-[0_0_8px_hsl(var(--accent)/0.5)] transition-shadow" variant="accent">
-                  Login
-                </Button>
-              </form>
+              {isClient ? <LoginForm /> : <div className="h-[212px]"></div>}
             </CardContent>
           </Card>
         </div>
