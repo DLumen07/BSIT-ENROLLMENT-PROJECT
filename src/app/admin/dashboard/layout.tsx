@@ -270,7 +270,7 @@ export default function AdminDashboardLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
                <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === '/admin/dashboard/settings'}>
+                <SidebarMenuButton asChild disabled>
                   <Link href="/admin/dashboard/settings">
                     <Settings />
                     Settings
