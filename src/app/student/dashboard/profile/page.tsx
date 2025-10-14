@@ -126,6 +126,18 @@ export default function StudentProfilePage() {
                             <p className="text-sm text-muted-foreground">{studentData.academic.course}</p>
                         </CardContent>
                     </Card>
+                    <Card className="rounded-xl">
+                        <CardHeader>
+                            <CardTitle>Academic Information</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4 text-sm">
+                            <InfoField label="Student ID" value={studentData.academic.studentId} />
+                            <InfoField label="Course" value={studentData.academic.course} />
+                            <InfoField label="Year Level" value={studentData.academic.yearLevel} />
+                            <InfoField label="Block" value={studentData.academic.block} />
+                            <InfoField label="Status" value={studentData.academic.status} />
+                        </CardContent>
+                    </Card>
                 </div>
                 <div className="lg:col-span-2">
                     <Tabs defaultValue="personal" className="w-full">
@@ -273,4 +285,5 @@ export default function StudentProfilePage() {
             </div>
         </main>
     );
-}
+
+    
