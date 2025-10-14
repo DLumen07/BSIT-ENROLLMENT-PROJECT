@@ -45,7 +45,7 @@ export default function AdminLoginPage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="rounded-xl hover:border-accent focus:border-accent hover:shadow-[0_0_8px_hsl(var(--accent)/0.5)] focus:shadow-[0_0_8px_hsl(var(--accent)/0.5)] transition-all"
+                    className="rounded-xl hover:border-accent focus-visible:ring-accent hover:shadow-[0_0_8px_hsl(var(--accent)/0.5)] focus-visible:shadow-[0_0_8px_hsl(var(--accent)/0.5)] transition-all"
                   />
                 </div>
                 <div className="space-y-2 text-left">
@@ -56,7 +56,7 @@ export default function AdminLoginPage() {
                     required 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="rounded-xl hover:border-accent focus:border-accent hover:shadow-[0_0_8px_hsl(var(--accent)/0.5)] focus:shadow-[0_0_8px_hsl(var(--accent)/0.5)] transition-all"
+                    className="rounded-xl hover:border-accent focus-visible:ring-accent hover:shadow-[0_0_8px_hsl(var(--accent)/0.5)] focus-visible:shadow-[0_0_8px_hsl(var(--accent)/0.5)] transition-all"
                   />
                 </div>
                 <Button asChild className="w-full rounded-xl hover:shadow-[0_0_8px_hsl(var(--accent)/0.5)] transition-shadow" variant="accent">

@@ -57,7 +57,7 @@ function LoginForm() {
               type="email"
               placeholder="student@example.com"
               required
-              className="rounded-xl hover:border-primary focus:border-primary focus:ring-primary hover:shadow-[0_0_8px_hsl(var(--primary)/0.5)] focus:shadow-[0_0_8px_hsl(var(--primary)/0.5)] transition-all"
+              className="rounded-xl hover:border-primary focus-visible:ring-primary hover:shadow-[0_0_8px_hsl(var(--primary)/0.5)] focus-visible:shadow-[0_0_8px_hsl(var(--primary)/0.5)] transition-all"
           />
       </div>
       <div className="space-y-2 text-left">
@@ -66,7 +66,7 @@ function LoginForm() {
               id="password" 
               type="password" 
               required 
-              className="rounded-xl hover:border-primary focus:border-primary focus:ring-primary hover:shadow-[0_0_8px_hsl(var(--primary)/0.5)] focus:shadow-[0_0_8px_hsl(var(--primary)/0.5)] transition-all"
+              className="rounded-xl hover:border-primary focus-visible:ring-primary hover:shadow-[0_0_8px_hsl(var(--primary)/0.5)] focus-visible:shadow-[0_0_8px_hsl(var(--primary)/0.5)] transition-all"
           />
       </div>
       <Button onClick={handleLogin} className="w-full rounded-xl hover:shadow-[0_0_8px_hsl(var(--primary)/0.5)] transition-shadow">
