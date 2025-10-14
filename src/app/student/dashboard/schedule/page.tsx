@@ -17,7 +17,7 @@ type Subject = {
     room: string;
 };
 
-const studentSchedule: Subject[] = [
+export const studentSchedule: Subject[] = [
     { id: 1, code: 'IT 201', description: 'Data Structures & Algorithms', day: 'Monday', startTime: '09:00', endTime: '10:30', instructor: 'Prof. Ada Lovelace', room: 'Lab 501', color: 'bg-blue-200/50 dark:bg-blue-800/50 border-blue-400' },
     { id: 2, code: 'IT 202', description: 'Web Development', day: 'Tuesday', startTime: '13:00', endTime: '14:30', instructor: 'Dr. Grace Hopper', room: 'Lab 502', color: 'bg-green-200/50 dark:bg-green-800/50 border-green-400' },
     { id: 3, code: 'MATH 201', description: 'Discrete Mathematics', day: 'Wednesday', startTime: '11:00', endTime: '12:30', instructor: 'Dr. Alan Turing', room: 'Room 301', color: 'bg-yellow-200/50 dark:bg-yellow-800/50 border-yellow-400' },
