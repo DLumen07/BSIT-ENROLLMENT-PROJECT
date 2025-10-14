@@ -50,6 +50,7 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useAdmin } from '../../context/admin-context';
+import { useToast } from '@/hooks/use-toast';
 
 
 export type Instructor = {
@@ -118,6 +119,7 @@ const MultiSelectSubject = ({ selectedSubjects, onSelectionChange }: { selectedS
 export default function InstructorsPage() {
     const { adminData, setAdminData } = useAdmin();
     const { instructors } = adminData;
+    const { toast } = useToast();
 
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -129,11 +131,15 @@ export default function InstructorsPage() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [subjects, setSubjects] = useState<string[]>([]);
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
 
     const resetForm = () => {
         setName('');
         setEmail('');
         setSubjects([]);
+        setPassword('');
+        setConfirmPassword('');
     };
 
     const openAddDialog = () => {
@@ -157,6 +163,15 @@ export default function InstructorsPage() {
     
     const handleAddInstructor = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        if (password !== confirmPassword) {
+            toast({
+                variant: 'destructive',
+                title: 'Passwords do not match',
+                description: 'Please ensure the password and confirmation match.',
+            });
+            return;
+        }
+
         const newInstructor: Instructor = {
             id: Date.now(),
             name,
@@ -166,6 +181,10 @@ export default function InstructorsPage() {
         };
         setAdminData(prev => ({...prev, instructors: [...prev.instructors, newInstructor]}));
         setIsAddDialogOpen(false);
+        toast({
+            title: 'Instructor Account Created',
+            description: `An account for ${name} has been successfully created.`,
+        });
     };
 
     const handleEditInstructor = (e: React.FormEvent<HTMLFormElement>) => {
@@ -291,7 +310,7 @@ export default function InstructorsPage() {
                     <DialogHeader>
                         <DialogTitle>Add New Instructor</DialogTitle>
                         <DialogDescription>
-                            Enter the details for the new instructor.
+                            Create an account for the new instructor.
                         </DialogDescription>
                     </DialogHeader>
                     <form id="add-instructor-form" onSubmit={handleAddInstructor}>
@@ -305,6 +324,14 @@ export default function InstructorsPage() {
                                 <Input id="email" name="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                             </div>
                             <div className="space-y-2">
+                                <Label htmlFor="password">Password</Label>
+                                <Input id="password" name="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                                <Input id="confirmPassword" name="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+                            </div>
+                            <div className="space-y-2">
                                 <Label htmlFor="subjects">Subjects Handled</Label>
                                 <MultiSelectSubject selectedSubjects={subjects} onSelectionChange={setSubjects} />
                             </div>
@@ -312,7 +339,7 @@ export default function InstructorsPage() {
                     </form>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-                        <Button type="submit" form="add-instructor-form">Add Instructor</Button>
+                        <Button type="submit" form="add-instructor-form">Create Account</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -382,3 +409,5 @@ export default function InstructorsPage() {
         </>
     );
 }
+
+    
