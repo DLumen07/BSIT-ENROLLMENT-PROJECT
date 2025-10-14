@@ -1,7 +1,7 @@
 
 'use client';
 import React, { useState, useMemo } from 'react';
-import { MoreHorizontal, Search, Filter, FilterX, PlusCircle, Pencil, Trash2, Files } from 'lucide-react';
+import { MoreHorizontal, Search, Filter, FilterX, Pencil, Trash2 } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -57,7 +57,6 @@ export default function StudentsPage() {
     const [filters, setFilters] = useState({
         course: 'all',
         year: 'all',
-        status: 'all',
     });
 
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -121,13 +120,15 @@ export default function StudentsPage() {
 
     const clearFilters = () => {
         setSearchTerm('');
-        setFilters({ course: 'all', year: 'all', status: 'all' });
+        setFilters({ course: 'all', year: 'all' });
     };
     
-    const isFiltered = searchTerm || filters.course !== 'all' || filters.year !== 'all' || filters.status !== 'all';
+    const isFiltered = searchTerm || filters.course !== 'all' || filters.year !== 'all';
     
     const filteredStudents = useMemo(() => {
-        return students.filter(student => {
+        const enrolledStudents = students.filter(student => student.status === 'Enrolled');
+
+        return enrolledStudents.filter(student => {
             const searchTermLower = searchTerm.toLowerCase();
             const matchesSearch = searchTerm ? 
                 student.name.toLowerCase().includes(searchTermLower) || 
@@ -136,15 +137,13 @@ export default function StudentsPage() {
             
             const matchesCourse = filters.course !== 'all' ? student.course === filters.course : true;
             const matchesYear = filters.year !== 'all' ? student.year.toString() === filters.year : true;
-            const matchesStatus = filters.status !== 'all' ? student.status === filters.status : true;
 
-            return matchesSearch && matchesCourse && matchesYear && matchesStatus;
+            return matchesSearch && matchesCourse && matchesYear;
         });
     }, [students, searchTerm, filters]);
     
     const courses = ['all', ...Array.from(new Set(students.map(app => app.course)))];
     const years = ['all', ...Array.from(new Set(students.map(app => app.year.toString())))].sort();
-    const statuses = ['all', 'Enrolled', 'Not Enrolled', 'Graduated'];
     
     const getStatusBadgeVariant = (status: Student['status']) => {
         switch (status) {
@@ -167,7 +166,7 @@ export default function StudentsPage() {
                     <div className="space-y-0.5">
                         <h1 className="text-2xl font-bold tracking-tight">Student Directory</h1>
                         <p className="text-muted-foreground">
-                            Manage and view all student records in the system.
+                            Manage and view all enrolled students for the current semester.
                         </p>
                     </div>
                 </div>
@@ -198,7 +197,7 @@ export default function StudentsPage() {
                                         <div className="space-y-2">
                                             <Label>Course</Label>
                                             <Select value={filters.course} onValueChange={(value) => handleFilterChange('course', value)}>
-                                                <SelectTrigger className="focus:ring-0 focus:ring-offset-0 rounded-xl">
+                                                <SelectTrigger className="rounded-xl focus:ring-0 focus:ring-offset-0">
                                                     <SelectValue placeholder="All Courses" />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -209,22 +208,11 @@ export default function StudentsPage() {
                                          <div className="space-y-2">
                                             <Label>Year</Label>
                                             <Select value={filters.year} onValueChange={(value) => handleFilterChange('year', value)}>
-                                                <SelectTrigger className="focus:ring-0 focus:ring-offset-0 rounded-xl">
+                                                <SelectTrigger className="rounded-xl focus:ring-0 focus:ring-offset-0">
                                                     <SelectValue placeholder="All Years" />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     {years.map(year => <SelectItem key={year} value={year}>{year === 'all' ? 'All Years' : `${year}${year === '1' ? 'st' : year === '2' ? 'nd' : year === '3' ? 'rd' : 'th'} Year`}</SelectItem>)}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label>Status</Label>
-                                            <Select value={filters.status} onValueChange={(value) => handleFilterChange('status', value)}>
-                                                <SelectTrigger className="focus:ring-0 focus:ring-offset-0 rounded-xl">
-                                                    <SelectValue placeholder="All Statuses" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {statuses.map(status => <SelectItem key={status} value={status}>{status === 'all' ? 'All Statuses' : status}</SelectItem>)}
                                                 </SelectContent>
                                             </Select>
                                         </div>
@@ -282,10 +270,6 @@ export default function StudentsPage() {
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
                                                         <DropdownMenuItem>View Profile</DropdownMenuItem>
-                                                        <DropdownMenuItem>
-                                                            <Files className="mr-2 h-4 w-4" />
-                                                            Claim Green Form
-                                                        </DropdownMenuItem>
                                                         <DropdownMenuItem onSelect={() => openEditDialog(student)}>
                                                             <Pencil className="mr-2 h-4 w-4" /> Edit
                                                         </DropdownMenuItem>
@@ -303,7 +287,7 @@ export default function StudentsPage() {
                                     )) : (
                                         <TableRow>
                                             <TableCell colSpan={5} className="h-24 text-center">
-                                                No students found.
+                                                No enrolled students found.
                                             </TableCell>
                                         </TableRow>
                                     )}
@@ -398,3 +382,5 @@ export default function StudentsPage() {
         </>
     );
 }
+
+    
