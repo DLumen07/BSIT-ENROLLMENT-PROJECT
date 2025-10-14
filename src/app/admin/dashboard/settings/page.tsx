@@ -1,6 +1,6 @@
 
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,16 +26,26 @@ const InfoField = ({ label, value }: { label: string; value?: string | null }) =
 export default function AdminSettingsPage() {
     const { toast } = useToast();
     const { adminData, setAdminData } = useAdmin();
-    const currentUser = adminData.adminUsers[0]; // Assuming the first user is the logged-in user for demo
+    const { currentUser } = adminData;
 
     const [editableData, setEditableData] = React.useState({
-        name: currentUser.name,
-        email: currentUser.email,
+        name: '',
+        email: '',
     });
     
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+
+    useEffect(() => {
+        if (currentUser) {
+            setEditableData({
+                name: currentUser.name,
+                email: currentUser.email,
+            });
+        }
+    }, [currentUser]);
+
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = e.target;
@@ -43,15 +53,15 @@ export default function AdminSettingsPage() {
     }
 
     const handleSaveChanges = () => {
-        // In a real app, you'd send this to your backend.
-        // For now, we update the context state.
+        if (!currentUser) return;
         setAdminData(prev => ({
             ...prev,
             adminUsers: prev.adminUsers.map(user => 
                 user.id === currentUser.id 
                 ? { ...user, name: editableData.name, email: editableData.email }
                 : user
-            )
+            ),
+            currentUser: { ...currentUser, name: editableData.name, email: editableData.email }
         }));
 
         toast({
@@ -90,6 +100,10 @@ export default function AdminSettingsPage() {
         setNewPassword('');
         setConfirmPassword('');
     };
+
+    if (!currentUser) {
+        return <div>Loading...</div>;
+    }
 
     return (
         <main className="flex-1 p-4 sm:p-6 space-y-6">

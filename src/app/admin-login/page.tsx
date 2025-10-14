@@ -16,7 +16,7 @@ import { useAdmin } from '@/app/admin/context/admin-context';
 function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
-  const { adminData } = useAdmin();
+  const { adminData, setAdminData } = useAdmin();
   const { adminUsers, instructors } = adminData;
 
   const [email, setEmail] = React.useState('');
@@ -25,21 +25,24 @@ function LoginForm() {
   const handleLogin = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
-    const isAdmin = adminUsers.some(user => user.email === email);
-    const isInstructor = instructors.some(user => user.email === email);
+    const admin = adminUsers.find(user => user.email === email);
+    if (admin) {
+        setAdminData(prev => ({ ...prev, currentUser: admin }));
+        router.push('/admin/dashboard');
+        return;
+    }
 
-    if (isAdmin) {
-      router.push('/admin/dashboard');
-    } else if (isInstructor) {
-      // Pass the instructor's email to the dashboard. In a real app, this would be a session.
+    const instructor = instructors.find(user => user.email === email);
+    if (instructor) {
       router.push(`/instructor/dashboard?email=${encodeURIComponent(email)}`);
-    } else {
-      toast({
+      return;
+    }
+    
+    toast({
         variant: 'destructive',
         title: 'Login Failed',
         description: 'No account found with that email address. Please check your credentials.',
-      });
-    }
+    });
   };
 
   return (

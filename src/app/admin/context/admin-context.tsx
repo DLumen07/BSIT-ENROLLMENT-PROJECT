@@ -137,6 +137,7 @@ const initialGrades: StudentGrades = {
 
 // --- Main Admin Data Structure ---
 const mockAdminData = {
+    currentUser: null as AdminUser | null, // Add currentUser
     instructors: initialInstructors,
     availableSubjects: initialAvailableSubjects,
     adminUsers: initialAdminUsers,

@@ -164,7 +164,12 @@ export default function AdminDashboardLayout({
   }, [pathname]);
 
   const { adminData } = useAdmin();
-  const currentUser = adminData.adminUsers[1]; // Using 'Admin' role for demo
+  const { currentUser } = adminData;
+
+  if (!currentUser) {
+    // You can render a loading state or redirect to login
+    return <div>Loading user or redirecting...</div>;
+  }
 
   return (
       <SidebarProvider>
@@ -323,10 +328,10 @@ export default function AdminDashboardLayout({
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="rounded-full">
                     <Image
-                      src="https://picsum.photos/seed/admin-avatar/32/32"
+                      src={currentUser.avatar}
                       width={32}
                       height={32}
-                      alt="Admin Avatar"
+                      alt={currentUser.name}
                       className="rounded-full"
                       data-ai-hint="person avatar"
                     />
@@ -334,7 +339,7 @@ export default function AdminDashboardLayout({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Admin Account</DropdownMenuLabel>
+                  <DropdownMenuLabel>{currentUser.name}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link href="/admin/dashboard/settings">Settings</Link>
