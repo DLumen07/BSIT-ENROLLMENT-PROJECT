@@ -85,16 +85,16 @@ export default function ProfilePage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <Label>First Name</Label>
-                                    <Input value="Student" disabled />
+                                    <Input value="Student" disabled className="rounded-xl" />
                                 </div>
                                  <div className="space-y-1">
                                     <Label>Last Name</Label>
-                                    <Input value="Name" disabled />
+                                    <Input value="Name" disabled className="rounded-xl" />
                                 </div>
                             </div>
                              <div className="space-y-1">
                                 <Label>Date of Birth</Label>
-                                <Input value="January 1, 2004" disabled />
+                                <Input value="January 1, 2004" disabled className="rounded-xl" />
                             </div>
                         </CardContent>
                     </Card>
@@ -109,15 +109,15 @@ export default function ProfilePage() {
                         <CardContent className="space-y-4">
                             <div className="space-y-1">
                                 <Label htmlFor="email">Email Address</Label>
-                                <Input id="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                                <Input id="email" value={email} onChange={(e) => setEmail(e.target.value)} className="rounded-xl" />
                             </div>
                              <div className="space-y-1">
                                 <Label htmlFor="contact-number">Contact Number</Label>
-                                <Input id="contact-number" value={contactNumber} onChange={(e) => setContactNumber(e.target.value)} />
+                                <Input id="contact-number" value={contactNumber} onChange={(e) => setContactNumber(e.target.value)} className="rounded-xl" />
                             </div>
                         </CardContent>
                         <CardFooter>
-                            <Button onClick={handleSaveChanges}>Save Changes</Button>
+                            <Button onClick={handleSaveChanges} className="rounded-xl">Save Changes</Button>
                         </CardFooter>
                     </Card>
                 </div>
