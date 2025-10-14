@@ -58,17 +58,21 @@ const AnimatedSubtitle = () => {
     return () => clearTimeout(ticker);
   }, [currentLine1, currentLine2, isDeleting, loopNum, subtitles, typingSpeed]);
 
+  const showLine1Cursor = currentLine1.length < subtitles[0].line1.length && !isDeleting;
+  const showLine2Cursor = currentLine1.length === subtitles[0].line1.length && currentLine2.length < subtitles[0].line2.length && !isDeleting;
+  
+  const showDeletingCursor1 = isDeleting && currentLine2.length === 0 && currentLine1.length > 0;
+  const showDeletingCursor2 = isDeleting && currentLine2.length > 0;
+
   return (
     <p className="text-sm text-muted-foreground font-mono h-12 flex flex-col items-center">
       <span>
         {currentLine1}
-        {currentLine1.length < subtitles[0].line1.length && <span className="animate-pulse">|</span>}
+        {(showLine1Cursor || showDeletingCursor1) && <span className="animate-pulse">|</span>}
       </span>
       <span>
         {currentLine2}
-        {currentLine1.length === subtitles[0].line1.length && currentLine2.length < subtitles[0].line2.length && <span className="animate-pulse">|</span>}
-        {isDeleting && currentLine2.length === 0 && currentLine1.length > 0 && <span className="animate-pulse">|</span>}
-        {isDeleting && currentLine2.length > 0 && <span className="animate-pulse">|</span>}
+        {(showLine2Cursor || showDeletingCursor2) && <span className="animate-pulse">|</span>}
       </span>
     </p>
   );
@@ -82,7 +86,6 @@ export default function Home() {
     <div className={cn(
         "relative flex flex-col min-h-screen bg-background",
         "bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,hsl(var(--primary)/0.3),hsl(var(--background)))]",
-        "animate-background-pan"
     )}>
       <main className="flex-1 flex flex-col items-center justify-center text-center p-4">
         <div className="flex flex-col items-center space-y-4 border rounded-3xl p-8 md:p-12 bg-background/50 backdrop-blur-sm shadow-[0_8px_16px_-4px_hsl(var(--primary)/0.3),0_-8px_16px_-4px_hsl(var(--accent)/0.3)]">
