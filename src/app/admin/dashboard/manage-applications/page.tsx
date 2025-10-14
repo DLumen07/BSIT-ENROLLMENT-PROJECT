@@ -1,7 +1,7 @@
 
 'use client';
-import React, { useState, useMemo } from 'react';
-import { MoreHorizontal, CheckCircle2, XCircle, Pencil, X, RotateCw, Trash2, Search, FilterX, Filter } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { MoreHorizontal, CheckCircle2, XCircle, Pencil, X, RotateCw, Trash2, Search, FilterX, Filter, PlusCircle, UserPlus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -14,6 +14,7 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
+    DialogTrigger,
 } from '@/components/ui/dialog';
 import {
     DropdownMenu,
@@ -39,11 +40,15 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useAdmin, Application, credentialLabels, rejectionReasons } from '../../context/admin-context';
-
+import { useToast } from '@/hooks/use-toast';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import type { Subject } from '../../context/admin-context';
 
 export default function ManageApplicationsPage() {
   const { adminData, setAdminData } = useAdmin();
-  const { pendingApplications, approvedApplications, rejectedApplications } = adminData;
+  const { pendingApplications, approvedApplications, rejectedApplications, enrolledApplications, blocks, subjects: yearLevelSubjects, students } = adminData;
+  const { toast } = useToast();
 
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [rejectionDialog, setRejectionDialog] = useState<{ isOpen: boolean; application: Application | null }>({
@@ -63,6 +68,53 @@ export default function ManageApplicationsPage() {
       year: 'all',
       status: 'all',
   });
+
+  // Enrollment Dialog State
+  const [isEnrollDialogOpen, setIsEnrollDialogOpen] = useState(false);
+  const [applicationToEnroll, setApplicationToEnroll] = useState<Application | null>(null);
+  const [enrollBlock, setEnrollBlock] = useState('');
+  const [enlistedSubjects, setEnlistedSubjects] = useState<Subject[]>([]);
+
+  const availableBlocksForEnrollment = useMemo(() => {
+    if (!applicationToEnroll) return [];
+    const yearKey = `${applicationToEnroll.year.toString()}-year`;
+    const correctedYearKey = yearKey.replace('st-year', '-year').replace('nd-year', '-year').replace('rd-year', '-year').replace('th-year', '-year');
+    const finalKey = `${applicationToEnroll.year}${['st', 'nd', 'rd'][applicationToEnroll.year-1] || 'th'}-year`;
+
+    let foundYear: '1st-year' | '2nd-year' | '3rd-year' | '4th-year' = '1st-year';
+    if (applicationToEnroll.year === 1) foundYear = '1st-year';
+    if (applicationToEnroll.year === 2) foundYear = '2nd-year';
+    if (applicationToEnroll.year === 3) foundYear = '3rd-year';
+    if (applicationToEnroll.year === 4) foundYear = '4th-year';
+
+    return blocks.filter(b => b.year === foundYear);
+  }, [blocks, applicationToEnroll]);
+
+  const availableSubjectsForEnrollment = useMemo(() => {
+    if (!applicationToEnroll) return [];
+    
+    let foundYear: '1st-year' | '2nd-year' | '3rd-year' | '4th-year' = '1st-year';
+    if (applicationToEnroll.year === 1) foundYear = '1st-year';
+    if (applicationToEnroll.year === 2) foundYear = '2nd-year';
+    if (applicationToEnroll.year === 3) foundYear = '3rd-year';
+    if (applicationToEnroll.year === 4) foundYear = '4th-year';
+
+    return yearLevelSubjects[foundYear] || [];
+  }, [yearLevelSubjects, applicationToEnroll]);
+
+  const openEnrollDialog = (application: Application) => {
+    setApplicationToEnroll(application);
+    setIsEnrollDialogOpen(true);
+  };
+
+  useEffect(() => {
+    setEnrollBlock('');
+  }, [applicationToEnroll]);
+
+  useEffect(() => {
+    setEnlistedSubjects([]);
+  }, [enrollBlock]);
+
 
   const handleOpenRejectionDialog = (application: Application) => {
     setRejectionDialog({ isOpen: true, application });
@@ -128,11 +180,59 @@ export default function ManageApplicationsPage() {
       setFilters({ course: 'all', year: 'all', status: 'all' });
   };
 
+  const handleEnroll = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!applicationToEnroll || !enrollBlock) {
+        toast({
+            variant: 'destructive',
+            title: 'Enrollment Failed',
+            description: 'Please select a valid block.',
+        });
+        return;
+    }
+
+    const newStudent: Student = {
+        id: applicationToEnroll.id, // Re-use ID for simplicity, or generate new
+        studentId: applicationToEnroll.studentId,
+        name: applicationToEnroll.name,
+        avatar: `https://picsum.photos/seed/${applicationToEnroll.id}/40/40`,
+        email: `${applicationToEnroll.name.toLowerCase().replace(' ', '.')}@example.com`,
+        course: applicationToEnroll.course as 'BSIT' | 'ACT',
+        year: applicationToEnroll.year,
+        status: 'Enrolled',
+        block: enrollBlock,
+        enlistedSubjects: enlistedSubjects,
+    };
+
+    setAdminData(prev => {
+        const updatedStudents = [...prev.students, newStudent];
+        const updatedBlocks = prev.blocks.map(b => 
+            b.name === enrollBlock ? { ...b, enrolled: b.enrolled + 1 } : b
+        );
+        return {
+            ...prev,
+            approvedApplications: prev.approvedApplications.filter(app => app.id !== applicationToEnroll.id),
+            enrolledApplications: [...prev.enrolledApplications, applicationToEnroll],
+            students: updatedStudents,
+            blocks: updatedBlocks,
+        };
+    });
+
+    toast({
+        title: 'Enrollment Successful',
+        description: `${applicationToEnroll.name} has been enrolled in block ${enrollBlock}.`,
+    });
+
+    setIsEnrollDialogOpen(false);
+    setApplicationToEnroll(null);
+  };
+
   const filteredApplications = useMemo(() => {
         let applications: Application[] = [];
         if (activeTab === 'pending') applications = pendingApplications;
         else if (activeTab === 'approved') applications = approvedApplications;
         else if (activeTab === 'rejected') applications = rejectedApplications;
+        else if (activeTab === 'enrolled') applications = enrolledApplications;
 
         return applications.filter(app => {
             const searchTermLower = searchTerm.toLowerCase();
@@ -146,9 +246,9 @@ export default function ManageApplicationsPage() {
 
             return matchesSearch && matchesCourse && matchesYear && matchesStatus;
         });
-    }, [activeTab, pendingApplications, approvedApplications, rejectedApplications, searchTerm, filters]);
+    }, [activeTab, pendingApplications, approvedApplications, rejectedApplications, enrolledApplications, searchTerm, filters]);
 
-  const allAppsForFilters = [...pendingApplications, ...approvedApplications, ...rejectedApplications];
+  const allAppsForFilters = [...pendingApplications, ...approvedApplications, ...rejectedApplications, ...enrolledApplications];
   const courses = ['all', ...Array.from(new Set(allAppsForFilters.map(app => app.course)))];
   const years = ['all', ...Array.from(new Set(allAppsForFilters.map(app => app.year.toString())))].sort();
   const statuses = ['all', ...Array.from(new Set(allAppsForFilters.map(app => app.status)))];
@@ -246,9 +346,10 @@ export default function ManageApplicationsPage() {
                 </CardHeader>
                 <CardContent>
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                        <TabsList className="grid w-full grid-cols-3">
+                        <TabsList className="grid w-full grid-cols-4">
                             <TabsTrigger value="pending">Pending</TabsTrigger>
                             <TabsTrigger value="approved">Approved</TabsTrigger>
+                            <TabsTrigger value="enrolled">Enrolled</TabsTrigger>
                             <TabsTrigger value="rejected">Rejected</TabsTrigger>
                         </TabsList>
                         <TabsContent value="pending">
@@ -333,6 +434,10 @@ export default function ManageApplicationsPage() {
                                                             </Button>
                                                         </DropdownMenuTrigger>
                                                         <DropdownMenuContent align="end">
+                                                            <DropdownMenuItem onSelect={() => openEnrollDialog(application)}>
+                                                                <UserPlus className="mr-2 h-4 w-4" />
+                                                                Enroll Student
+                                                            </DropdownMenuItem>
                                                             <DropdownMenuItem>
                                                                 <Pencil className="mr-2 h-4 w-4" />
                                                                 Edit
@@ -352,6 +457,37 @@ export default function ManageApplicationsPage() {
                                 {filteredApplications.length === 0 && (
                                     <div className="text-center p-4 text-muted-foreground">
                                         No approved applications match the current filters.
+                                    </div>
+                                )}
+                            </div>
+                        </TabsContent>
+                         <TabsContent value="enrolled">
+                             <div className="border rounded-lg mt-4">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Student ID</TableHead>
+                                            <TableHead>Student Name</TableHead>
+                                            <TableHead>Course</TableHead>
+                                            <TableHead>Year</TableHead>
+                                            <TableHead>Status</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {filteredApplications.map((application) => (
+                                            <TableRow key={application.id}>
+                                                <TableCell>{application.studentId}</TableCell>
+                                                <TableCell className="font-medium">{application.name}</TableCell>
+                                                <TableCell>{application.course}</TableCell>
+                                                <TableCell>{application.year}</TableCell>
+                                                <TableCell>{application.status}</TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                                {filteredApplications.length === 0 && (
+                                    <div className="text-center p-4 text-muted-foreground">
+                                        No students have been enrolled from applications yet.
                                     </div>
                                 )}
                             </div>
@@ -515,6 +651,75 @@ export default function ManageApplicationsPage() {
                     <DialogFooter>
                         <Button variant="outline" onClick={handleCloseRejectionDialog}>Cancel</Button>
                         <Button variant="destructive" type="submit" form="rejection-form">Confirm Rejection</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        )}
+
+        {isEnrollDialogOpen && applicationToEnroll && (
+            <Dialog open={isEnrollDialogOpen} onOpenChange={setIsEnrollDialogOpen}>
+                <DialogContent className="sm:max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Enroll Student</DialogTitle>
+                        <DialogDescription>
+                            Assign a block and subjects for {applicationToEnroll.name}.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form id="enroll-student-form" onSubmit={handleEnroll}>
+                        <div className="space-y-4 py-2">
+                             <div className="flex items-center gap-4 p-4 border rounded-xl">
+                                <Avatar>
+                                    <AvatarImage src={`https://picsum.photos/seed/${applicationToEnroll.id}/40/40`} alt={applicationToEnroll.name} />
+                                    <AvatarFallback>{applicationToEnroll.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <p className="font-semibold">{applicationToEnroll.name}</p>
+                                    <p className="text-sm text-muted-foreground">{applicationToEnroll.course} - {applicationToEnroll.year} Year</p>
+                                </div>
+                            </div>
+                             <div className="space-y-2">
+                                <Label htmlFor="block">Block</Label>
+                                <Select value={enrollBlock} onValueChange={setEnrollBlock} required>
+                                    <SelectTrigger id="block" className="rounded-xl">
+                                        <SelectValue placeholder="Select a block" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {availableBlocksForEnrollment.map(b => (
+                                            <SelectItem key={b.id} value={b.name}>{b.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            {enrollBlock && availableSubjectsForEnrollment.length > 0 && (
+                                <div className="space-y-3 mt-4 pt-4 border-t">
+                                    <h4 className="font-medium">Enlist Subjects</h4>
+                                    <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
+                                        {availableSubjectsForEnrollment.map(subject => (
+                                            <div key={subject.id} className="flex items-center space-x-2 p-2 border rounded-md">
+                                                <Checkbox
+                                                    id={`sub-${subject.id}`}
+                                                    onCheckedChange={(checked) => {
+                                                        if (checked) {
+                                                            setEnlistedSubjects(prev => [...prev, subject]);
+                                                        } else {
+                                                            setEnlistedSubjects(prev => prev.filter(s => s.id !== subject.id));
+                                                        }
+                                                    }}
+                                                />
+                                                <Label htmlFor={`sub-${subject.id}`} className="flex-1 font-normal">
+                                                    {subject.code} - {subject.description}
+                                                </Label>
+                                                <span className="text-xs text-muted-foreground">{subject.units} units</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </form>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsEnrollDialogOpen(false)}>Cancel</Button>
+                        <Button type="submit" form="enroll-student-form">Confirm Enrollment</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

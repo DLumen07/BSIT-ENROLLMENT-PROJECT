@@ -1,13 +1,11 @@
 
 'use client';
-import React, { useState, useMemo, useEffect } from 'react';
-import { MoreHorizontal, Search, Filter, FilterX, PlusCircle, Pencil, Trash2, Files, UserPlus } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { MoreHorizontal, Search, Filter, FilterX, PlusCircle, Pencil, Trash2, Files } from 'lucide-react';
 import {
   Card,
   CardContent,
   CardHeader,
-  CardTitle,
-  CardDescription,
 } from '@/components/ui/card';
 import {
   Table,
@@ -33,7 +31,6 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
     AlertDialog,
@@ -50,14 +47,11 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { useAdmin, Student, Subject } from '../../context/admin-context';
-import { Checkbox } from '@/components/ui/checkbox';
-import { useToast } from '@/hooks/use-toast';
+import { useAdmin, Student } from '../../context/admin-context';
 
 export default function StudentsPage() {
     const { adminData, setAdminData } = useAdmin();
-    const { students, blocks, subjects: yearLevelSubjects } = adminData;
-    const { toast } = useToast();
+    const { students } = adminData;
     
     const [searchTerm, setSearchTerm] = useState('');
     const [filters, setFilters] = useState({
@@ -68,7 +62,6 @@ export default function StudentsPage() {
 
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-    const [isEnrollDialogOpen, setIsEnrollDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
 
@@ -78,44 +71,6 @@ export default function StudentsPage() {
     const [studentId, setStudentId] = useState('');
     const [studentCourse, setStudentCourse] = useState<'BSIT' | 'ACT'>('BSIT');
     const [studentYear, setStudentYear] = useState(1);
-
-    // State for enrollment form
-    const [enrollSearchTerm, setEnrollSearchTerm] = useState('');
-    const [enrollStudentId, setEnrollStudentId] = useState('');
-    const [enrollYearLevel, setEnrollYearLevel] = useState('');
-    const [enrollBlock, setEnrollBlock] = useState('');
-    const [enlistedSubjects, setEnlistedSubjects] = useState<Subject[]>([]);
-
-    const studentToEnroll = useMemo(() => students.find(s => s.studentId === enrollStudentId), [students, enrollStudentId]);
-
-    const availableBlocks = useMemo(() => {
-        if (!enrollYearLevel) return [];
-        const yearKey = `${enrollYearLevel}-year`;
-        return blocks.filter(b => b.year === yearKey);
-    }, [blocks, enrollYearLevel]);
-
-    const availableSubjects = useMemo(() => {
-        if (!enrollYearLevel) return [];
-        const yearKey = `${enrollYearLevel}-year`;
-        return yearLevelSubjects[yearKey] || [];
-    }, [yearLevelSubjects, enrollYearLevel]);
-    
-    useEffect(() => {
-        if (studentToEnroll) {
-            setEnrollYearLevel(studentToEnroll.year.toString());
-        } else {
-            setEnrollYearLevel('');
-        }
-    }, [studentToEnroll]);
-    
-    useEffect(() => {
-        setEnrollBlock('');
-    }, [enrollYearLevel]);
-
-    useEffect(() => {
-        setEnlistedSubjects([]);
-    }, [enrollBlock]);
-
 
     const openAddDialog = () => {
         setSelectedStudent(null);
@@ -175,39 +130,6 @@ export default function StudentsPage() {
         }));
         setIsEditDialogOpen(false);
         setSelectedStudent(null);
-    };
-
-    const handleEnrollStudent = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        if (!studentToEnroll || !enrollBlock) {
-            toast({
-                variant: 'destructive',
-                title: 'Enrollment Failed',
-                description: 'Please select a valid student and block.',
-            });
-            return;
-        }
-
-        setAdminData(prev => {
-            const updatedStudents = prev.students.map(s => 
-                s.id === studentToEnroll.id 
-                ? { ...s, status: 'Enrolled' as const, year: parseInt(enrollYearLevel, 10), block: enrollBlock, enlistedSubjects } 
-                : s
-            );
-            const updatedBlocks = prev.blocks.map(b => 
-                b.name === enrollBlock ? { ...b, enrolled: b.enrolled + 1 } : b
-            );
-            return { ...prev, students: updatedStudents, blocks: updatedBlocks };
-        });
-
-        toast({
-            title: 'Enrollment Successful',
-            description: `${studentToEnroll.name} has been enrolled in block ${enrollBlock}.`,
-        });
-
-        setIsEnrollDialogOpen(false);
-        setEnrollStudentId('');
-        setEnrollSearchTerm('');
     };
 
      const handleDeleteStudent = () => {
@@ -276,121 +198,10 @@ export default function StudentsPage() {
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Button onClick={openAddDialog} variant="outline" className="rounded-full">
-                            <UserPlus className="mr-2 h-4 w-4" />
+                        <Button onClick={openAddDialog} className="rounded-full">
+                            <PlusCircle className="mr-2 h-4 w-4" />
                             Add Student
                         </Button>
-                         <Dialog open={isEnrollDialogOpen} onOpenChange={setIsEnrollDialogOpen}>
-                            <DialogTrigger asChild>
-                                <Button className="rounded-full">
-                                    <PlusCircle className="mr-2 h-4 w-4" />
-                                    Enroll Student
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-2xl">
-                                <DialogHeader>
-                                    <DialogTitle>Manual Student Enrollment</DialogTitle>
-                                    <DialogDescription>
-                                        Search for a student and assign them to a block and subjects.
-                                    </DialogDescription>
-                                </DialogHeader>
-                                <form id="enroll-student-form" onSubmit={handleEnrollStudent}>
-                                    <div className="space-y-4 py-2">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="studentId">Search Student (Name or ID)</Label>
-                                            <Input 
-                                                id="studentId" 
-                                                name="studentId" 
-                                                value={enrollSearchTerm}
-                                                onChange={(e) => {
-                                                    setEnrollSearchTerm(e.target.value);
-                                                    const foundStudent = students.find(s => s.name.toLowerCase().includes(e.target.value.toLowerCase()) || s.studentId.includes(e.target.value));
-                                                    setEnrollStudentId(foundStudent ? foundStudent.studentId : '');
-                                                }}
-                                                placeholder="Enter student name or ID to search..." 
-                                                required 
-                                            />
-                                        </div>
-                                        
-                                        {studentToEnroll && (
-                                            <Card>
-                                                <CardContent className="pt-4">
-                                                    <div className="flex items-center gap-4">
-                                                        <Avatar>
-                                                            <AvatarImage src={studentToEnroll.avatar} alt={studentToEnroll.name} />
-                                                            <AvatarFallback>{studentToEnroll.name.charAt(0)}</AvatarFallback>
-                                                        </Avatar>
-                                                        <div>
-                                                            <p className="font-semibold">{studentToEnroll.name}</p>
-                                                            <p className="text-sm text-muted-foreground">{studentToEnroll.course} - {studentToEnroll.year} Year</p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="grid grid-cols-2 gap-4 mt-4">
-                                                        <div className="space-y-2">
-                                                            <Label htmlFor="year-level">Year Level</Label>
-                                                            <Select value={enrollYearLevel} onValueChange={setEnrollYearLevel}>
-                                                                <SelectTrigger id="year-level">
-                                                                    <SelectValue placeholder="Select Year" />
-                                                                </SelectTrigger>
-                                                                <SelectContent>
-                                                                    <SelectItem value="1">1st Year</SelectItem>
-                                                                    <SelectItem value="2">2nd Year</SelectItem>
-                                                                    <SelectItem value="3">3rd Year</SelectItem>
-                                                                    <SelectItem value="4">4th Year</SelectItem>
-                                                                </SelectContent>
-                                                            </Select>
-                                                        </div>
-                                                        <div className="space-y-2">
-                                                            <Label htmlFor="block">Block</Label>
-                                                            <Select value={enrollBlock} onValueChange={setEnrollBlock} required disabled={!enrollYearLevel}>
-                                                                <SelectTrigger id="block">
-                                                                    <SelectValue placeholder="Select a block" />
-                                                                </SelectTrigger>
-                                                                <SelectContent>
-                                                                    {availableBlocks.map(b => (
-                                                                        <SelectItem key={b.id} value={b.name}>{b.name}</SelectItem>
-                                                                    ))}
-                                                                </SelectContent>
-                                                            </Select>
-                                                        </div>
-                                                    </div>
-                                                    {enrollBlock && availableSubjects.length > 0 && (
-                                                        <div className="space-y-3 mt-4 pt-4 border-t">
-                                                            <h4 className="font-medium">Enlist Subjects</h4>
-                                                            <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
-                                                                {availableSubjects.map(subject => (
-                                                                    <div key={subject.id} className="flex items-center space-x-2 p-2 border rounded-md">
-                                                                        <Checkbox 
-                                                                            id={`sub-${subject.id}`}
-                                                                            onCheckedChange={(checked) => {
-                                                                                if (checked) {
-                                                                                    setEnlistedSubjects(prev => [...prev, subject]);
-                                                                                } else {
-                                                                                    setEnlistedSubjects(prev => prev.filter(s => s.id !== subject.id));
-                                                                                }
-                                                                            }}
-                                                                        />
-                                                                        <Label htmlFor={`sub-${subject.id}`} className="flex-1 font-normal">
-                                                                            {subject.code} - {subject.description}
-                                                                        </Label>
-                                                                        <span className="text-xs text-muted-foreground">{subject.units} units</span>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </CardContent>
-                                            </Card>
-                                        )}
-
-                                    </div>
-                                </form>
-                                 <DialogFooter>
-                                    <Button variant="outline" onClick={() => setIsEnrollDialogOpen(false)}>Cancel</Button>
-                                    <Button type="submit" form="enroll-student-form">Enroll Student</Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
                     </div>
                 </div>
 
@@ -620,5 +431,3 @@ export default function StudentsPage() {
         </>
     );
 }
-
-    

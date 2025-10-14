@@ -7,16 +7,16 @@ import { Subject as ScheduleSubject } from '../dashboard/schedule/[blockId]/page
 
 // --- Data from manage-applications ---
 const initialPendingApplications = [
-    { id: 1, studentId: '24-01-0001', name: 'John Doe', course: 'BSIT', year: 2, status: 'Old', credentials: { birthCertificate: true, grades: true, goodMoral: false, registrationForm: true }},
-    { id: 2, studentId: '24-01-0002', name: 'Jane Smith', course: 'ACT', year: 1, status: 'New', credentials: { birthCertificate: true, grades: false, goodMoral: true, registrationForm: false }},
-    { id: 3, studentId: '24-01-0003', name: 'Peter Jones', course: 'BSIT', year: 1, status: 'Transferee', credentials: { birthCertificate: true, grades: true, goodMoral: true, registrationForm: true }},
+    { id: 1, studentId: '24-00-0001', name: 'John Doe', course: 'BSIT', year: 2, status: 'Old', credentials: { birthCertificate: true, grades: true, goodMoral: false, registrationForm: true }},
+    { id: 2, studentId: '24-00-0002', name: 'Jane Smith', course: 'ACT', year: 1, status: 'New', credentials: { birthCertificate: true, grades: false, goodMoral: true, registrationForm: false }},
+    { id: 3, studentId: '24-00-0003', name: 'Peter Jones', course: 'BSIT', year: 1, status: 'Transferee', credentials: { birthCertificate: true, grades: true, goodMoral: true, registrationForm: true }},
 ];
 const initialApprovedApplications = [
-    { id: 4, studentId: '23-01-0999', name: 'Emily White', course: 'BSIT', year: 3, status: 'Old', credentials: { birthCertificate: true, grades: true, goodMoral: true, registrationForm: true }},
-    { id: 5, studentId: '22-01-0998', name: 'Chris Green', course: 'ACT', year: 2, status: 'Old', credentials: { birthCertificate: true, grades: true, goodMoral: true, registrationForm: true }},
+    { id: 4, studentId: '23-00-0999', name: 'Emily White', course: 'BSIT', year: 3, status: 'Old', credentials: { birthCertificate: true, grades: true, goodMoral: true, registrationForm: true }},
+    { id: 5, studentId: '22-00-0998', name: 'Chris Green', course: 'ACT', year: 2, status: 'Old', credentials: { birthCertificate: true, grades: true, goodMoral: true, registrationForm: true }},
 ];
 const initialRejectedApplications = [
-     { id: 6, studentId: '24-01-0997', name: 'Michael Brown', course: 'BSIT', year: 1, status: 'New', credentials: { birthCertificate: false, grades: true, goodMoral: true, registrationForm: true }, rejectionReason: 'Incomplete or missing documents.'},
+     { id: 6, studentId: '24-00-0997', name: 'Michael Brown', course: 'BSIT', year: 1, status: 'New', credentials: { birthCertificate: false, grades: true, goodMoral: true, registrationForm: true }, rejectionReason: 'Incomplete or missing documents.'},
 ];
 export type Application = typeof initialPendingApplications[0] & { rejectionReason?: string };
 export const rejectionReasons = [
@@ -50,10 +50,10 @@ const initialBlocks: Block[] = [
     { id: 6, name: `BSIT 4-A`, capacity: 40, enrolled: 25, specialization: 'AP', year: '4th-year' },
 ];
 export const mockStudents = [
-    { id: '24-01-0004', name: 'Alice Johnson', avatar: 'https://picsum.photos/seed/aj/40/40' },
-    { id: '24-01-0005', name: 'Bob Williams', avatar: 'https://picsum.photos/seed/bw/40/40' },
-    { id: '24-01-0006', name: 'Charlie Brown', avatar: 'https://picsum.photos/seed/cb/40/40' },
-    { id: '24-01-0007', name: 'Diana Miller', avatar: 'https://picsum.photos/seed/dm/40/40' },
+    { id: '24-00-0004', name: 'Alice Johnson', avatar: 'https://picsum.photos/seed/aj/40/40' },
+    { id: '24-00-0005', name: 'Bob Williams', avatar: 'https://picsum.photos/seed/bw/40/40' },
+    { id: '24-00-0006', name: 'Charlie Brown', avatar: 'https://picsum.photos/seed/cb/40/40' },
+    { id: '24-00-0007', name: 'Diana Miller', avatar: 'https://picsum.photos/seed/dm/40/40' },
 ];
 
 // --- Data from manage-subjects ---
@@ -98,12 +98,13 @@ export type Student = {
     enlistedSubjects?: Subject[];
 };
 const initialStudentsList: Student[] = [
-    { id: 1, studentId: '21-01-0123', name: 'Alice Johnson', avatar: 'https://picsum.photos/seed/aj-student/40/40', email: 'alice.j@student.example.com', course: 'BSIT', year: 4, status: 'Enrolled' },
-    { id: 2, studentId: '22-01-0234', name: 'Bob Williams', avatar: 'https://picsum.photos/seed/bw-student/40/40', email: 'bob.w@student.example.com', course: 'BSIT', year: 3, status: 'Enrolled' },
-    { id: 3, studentId: '23-01-0345', name: 'Charlie Brown', avatar: 'https://picsum.photos/seed/cb-student/40/40', email: 'charlie.b@student.example.com', course: 'ACT', year: 2, status: 'Enrolled' },
-    { id: 4, studentId: '23-01-0456', name: 'David Wilson', avatar: 'https://picsum.photos/seed/dw-student/40/40', email: 'david.w@student.example.com', course: 'BSIT', year: 2, status: 'Not Enrolled' },
+    { id: 1, studentId: '21-00-0123', name: 'Alice Johnson', avatar: 'https://picsum.photos/seed/aj-student/40/40', email: 'alice.j@student.example.com', course: 'BSIT', year: 4, status: 'Enrolled' },
+    { id: 2, studentId: '22-00-0234', name: 'Bob Williams', avatar: 'https://picsum.photos/seed/bw-student/40/40', email: 'bob.w@student.example.com', course: 'BSIT', year: 3, status: 'Enrolled' },
+    { id: 3, studentId: '23-00-0345', name: 'Charlie Brown', avatar: 'https://picsum.photos/seed/cb-student/40/40', email: 'charlie.b@student.example.com', course: 'ACT', year: 2, status: 'Enrolled' },
+    { id: 4, studentId: '23-00-0456', name: 'David Wilson', avatar: 'https://picsum.photos/seed/dw-student/40/40', email: 'david.w@student.example.com', course: 'BSIT', year: 2, status: 'Not Enrolled' },
 ];
 
+const initialEnrolledApplications: Application[] = [];
 
 // --- Main Admin Data Structure ---
 const mockAdminData = {
@@ -114,6 +115,7 @@ const mockAdminData = {
     pendingApplications: initialPendingApplications,
     approvedApplications: initialApprovedApplications,
     rejectedApplications: initialRejectedApplications,
+    enrolledApplications: initialEnrolledApplications,
     blocks: initialBlocks,
     subjects: initialSubjects,
     schedules: initialSchedules,
@@ -146,6 +148,3 @@ export const useAdmin = (): AdminContextType => {
   }
   return context;
 };
-
-    
-    
