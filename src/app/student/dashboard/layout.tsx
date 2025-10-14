@@ -1,4 +1,3 @@
-
 'use client';
 import Link from 'next/link';
 import {
@@ -73,6 +72,14 @@ export default function StudentDashboardLayout({
                 <Link href="/student/dashboard">
                   <Home />
                   Dashboard
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={pathname === '/student/dashboard/profile'}>
+                <Link href="/student/dashboard/profile">
+                  <User />
+                  Profile
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
