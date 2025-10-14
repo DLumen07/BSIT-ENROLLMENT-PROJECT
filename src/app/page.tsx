@@ -80,6 +80,16 @@ const AnimatedSubtitle = () => {
   );
 };
 
+const ClientOnlyAnimatedSubtitle = () => {
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    return isClient ? <AnimatedSubtitle /> : <p className="text-sm text-muted-foreground font-mono h-12"></p>;
+}
+
 
 export default function Home() {
   const schoolLogo = PlaceHolderImages.find(p => p.id === 'school-logo');
@@ -104,7 +114,7 @@ export default function Home() {
           <h1 className="text-4xl font-bold tracking-tight text-foreground">
             BSIT Enrollment System
           </h1>
-          <AnimatedSubtitle />
+          <ClientOnlyAnimatedSubtitle />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-xs pt-4">
              <Button asChild variant="outline" size="lg" className="rounded-full border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
               <Link href="/student-login">
