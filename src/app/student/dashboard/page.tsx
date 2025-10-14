@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 export default function StudentDashboardPage() {
-  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [isEnrolled, setIsEnrolled] = useState(true);
 
   return (
     <main className="flex-1 p-4 sm:p-6">
