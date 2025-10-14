@@ -19,7 +19,7 @@ import {
   BookUser,
 } from 'lucide-react';
 import Image from 'next/image';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { usePathname } from 'next/navigation';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
@@ -156,9 +156,9 @@ export default function AdminDashboardLayout({
   const pathname = usePathname();
   const schoolLogo = PlaceHolderImages.find(p => p.id === 'school-logo-sm');
   const isEnrollmentPath = pathname.startsWith('/admin/dashboard/manage-');
-  const [isEnrollmentOpen, setIsEnrollmentOpen] = useState(isEnrollmentPath);
+  const [isEnrollmentOpen, setIsEnrollmentOpen] = React.useState(isEnrollmentPath);
 
-  useEffect(() => {
+  React.useEffect(() => {
     setIsEnrollmentOpen(pathname.startsWith('/admin/dashboard/manage-'));
   }, [pathname]);
 
@@ -329,7 +329,9 @@ export default function AdminDashboardLayout({
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Admin Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Settings</DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/admin/dashboard/settings">Settings</Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem>Support</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
