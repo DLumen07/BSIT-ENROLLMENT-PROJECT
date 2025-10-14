@@ -1,7 +1,7 @@
 
 'use client';
 import React, { createContext, useContext, useState } from 'react';
-import { Instructor, initialInstructors, availableSubjects } from '../dashboard/instructors/page';
+import { Instructor, initialInstructors, availableSubjects as initialAvailableSubjects } from '../dashboard/instructors/page';
 import { AdminUser, initialAdminUsers, roles as adminRoles } from '../dashboard/administrators/page';
 import { Subject as ScheduleSubject } from '../dashboard/schedule/[blockId]/page';
 
@@ -94,18 +94,21 @@ export type Student = {
     course: 'BSIT' | 'ACT';
     year: number;
     status: 'Enrolled' | 'Not Enrolled' | 'Graduated';
+    block?: string;
+    enlistedSubjects?: Subject[];
 };
 const initialStudentsList: Student[] = [
     { id: 1, studentId: '2021-0123', name: 'Alice Johnson', avatar: 'https://picsum.photos/seed/aj-student/40/40', email: 'alice.j@student.example.com', course: 'BSIT', year: 4, status: 'Enrolled' },
     { id: 2, studentId: '2022-0234', name: 'Bob Williams', avatar: 'https://picsum.photos/seed/bw-student/40/40', email: 'bob.w@student.example.com', course: 'BSIT', year: 3, status: 'Enrolled' },
     { id: 3, studentId: '2023-0345', name: 'Charlie Brown', avatar: 'https://picsum.photos/seed/cb-student/40/40', email: 'charlie.b@student.example.com', course: 'ACT', year: 2, status: 'Enrolled' },
+    { id: 4, studentId: '2023-0456', name: 'David Wilson', avatar: 'https://picsum.photos/seed/dw-student/40/40', email: 'david.w@student.example.com', course: 'BSIT', year: 2, status: 'Not Enrolled' },
 ];
 
 
 // --- Main Admin Data Structure ---
 const mockAdminData = {
     instructors: initialInstructors,
-    availableSubjects: availableSubjects,
+    availableSubjects: initialAvailableSubjects,
     adminUsers: initialAdminUsers,
     adminRoles: adminRoles,
     pendingApplications: initialPendingApplications,
@@ -143,3 +146,5 @@ export const useAdmin = (): AdminContextType => {
   }
   return context;
 };
+
+    

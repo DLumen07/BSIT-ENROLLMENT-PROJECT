@@ -1,6 +1,6 @@
 
 'use client';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { MoreHorizontal, Search, Filter, FilterX, PlusCircle, Pencil, Trash2, Files } from 'lucide-react';
 import {
   Card,
@@ -50,61 +50,92 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { useAdmin, Student } from '../../context/admin-context';
+import { useAdmin, Student, Subject } from '../../context/admin-context';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useToast } from '@/hooks/use-toast';
 
 export default function StudentsPage() {
     const { adminData, setAdminData } = useAdmin();
-    const { students } = adminData;
+    const { students, blocks, subjects: yearLevelSubjects } = adminData;
+    const { toast } = useToast();
     
     const [searchTerm, setSearchTerm] = useState('');
     const [filters, setFilters] = useState({
         course: 'all',
         year: 'all',
+        status: 'all',
     });
 
-    const [isAddEditDialogOpen, setIsAddEditDialogOpen] = useState(false);
+    const [isEnrollDialogOpen, setIsEnrollDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
 
-    const openEditDialog = (student: Student) => {
-        setSelectedStudent(student);
-        setIsAddEditDialogOpen(true);
-    };
+    // State for enrollment form
+    const [enrollStudentId, setEnrollStudentId] = useState('');
+    const [enrollYearLevel, setEnrollYearLevel] = useState('');
+    const [enrollBlock, setEnrollBlock] = useState('');
+    const [enlistedSubjects, setEnlistedSubjects] = useState<Subject[]>([]);
+
+    const studentToEnroll = useMemo(() => students.find(s => s.studentId === enrollStudentId), [students, enrollStudentId]);
+
+    const availableBlocks = useMemo(() => {
+        if (!enrollYearLevel) return [];
+        const yearKey = `${enrollYearLevel.toLowerCase().replace(' ', '-')}-year`;
+        return blocks.filter(b => b.year === yearKey);
+    }, [blocks, enrollYearLevel]);
+
+    const availableSubjects = useMemo(() => {
+        if (!enrollYearLevel) return [];
+        const yearKey = `${enrollYearLevel.toLowerCase().replace(' ', '-')}-year`;
+        return yearLevelSubjects[yearKey] || [];
+    }, [yearLevelSubjects, enrollYearLevel]);
+    
+    useEffect(() => {
+        if (studentToEnroll) {
+            setEnrollYearLevel(studentToEnroll.year.toString());
+        } else {
+            setEnrollYearLevel('');
+        }
+        setEnrollBlock('');
+        setEnlistedSubjects([]);
+    }, [studentToEnroll]);
+
 
     const openDeleteDialog = (student: Student) => {
         setSelectedStudent(student);
         setIsDeleteDialogOpen(true);
     };
 
-    const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleEnrollStudent = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const formData = new FormData(e.currentTarget);
-        const studentData = {
-            studentId: formData.get('studentId') as string,
-            name: formData.get('name') as string,
-            email: formData.get('email') as string,
-            course: formData.get('course') as 'BSIT' | 'ACT',
-            year: parseInt(formData.get('year') as string, 10),
-            status: formData.get('status') as 'Enrolled' | 'Not Enrolled' | 'Graduated',
-        };
-
-        if (selectedStudent) { // Editing
-            const updatedStudent = { ...selectedStudent, ...studentData };
-            setAdminData(prev => ({
-                ...prev,
-                students: prev.students.map(s => s.id === selectedStudent.id ? updatedStudent : s)
-            }));
-        } else { // Adding
-            const newStudent: Student = {
-                id: Date.now(),
-                avatar: `https://picsum.photos/seed/${Date.now()}/40/40`,
-                ...studentData,
-            };
-            setAdminData(prev => ({ ...prev, students: [...prev.students, newStudent] }));
+        if (!studentToEnroll || !enrollBlock) {
+            toast({
+                variant: 'destructive',
+                title: 'Enrollment Failed',
+                description: 'Please select a valid student and block.',
+            });
+            return;
         }
 
-        setIsAddEditDialogOpen(false);
-        setSelectedStudent(null);
+        setAdminData(prev => {
+            const updatedStudents = prev.students.map(s => 
+                s.id === studentToEnroll.id 
+                ? { ...s, status: 'Enrolled' as const, block: enrollBlock, enlistedSubjects } 
+                : s
+            );
+            const updatedBlocks = prev.blocks.map(b => 
+                b.name === enrollBlock ? { ...b, enrolled: b.enrolled + 1 } : b
+            );
+            return { ...prev, students: updatedStudents, blocks: updatedBlocks };
+        });
+
+        toast({
+            title: 'Enrollment Successful',
+            description: `${studentToEnroll.name} has been enrolled in block ${enrollBlock}.`,
+        });
+
+        setIsEnrollDialogOpen(false);
+        setEnrollStudentId('');
     };
 
      const handleDeleteStudent = () => {
@@ -123,10 +154,10 @@ export default function StudentsPage() {
 
     const clearFilters = () => {
         setSearchTerm('');
-        setFilters({ course: 'all', year: 'all' });
+        setFilters({ course: 'all', year: 'all', status: 'all' });
     };
     
-    const isFiltered = searchTerm || filters.course !== 'all' || filters.year !== 'all';
+    const isFiltered = searchTerm || filters.course !== 'all' || filters.year !== 'all' || filters.status !== 'all';
     
     const filteredStudents = useMemo(() => {
         return students.filter(student => {
@@ -138,13 +169,15 @@ export default function StudentsPage() {
             
             const matchesCourse = filters.course !== 'all' ? student.course === filters.course : true;
             const matchesYear = filters.year !== 'all' ? student.year.toString() === filters.year : true;
+            const matchesStatus = filters.status !== 'all' ? student.status === filters.status : true;
 
-            return matchesSearch && matchesCourse && matchesYear;
-        }).filter(student => student.status === 'Enrolled');
+            return matchesSearch && matchesCourse && matchesYear && matchesStatus;
+        });
     }, [students, searchTerm, filters]);
     
     const courses = ['all', ...Array.from(new Set(students.map(app => app.course)))];
     const years = ['all', ...Array.from(new Set(students.map(app => app.year.toString())))].sort();
+    const statuses = ['all', 'Enrolled', 'Not Enrolled', 'Graduated'];
     
     const getStatusBadgeVariant = (status: Student['status']) => {
         switch (status) {
@@ -170,85 +203,100 @@ export default function StudentsPage() {
                             Manage and view all student records in the system.
                         </p>
                     </div>
-                     <Dialog open={isAddEditDialogOpen} onOpenChange={(isOpen) => {
-                        setIsAddEditDialogOpen(isOpen);
-                        if (!isOpen) setSelectedStudent(null);
-                     }}>
+                     <Dialog open={isEnrollDialogOpen} onOpenChange={setIsEnrollDialogOpen}>
                         <DialogTrigger asChild>
                             <Button className="rounded-full">
                                 <PlusCircle className="mr-2 h-4 w-4" />
-                                Add Student
+                                Enroll Student
                             </Button>
                         </DialogTrigger>
-                        <DialogContent>
+                        <DialogContent className="sm:max-w-2xl">
                             <DialogHeader>
-                                <DialogTitle>{selectedStudent ? 'Edit Student' : 'Add New Student'}</DialogTitle>
+                                <DialogTitle>Manual Student Enrollment</DialogTitle>
                                 <DialogDescription>
-                                    {selectedStudent ? 'Update the details for this student.' : 'Enter the details for the new student.'}
+                                    Search for a student and assign them to a block and subjects.
                                 </DialogDescription>
                             </DialogHeader>
-                            <form id="student-form" onSubmit={handleFormSubmit}>
+                            <form id="enroll-student-form" onSubmit={handleEnrollStudent}>
                                 <div className="space-y-4 py-2">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="name">Full Name</Label>
-                                            <Input id="name" name="name" defaultValue={selectedStudent?.name} required />
-                                        </div>
-                                         <div className="space-y-2">
-                                            <Label htmlFor="studentId">Student ID</Label>
-                                            <Input id="studentId" name="studentId" defaultValue={selectedStudent?.studentId} required />
-                                        </div>
-                                    </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="email">Email</Label>
-                                        <Input id="email" name="email" type="email" defaultValue={selectedStudent?.email} required />
+                                        <Label htmlFor="studentId">Student ID</Label>
+                                        <Input 
+                                            id="studentId" 
+                                            name="studentId" 
+                                            value={enrollStudentId}
+                                            onChange={(e) => setEnrollStudentId(e.target.value)}
+                                            placeholder="Enter student ID to search..." 
+                                            required 
+                                        />
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="course">Course</Label>
-                                            <Select name="course" defaultValue={selectedStudent?.course} required>
-                                                <SelectTrigger id="course">
-                                                    <SelectValue placeholder="Select course" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="BSIT">BSIT</SelectItem>
-                                                    <SelectItem value="ACT">ACT</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="year">Year Level</Label>
-                                            <Select name="year" defaultValue={selectedStudent?.year.toString()} required>
-                                                <SelectTrigger id="year">
-                                                    <SelectValue placeholder="Select year" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="1">1st Year</SelectItem>
-                                                    <SelectItem value="2">2nd Year</SelectItem>
-                                                    <SelectItem value="3">3rd Year</SelectItem>
-                                                    <SelectItem value="4">4th Year</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    </div>
-                                     <div className="space-y-2">
-                                        <Label htmlFor="status">Status</Label>
-                                        <Select name="status" defaultValue={selectedStudent?.status} required>
-                                            <SelectTrigger id="status">
-                                                <SelectValue placeholder="Select status" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="Enrolled">Enrolled</SelectItem>
-                                                <SelectItem value="Not Enrolled">Not Enrolled</SelectItem>
-                                                <SelectItem value="Graduated">Graduated</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
+                                    
+                                    {studentToEnroll && (
+                                        <Card>
+                                            <CardContent className="pt-4">
+                                                <div className="flex items-center gap-4">
+                                                    <Avatar>
+                                                        <AvatarImage src={studentToEnroll.avatar} alt={studentToEnroll.name} />
+                                                        <AvatarFallback>{studentToEnroll.name.charAt(0)}</AvatarFallback>
+                                                    </Avatar>
+                                                    <div>
+                                                        <p className="font-semibold">{studentToEnroll.name}</p>
+                                                        <p className="text-sm text-muted-foreground">{studentToEnroll.course} - {studentToEnroll.year} Year</p>
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-4 mt-4">
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor="year-level">Year Level</Label>
+                                                        <Input id="year-level" value={enrollYearLevel} disabled />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor="block">Block</Label>
+                                                        <Select value={enrollBlock} onValueChange={setEnrollBlock} required>
+                                                            <SelectTrigger id="block">
+                                                                <SelectValue placeholder="Select a block" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {availableBlocks.map(b => (
+                                                                    <SelectItem key={b.id} value={b.name}>{b.name}</SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                </div>
+                                                {enrollBlock && availableSubjects.length > 0 && (
+                                                    <div className="space-y-3 mt-4 pt-4 border-t">
+                                                        <h4 className="font-medium">Enlist Subjects</h4>
+                                                        <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
+                                                            {availableSubjects.map(subject => (
+                                                                <div key={subject.id} className="flex items-center space-x-2 p-2 border rounded-md">
+                                                                    <Checkbox 
+                                                                        id={`sub-${subject.id}`}
+                                                                        onCheckedChange={(checked) => {
+                                                                            if (checked) {
+                                                                                setEnlistedSubjects(prev => [...prev, subject]);
+                                                                            } else {
+                                                                                setEnlistedSubjects(prev => prev.filter(s => s.id !== subject.id));
+                                                                            }
+                                                                        }}
+                                                                    />
+                                                                    <Label htmlFor={`sub-${subject.id}`} className="flex-1 font-normal">
+                                                                        {subject.code} - {subject.description}
+                                                                    </Label>
+                                                                    <span className="text-xs text-muted-foreground">{subject.units} units</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </CardContent>
+                                        </Card>
+                                    )}
+
                                 </div>
                             </form>
                              <DialogFooter>
-                                <Button variant="outline" onClick={() => setIsAddEditDialogOpen(false)}>Cancel</Button>
-                                <Button type="submit" form="student-form">{selectedStudent ? 'Save Changes' : 'Add Student'}</Button>
+                                <Button variant="outline" onClick={() => setIsEnrollDialogOpen(false)}>Cancel</Button>
+                                <Button type="submit" form="enroll-student-form">Enroll Student</Button>
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
@@ -295,7 +343,18 @@ export default function StudentsPage() {
                                                     <SelectValue placeholder="All Years" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    {years.map(year => <SelectItem key={year} value={year}>{year === 'all' ? 'All Years' : `Year ${year}`}</SelectItem>)}
+                                                    {years.map(year => <SelectItem key={year} value={year}>{year === 'all' ? 'All Years' : `${year}${year === '1' ? 'st' : year === '2' ? 'nd' : year === '3' ? 'rd' : 'th'} Year`}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label>Status</Label>
+                                            <Select value={filters.status} onValueChange={(value) => handleFilterChange('status', value)}>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="All Statuses" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {statuses.map(status => <SelectItem key={status} value={status}>{status === 'all' ? 'All Statuses' : status}</SelectItem>)}
                                                 </SelectContent>
                                             </Select>
                                         </div>
@@ -357,7 +416,7 @@ export default function StudentsPage() {
                                                             <Files className="mr-2 h-4 w-4" />
                                                             Claim Green Form
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuItem onSelect={() => openEditDialog(student)}>
+                                                        <DropdownMenuItem disabled>
                                                             <Pencil className="mr-2 h-4 w-4" /> Edit
                                                         </DropdownMenuItem>
                                                         <DropdownMenuSeparator />
