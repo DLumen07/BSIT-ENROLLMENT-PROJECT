@@ -82,35 +82,13 @@ const academicSchema = z.object({
     course: z.string().min(1, 'Course is required'),
     yearLevel: z.string().min(1, 'Year level is required'),
     status: z.enum(['New', 'Old', 'Transferee']),
-    block: z.string().optional(),
-    subjects: z.array(z.string()).optional(),
+    block: z.string({required_error: 'Please select a block.'}).min(1, 'Please select a block.'),
+    subjects: z.array(z.string()).min(1, "Please select at least one subject."),
 });
 
 
 const enrollmentSchema = personalFamilySchema.merge(additionalInfoSchema).merge(academicSchema);
 type EnrollmentSchemaType = z.infer<typeof enrollmentSchema>;
-
-const subjectsByCourseAndYear: Record<string, Record<string, { id: string; label: string; units: number }[]>> = {
-    "BSIT": {
-        "3rd Year": [
-             { id: 'IT301', label: 'IT 301 - Software Engineering', units: 3 },
-             { id: 'IT302', label: 'IT 302 - Database Management', units: 3 },
-        ],
-        "4th Year": [
-            { id: 'IT401', label: 'IT 401 - Capstone Project 1', units: 5 },
-            { id: 'IT402', label: 'IT 402 - Information Assurance & Security', units: 3 },
-        ]
-    },
-    "ACT": {
-        "1st Year": [
-            { id: 'IT 101', label: 'IT 101 - Introduction to Computing', units: 3 },
-            { id: 'MATH 101', label: 'MATH 101 - Calculus 1', units: 3 },
-        ],
-        "2nd Year": [
-             { id: 'IT 201', label: 'IT 201 - Data Structures & Algorithms', units: 3 },
-        ]
-    }
-};
 
 function Step1() {
     return (
@@ -289,9 +267,8 @@ function Step3() {
     const form = useFormContext();
     const selectedYear = form.watch('yearLevel');
     const selectedCourse = form.watch('course');
-    const selectedBlock = form.watch('block');
-
-    const yearLevelMap: Record<string, string> = {
+    
+    const yearLevelMap: Record<string, '1st-year' | '2nd-year' | '3rd-year' | '4th-year'> = {
         '1st Year': '1st-year',
         '2nd Year': '2nd-year',
         '3rd Year': '3rd-year',
@@ -306,7 +283,15 @@ function Step3() {
             .map(b => ({ value: b.name, label: b.name }));
     }, [selectedYear, selectedCourse, adminData.blocks]);
 
-    const availableSubjects = selectedCourse && selectedYear ? subjectsByCourseAndYear[selectedCourse]?.[selectedYear] || [] : [];
+    const availableSubjects = useMemo(() => {
+        if (!selectedYear) return [];
+        const yearKey = yearLevelMap[selectedYear];
+        return Object.values(adminData.subjects[yearKey] || {}).map(s => ({
+            id: s.code,
+            label: `${s.code} - ${s.description}`,
+            units: s.units,
+        }));
+    }, [selectedYear, adminData.subjects]);
     
     return (
         <div className="space-y-6">
@@ -337,30 +322,28 @@ function Step3() {
                 <FormField name="yearLevel" render={({ field }) => (
                     <FormItem><FormLabel>Year Level</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value} disabled><FormControl><SelectTrigger className="rounded-xl"><SelectValue placeholder="Select year level" /></SelectTrigger></FormControl><SelectContent className="rounded-xl"><SelectItem value="1st Year">1st Year</SelectItem><SelectItem value="2nd Year">2nd Year</SelectItem><SelectItem value="3rd Year">3rd Year</SelectItem><SelectItem value="4th Year">4th Year</SelectItem></SelectContent></Select><FormMessage /></FormItem>
                 )} />
-                {selectedYear === '1st Year' && (
-                     <FormField name="block" render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Block</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={availableBlocks.length === 0}>
-                                <FormControl>
-                                    <SelectTrigger className="rounded-xl">
-                                        <SelectValue placeholder={availableBlocks.length === 0 ? "No available blocks" : "Select block"} />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent className="rounded-xl">
-                                    {availableBlocks.map(block => (
-                                        <SelectItem key={block.value} value={block.value}>{block.label}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {availableBlocks.length === 0 && <p className="text-sm text-destructive mt-2">There are no available blocks for this year level. Please contact admin.</p>}
-                            <FormMessage />
-                        </FormItem>
-                    )} />
-                )}
+                <FormField name="block" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Block</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={availableBlocks.length === 0}>
+                            <FormControl>
+                                <SelectTrigger className="rounded-xl">
+                                    <SelectValue placeholder={availableBlocks.length === 0 ? "No available blocks" : "Select block"} />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="rounded-xl">
+                                {availableBlocks.map(block => (
+                                    <SelectItem key={block.value} value={block.value}>{block.label}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        {availableBlocks.length === 0 && <p className="text-sm text-destructive mt-2">There are no available blocks for this course and year level. Please contact the admin.</p>}
+                        <FormMessage />
+                    </FormItem>
+                )} />
             </div>
             
-            {selectedYear === '1st Year' && selectedBlock && availableSubjects.length > 0 && (
+            {availableSubjects.length > 0 && (
                 <div className="space-y-4 pt-4 border-t">
                      <h3 className="text-lg font-medium">Enlist Subjects</h3>
                      <p className="text-sm text-muted-foreground">Select the subjects you want to enroll in.</p>
@@ -445,6 +428,8 @@ export default function EnrollmentFormPage() {
     useEffect(() => {
         if (studentData && studentData.academic.yearLevel !== '1st Year' && !hasMadeSkipChoice) {
             setShowSkipDialog(true);
+        } else if (studentData && studentData.academic.yearLevel === '1st Year') {
+            setHasMadeSkipChoice(true); // Don't show dialog for 1st years
         }
     }, [studentData, hasMadeSkipChoice]);
 
@@ -478,35 +463,10 @@ export default function EnrollmentFormPage() {
             Object.keys(academicSchema.shape) as FieldName[],
         ];
         
-        let fieldsToValidate: FieldName[] = fieldsByStep[currentStep];
+        const fieldsToValidate: FieldName[] = fieldsByStep[currentStep];
 
-        // For step 3 (academic info), if the user is not 1st year, they don't select blocks/subjects.
-        if (currentStep === 2) {
-             const yearLevel = methods.getValues('yearLevel');
-             if (yearLevel !== '1st Year') {
-                const schemaForOldStudent = academicSchema.omit({ block: true, subjects: true });
-                const result = await schemaForOldStudent.safeParseAsync(methods.getValues());
-                if (!result.success) {
-                     // Manually set errors if you want to display them
-                    console.error(result.error.format());
-                     // Trigger validation to show errors
-                    methods.trigger(fieldsToValidate);
-                    return;
-                }
-             } else {
-                 const result = await academicSchema.safeParseAsync(methods.getValues());
-                 if (!result.success) {
-                    console.error(result.error.format());
-                     // This part is tricky as trigger doesn't work well with safeParse
-                    methods.trigger(fieldsToValidate); // Attempt to trigger validation display
-                    return;
-                 }
-             }
-        } else {
-             const output = await methods.trigger(fieldsToValidate, { shouldFocus: true });
-             if (!output) return;
-        }
-
+        const output = await methods.trigger(fieldsToValidate, { shouldFocus: true });
+        if (!output) return;
 
         if (currentStep < steps.length - 1) {
             setCurrentStep(step => step + 1);
@@ -618,5 +578,3 @@ export default function EnrollmentFormPage() {
         </main>
     );
 }
-
-    
