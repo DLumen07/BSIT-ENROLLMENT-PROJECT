@@ -465,6 +465,16 @@ export default function EnrollmentFormPage() {
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isReviewing, setIsReviewing] = useState(false);
 
+    const getInitialStatus = () => {
+        if (!studentData) return 'New';
+        const validStatuses = ['New', 'Old', 'Transferee'];
+        if (validStatuses.includes(studentData.academic.status)) {
+            return studentData.academic.status as 'New' | 'Old' | 'Transferee';
+        }
+        // If student is 'Not Enrolled' or other, treat as 'New' for application purposes.
+        return 'New';
+    }
+
     const methods = useForm<EnrollmentSchemaType>({
         resolver: zodResolver(enrollmentSchema),
         defaultValues: {
@@ -474,7 +484,7 @@ export default function EnrollmentFormPage() {
             phoneNumber: studentData?.contact.phoneNumber,
             sex: studentData?.personal.sex,
             civilStatus: 'Single',
-            status: studentData?.academic.status as 'New' | 'Old' | 'Transferee',
+            status: getInitialStatus(),
             yearLevel: studentData?.academic.yearLevel,
             course: studentData?.academic.course,
             subjects: [],
@@ -598,5 +608,7 @@ export default function EnrollmentFormPage() {
         </main>
     );
 }
+
+    
 
     
