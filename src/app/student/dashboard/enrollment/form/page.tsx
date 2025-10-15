@@ -61,7 +61,7 @@ const additionalInfoSchema = z.object({
     elementarySchool: z.string().min(1, 'Elementary school is required'),
     elemYearGraduated: z.string().min(4, 'Invalid year'),
     secondarySchool: z.string().min(1, 'Secondary school is required'),
-    secondaryYearGraduated: z.string().min(4, 'Invalid year'),
+    secondaryYearGraduated: zstring().min(4, 'Invalid year'),
     collegiateSchool: z.string().optional(),
     collegiateYearGraduated: z.string().optional(),
 });
@@ -467,11 +467,23 @@ export default function EnrollmentFormPage() {
 
     const getInitialStatus = () => {
         if (!studentData) return 'New';
+        
+        // A 1st year student applying is always "New"
+        if (studentData.academic.yearLevel === '1st Year') {
+            return 'New';
+        }
+
+        // An upper-year student re-enrolling is "Old"
+        if (parseInt(studentData.academic.yearLevel, 10) > 1) {
+            return 'Old';
+        }
+        
+        // Fallback for any other case, e.g., if status was Transferee, it should remain so.
         const validStatuses = ['New', 'Old', 'Transferee'];
         if (validStatuses.includes(studentData.academic.status)) {
             return studentData.academic.status as 'New' | 'Old' | 'Transferee';
         }
-        // If student is 'Not Enrolled' or other, treat as 'New' for application purposes.
+
         return 'New';
     }
 
@@ -608,7 +620,3 @@ export default function EnrollmentFormPage() {
         </main>
     );
 }
-
-    
-
-    
