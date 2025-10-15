@@ -50,7 +50,7 @@ const personalFamilySchema = z.object({
     sex: z.enum(['Male', 'Female']),
     civilStatus: z.enum(['Single', 'Married', 'Widowed', 'Separated']),
     fathersName: z.string().min(1, "Father's name is required"),
-    fathersOccupation: zstring().min(1, "Father's occupation is required"),
+    fathersOccupation: z.string().min(1, "Father's occupation is required"),
     mothersName: z.string().min(1, "Mother's name is required"),
     mothersOccupation: z.string().min(1, "Mother's occupation is required"),
     guardiansName: z.string().optional(),
