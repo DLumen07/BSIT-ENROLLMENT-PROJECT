@@ -71,7 +71,7 @@ const additionalInfoSchema = z.object({
     elementarySchool: z.string().min(1, 'Elementary school is required'),
     elemYearGraduated: z.string().min(4, 'Invalid year'),
     secondarySchool: z.string().min(1, 'Secondary school is required'),
-    secondaryYearGraduated: z_string().min(4, 'Invalid year'),
+    secondaryYearGraduated: z.string().min(4, 'Invalid year'),
     collegiateSchool: z.string().optional(),
     collegiateYearGraduated: z.string().optional(),
 });
@@ -459,14 +459,30 @@ export default function EnrollmentFormPage() {
         let fieldsToValidate: FieldName[] = fieldsByStep[currentStep];
 
         // For step 3 (academic info), if the user is not 1st year, they don't select blocks/subjects.
-        // So we only need to validate the fields that are actually there.
-        if (currentStep === 2 && methods.getValues('yearLevel') !== '1st Year') {
-            fieldsToValidate = ['course', 'yearLevel', 'status'];
+        if (currentStep === 2) {
+             const yearLevel = methods.getValues('yearLevel');
+             if (yearLevel !== '1st Year') {
+                const schemaForOldStudent = academicSchema.omit({ block: true, subjects: true });
+                const result = await schemaForOldStudent.safeParseAsync(methods.getValues());
+                if (!result.success) {
+                     // Manually set errors if you want to display them
+                    console.error(result.error.format());
+                    return;
+                }
+             } else {
+                 const result = await academicSchema.safeParseAsync(methods.getValues());
+                 if (!result.success) {
+                    console.error(result.error.format());
+                     // This part is tricky as trigger doesn't work well with safeParse
+                    methods.trigger(fieldsToValidate); // Attempt to trigger validation display
+                    return;
+                 }
+             }
+        } else {
+             const output = await methods.trigger(fieldsToValidate, { shouldFocus: true });
+             if (!output) return;
         }
 
-        const output = await methods.trigger(fieldsToValidate, { shouldFocus: true });
-        
-        if (!output) return;
 
         if (currentStep < steps.length - 1) {
             setCurrentStep(step => step + 1);
