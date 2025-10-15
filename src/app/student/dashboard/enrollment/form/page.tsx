@@ -117,8 +117,98 @@ const subjectsByCourseAndYear: Record<string, Record<string, { id: string; label
     }
 };
 
+const ReviewItem = ({ label, value }: { label: string, value?: string | number | boolean | Date | null }) => {
+    if (value === null || value === undefined || value === '') return null;
+    return (
+        <div className="flex flex-col sm:flex-row sm:items-center">
+            <p className="w-full sm:w-1/3 font-medium text-muted-foreground">{label}</p>
+            <p className="w-full sm:w-2/3">{typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value instanceof Date ? format(value, "PPP") : value}</p>
+        </div>
+    );
+};
 
-const Step1 = () => (
+const ReviewStep = ({ formData }: { formData: EnrollmentSchemaType }) => {
+    const getSubjectLabel = (subjectId: string) => {
+        for (const course in subjectsByCourseAndYear) {
+            for (const year in subjectsByCourseAndYear[course]) {
+                const subject = subjectsByCourseAndYear[course][year].find(s => s.id === subjectId);
+                if (subject) return subject.label;
+            }
+        }
+        return subjectId;
+    };
+
+    return (
+        <div className="space-y-8">
+            <div>
+                <h3 className="text-lg font-medium mb-4">Personal & Family Information</h3>
+                <div className="space-y-2">
+                    <ReviewItem label="Full Name" value={`${formData.firstName} ${formData.middleName || ''} ${formData.lastName}`} />
+                    <ReviewItem label="Email" value={formData.email} />
+                    <ReviewItem label="Phone Number" value={formData.phoneNumber} />
+                    <ReviewItem label="Birthdate" value={formData.birthdate} />
+                    <ReviewItem label="Current Address" value={formData.currentAddress} />
+                    <ReviewItem label="Permanent Address" value={formData.permanentAddress} />
+                    <ReviewItem label="Nationality" value={formData.nationality} />
+                    <ReviewItem label="Religion" value={formData.religion} />
+                    <ReviewItem label="Dialect" value={formData.dialect} />
+                    <ReviewItem label="Sex" value={formData.sex} />
+                    <ReviewItem label="Civil Status" value={formData.civilStatus} />
+                    <ReviewItem label="Father's Name" value={formData.fathersName} />
+                    <ReviewItem label="Father's Occupation" value={formData.fathersOccupation} />
+                    <ReviewItem label="Mother's Name" value={formData.mothersName} />
+                    <ReviewItem label="Mother's Occupation" value={formData.mothersOccupation} />
+                    <ReviewItem label="Guardian's Name" value={formData.guardiansName} />
+                    <ReviewItem label="Guardian's Occupation" value={formData.guardiansOccupation} />
+                    <ReviewItem label="Guardian's Address" value={formData.guardiansAddress} />
+                </div>
+            </div>
+            <div className="border-t pt-8">
+                <h3 className="text-lg font-medium mb-4">Additional & Educational Background</h3>
+                <div className="space-y-2">
+                    <ReviewItem label="Living with Family" value={formData.livingWithFamily} />
+                    <ReviewItem label="Boarding" value={formData.boarding} />
+                    <ReviewItem label="Differently Abled" value={formData.differentlyAbled} />
+                    {formData.differentlyAbled && <ReviewItem label="Disability" value={formData.disability} />}
+                    <ReviewItem label="Belong to Minority Group" value={formData.minorityGroup} />
+                    {formData.minorityGroup && <ReviewItem label="Minority Group" value={formData.minority} />}
+                    <ReviewItem label="Emergency Contact Name" value={formData.emergencyContactName} />
+                    <ReviewItem label="Emergency Contact Address" value={formData.emergencyContactAddress} />
+                    <ReviewItem label="Emergency Contact Number" value={formData.emergencyContactNumber} />
+                    <ReviewItem label="Elementary School" value={formData.elementarySchool} />
+                    <ReviewItem label="Year Graduated (Elem)" value={formData.elemYearGraduated} />
+                    <ReviewItem label="Secondary School" value={formData.secondarySchool} />
+                    <ReviewItem label="Year Graduated (Secondary)" value={formData.secondaryYearGraduated} />
+                    <ReviewItem label="Collegiate School" value={formData.collegiateSchool} />
+                    <ReviewItem label="Year Graduated (Collegiate)" value={formData.collegiateYearGraduated} />
+                </div>
+            </div>
+            <div className="border-t pt-8">
+                <h3 className="text-lg font-medium mb-4">Academic Information</h3>
+                <div className="space-y-2">
+                    <ReviewItem label="Course" value={formData.course} />
+                    <ReviewItem label="Status" value={formData.status} />
+                    <ReviewItem label="Year Level" value={formData.yearLevel} />
+                    <ReviewItem label="Block" value={formData.block} />
+                    {formData.subjects && formData.subjects.length > 0 && (
+                        <div>
+                            <p className="w-full sm:w-1/3 font-medium text-muted-foreground mb-2">Enlisted Subjects</p>
+                            <ul className="list-disc pl-5 space-y-1">
+                                {formData.subjects.map(subjectId => (
+                                    <li key={subjectId}>{getSubjectLabel(subjectId)}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
+const Step1 = () => {
+    return (
     <div className="space-y-6">
         <h3 className="text-lg font-medium">Personal Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -185,7 +275,7 @@ const Step1 = () => (
                 <FormItem><FormLabel>Father's Name</FormLabel><FormControl><Input {...field} className="rounded-xl" /></FormControl><FormMessage /></FormItem>
             )} />
             <FormField name="fathersOccupation" render={({ field }) => (
-                <FormItem><FormLabel>Father's Occupation</FormLabel><FormControl><Input {...field} className="rounded-xl" /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Father's Occupation</FormLabel><FormControl><Input {...field} className="rounded-xl" /></FormControl><FormMessage /></FormMessage /></FormItem>
             )} />
         </div>
          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -208,7 +298,8 @@ const Step1 = () => (
             <FormItem><FormLabel>Guardian's Address (Optional)</FormLabel><FormControl><Input {...field} className="rounded-xl" /></FormControl><FormMessage /></FormItem>
         )} />
     </div>
-);
+    );
+};
 
 const Step2 = () => {
     const form = useFormContext();
@@ -394,94 +485,6 @@ const Step3 = () => {
     );
 };
 
-const ReviewStep = ({ formData }: { formData: EnrollmentSchemaType }) => {
-    const getSubjectLabel = (subjectId: string) => {
-        for (const course in subjectsByCourseAndYear) {
-            for (const year in subjectsByCourseAndYear[course]) {
-                const subject = subjectsByCourseAndYear[course][year].find(s => s.id === subjectId);
-                if (subject) return subject.label;
-            }
-        }
-        return subjectId;
-    };
-
-    const ReviewItem = ({ label, value }: { label: string, value?: string | number | boolean | Date | null }) => (
-        value ? (
-            <div className="flex flex-col sm:flex-row sm:items-center">
-                <p className="w-full sm:w-1/3 font-medium text-muted-foreground">{label}</p>
-                <p className="w-full sm:w-2/3">{typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value instanceof Date ? format(value, "PPP") : value}</p>
-            </div>
-        ) : null
-    );
-
-    return (
-        <div className="space-y-8">
-            <div>
-                <h3 className="text-lg font-medium mb-4">Personal & Family Information</h3>
-                <div className="space-y-2">
-                    <ReviewItem label="Full Name" value={`${formData.firstName} ${formData.middleName || ''} ${formData.lastName}`} />
-                    <ReviewItem label="Email" value={formData.email} />
-                    <ReviewItem label="Phone Number" value={formData.phoneNumber} />
-                    <ReviewItem label="Birthdate" value={formData.birthdate} />
-                    <ReviewItem label="Current Address" value={formData.currentAddress} />
-                    <ReviewItem label="Permanent Address" value={formData.permanentAddress} />
-                    <ReviewItem label="Nationality" value={formData.nationality} />
-                    <ReviewItem label="Religion" value={formData.religion} />
-                    <ReviewItem label="Dialect" value={formData.dialect} />
-                    <ReviewItem label="Sex" value={formData.sex} />
-                    <ReviewItem label="Civil Status" value={formData.civilStatus} />
-                    <ReviewItem label="Father's Name" value={formData.fathersName} />
-                    <ReviewItem label="Father's Occupation" value={formData.fathersOccupation} />
-                    <ReviewItem label="Mother's Name" value={formData.mothersName} />
-                    <ReviewItem label="Mother's Occupation" value={formData.mothersOccupation} />
-                    <ReviewItem label="Guardian's Name" value={formData.guardiansName} />
-                    <ReviewItem label="Guardian's Occupation" value={formData.guardiansOccupation} />
-                    <ReviewItem label="Guardian's Address" value={formData.guardiansAddress} />
-                </div>
-            </div>
-            <div className="border-t pt-8">
-                <h3 className="text-lg font-medium mb-4">Additional & Educational Background</h3>
-                <div className="space-y-2">
-                    <ReviewItem label="Living with Family" value={formData.livingWithFamily} />
-                    <ReviewItem label="Boarding" value={formData.boarding} />
-                    <ReviewItem label="Differently Abled" value={formData.differentlyAbled} />
-                    {formData.differentlyAbled && <ReviewItem label="Disability" value={formData.disability} />}
-                    <ReviewItem label="Belong to Minority Group" value={formData.minorityGroup} />
-                    {formData.minorityGroup && <ReviewItem label="Minority Group" value={formData.minority} />}
-                    <ReviewItem label="Emergency Contact Name" value={formData.emergencyContactName} />
-                    <ReviewItem label="Emergency Contact Address" value={formData.emergencyContactAddress} />
-                    <ReviewItem label="Emergency Contact Number" value={formData.emergencyContactNumber} />
-                    <ReviewItem label="Elementary School" value={formData.elementarySchool} />
-                    <ReviewItem label="Year Graduated (Elem)" value={formData.elemYearGraduated} />
-                    <ReviewItem label="Secondary School" value={formData.secondarySchool} />
-                    <ReviewItem label="Year Graduated (Secondary)" value={formData.secondaryYearGraduated} />
-                    <ReviewItem label="Collegiate School" value={formData.collegiateSchool} />
-                    <ReviewItem label="Year Graduated (Collegiate)" value={formData.collegiateYearGraduated} />
-                </div>
-            </div>
-            <div className="border-t pt-8">
-                <h3 className="text-lg font-medium mb-4">Academic Information</h3>
-                <div className="space-y-2">
-                    <ReviewItem label="Course" value={formData.course} />
-                    <ReviewItem label="Status" value={formData.status} />
-                    <ReviewItem label="Year Level" value={formData.yearLevel} />
-                    <ReviewItem label="Block" value={formData.block} />
-                    {formData.subjects && formData.subjects.length > 0 && (
-                        <div>
-                            <p className="w-full sm:w-1/3 font-medium text-muted-foreground mb-2">Enlisted Subjects</p>
-                            <ul className="list-disc pl-5 space-y-1">
-                                {formData.subjects.map(subjectId => (
-                                    <li key={subjectId}>{getSubjectLabel(subjectId)}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
-};
-
 
 export default function EnrollmentFormPage() {
     const { studentData } = useStudent();
@@ -625,7 +628,7 @@ export default function EnrollmentFormPage() {
 
     return (
         <main className="flex-1 p-4 sm:p-6">
-             <FormProvider {...methods}>
+            <FormProvider {...methods}>
                 <form onSubmit={methods.handleSubmit(processForm)}>
                     <Card className="max-w-4xl mx-auto rounded-xl">
                         <CardHeader>
@@ -643,9 +646,9 @@ export default function EnrollmentFormPage() {
                                 <ReviewStep formData={methods.getValues()} />
                             ) : (
                                 <>
-                                    <div style={{ display: currentStep === 0 ? 'block' : 'none' }}><Step1 /></div>
-                                    <div style={{ display: currentStep === 1 ? 'block' : 'none' }}><Step2 /></div>
-                                    <div style={{ display: currentStep === 2 ? 'block' : 'none' }}><Step3 /></div>
+                                    {currentStep === 0 && <Step1 />}
+                                    {currentStep === 1 && <Step2 />}
+                                    {currentStep === 2 && <Step3 />}
                                 </>
                             )}
                         </CardContent>
