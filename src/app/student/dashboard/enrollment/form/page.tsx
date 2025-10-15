@@ -117,7 +117,7 @@ const subjectsByCourseAndYear: Record<string, Record<string, { id: string; label
     }
 };
 
-const ReviewItem = ({ label, value }: { label: string; value?: string | number | boolean | Date | null }) => {
+function ReviewItem({ label, value }: { label: string; value?: string | number | boolean | Date | null }) {
     if (value === null || value === undefined || value === '') {
         return null;
     }
@@ -127,9 +127,9 @@ const ReviewItem = ({ label, value }: { label: string; value?: string | number |
             <p className="w-full sm:w-2/3">{typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value instanceof Date ? format(value, "PPP") : value}</p>
         </div>
     );
-};
+}
 
-const ReviewStep = ({ formData }: { formData: EnrollmentSchemaType }) => {
+function ReviewStep({ formData }: { formData: EnrollmentSchemaType }) {
     const getSubjectLabel = (subjectId: string) => {
         for (const course in subjectsByCourseAndYear) {
             for (const year in subjectsByCourseAndYear[course]) {
@@ -206,9 +206,9 @@ const ReviewStep = ({ formData }: { formData: EnrollmentSchemaType }) => {
             </div>
         </div>
     );
-};
+}
 
-const Step1 = () => {
+function Step1() {
     return (
         <div className="space-y-6">
             <h3 className="text-lg font-medium">Personal Information</h3>
@@ -300,9 +300,9 @@ const Step1 = () => {
             )} />
         </div>
     );
-};
+}
 
-const Step2 = () => {
+function Step2() {
     const form = useFormContext();
     const isDifferentlyAbled = form.watch('differentlyAbled');
     const belongsToMinority = form.watch('minorityGroup');
@@ -378,9 +378,9 @@ const Step2 = () => {
             </div>
         </div>
     );
-};
+}
 
-const Step3 = () => {
+function Step3() {
     const form = useFormContext();
     const selectedYear = form.watch('yearLevel');
     const selectedCourse = form.watch('course');
@@ -484,7 +484,7 @@ const Step3 = () => {
             )}
         </div>
     );
-};
+}
 
 
 export default function EnrollmentFormPage() {
