@@ -286,16 +286,6 @@ const Step3 = () => {
 
     const availableBlocks = selectedYear ? blocksByYear[selectedYear] || [] : [];
     const availableSubjects = selectedCourse && selectedYear ? subjectsByCourseAndYear[selectedCourse]?.[selectedYear] || [] : [];
-    
-    useEffect(() => {
-        const yearLevel = form.getValues('yearLevel');
-        if (yearLevel === '1st Year' || yearLevel === '2nd Year') {
-            form.setValue('course', 'ACT', { shouldValidate: true });
-        } else if (yearLevel === '3rd Year' || yearLevel === '4th Year') {
-            form.setValue('course', 'BSIT', { shouldValidate: true });
-        }
-    }, [form]);
-
 
     return (
         <div className="space-y-6">
@@ -497,19 +487,17 @@ export default function EnrollmentFormPage() {
         if (year === '1st Year') {
             return 'New';
         }
-
-        if (parseInt(year, 10) > 1) {
-            return 'Old';
-        }
         
-        // Fallback for transferees or other edge cases
-        const validStatuses = ['New', 'Old', 'Transferee'];
-        const academicStatus = studentData.academic.status as string;
-        if (validStatuses.includes(academicStatus)) {
-            return studentData.academic.status as 'New' | 'Old' | 'Transferee';
-        }
+        return 'Old';
+    }
 
-        return 'New';
+    const getInitialCourse = () => {
+        if (!studentData) return 'ACT';
+        const year = studentData.academic.yearLevel;
+        if (year === '1st Year' || year === '2nd Year') {
+            return 'ACT';
+        }
+        return 'BSIT';
     }
 
     const methods = useForm<EnrollmentSchemaType>({
@@ -523,7 +511,7 @@ export default function EnrollmentFormPage() {
             civilStatus: 'Single',
             status: getInitialStatus(),
             yearLevel: studentData?.academic.yearLevel,
-            course: studentData?.academic.course,
+            course: getInitialCourse(),
             subjects: [],
         }
     });
