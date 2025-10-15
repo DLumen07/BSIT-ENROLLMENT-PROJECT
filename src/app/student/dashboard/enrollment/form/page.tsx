@@ -71,7 +71,7 @@ const additionalInfoSchema = z.object({
     elementarySchool: z.string().min(1, 'Elementary school is required'),
     elemYearGraduated: z.string().min(4, 'Invalid year'),
     secondarySchool: z.string().min(1, 'Secondary school is required'),
-    secondaryYearGraduated: z.string().min(4, 'Invalid year'),
+    secondaryYearGraduated: z_string().min(4, 'Invalid year'),
     collegiateSchool: z.string().optional(),
     collegiateYearGraduated: z.string().optional(),
 });
@@ -327,7 +327,7 @@ function Step3() {
                 <FormField name="yearLevel" render={({ field }) => (
                     <FormItem><FormLabel>Year Level</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value} disabled><FormControl><SelectTrigger className="rounded-xl"><SelectValue placeholder="Select year level" /></SelectTrigger></FormControl><SelectContent className="rounded-xl"><SelectItem value="1st Year">1st Year</SelectItem><SelectItem value="2nd Year">2nd Year</SelectItem><SelectItem value="3rd Year">3rd Year</SelectItem><SelectItem value="4th Year">4th Year</SelectItem></SelectContent></Select><FormMessage /></FormItem>
                 )} />
-                {selectedYear && (
+                {selectedYear && availableBlocks.length > 0 && (
                      <FormField name="block" render={({ field }) => (
                         <FormItem><FormLabel>Block</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger className="rounded-xl"><SelectValue placeholder="Select block" /></SelectTrigger></FormControl><SelectContent className="rounded-xl">
                             {availableBlocks.map(block => (
@@ -450,13 +450,21 @@ export default function EnrollmentFormPage() {
     type FieldName = keyof EnrollmentSchemaType;
 
     const next = async () => {
-        const fields: FieldName[][] = [
+        const fieldsByStep: FieldName[][] = [
             Object.keys(personalFamilySchema.shape) as FieldName[],
             Object.keys(additionalInfoSchema.shape) as FieldName[],
             Object.keys(academicSchema.shape) as FieldName[],
         ];
         
-        const output = await methods.trigger(fields[currentStep], { shouldFocus: true });
+        let fieldsToValidate: FieldName[] = fieldsByStep[currentStep];
+
+        // For step 3 (academic info), if the user is not 1st year, they don't select blocks/subjects.
+        // So we only need to validate the fields that are actually there.
+        if (currentStep === 2 && methods.getValues('yearLevel') !== '1st Year') {
+            fieldsToValidate = ['course', 'yearLevel', 'status'];
+        }
+
+        const output = await methods.trigger(fieldsToValidate, { shouldFocus: true });
         
         if (!output) return;
 
