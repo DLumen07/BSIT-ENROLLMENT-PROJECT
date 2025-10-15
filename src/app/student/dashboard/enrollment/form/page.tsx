@@ -118,7 +118,9 @@ const subjectsByCourseAndYear: Record<string, Record<string, { id: string; label
 };
 
 const ReviewItem = ({ label, value }: { label: string, value?: string | number | boolean | Date | null }) => {
-    if (value === null || value === undefined || value === '') return null;
+    if (value === null || value === undefined || value === '') {
+        return null;
+    }
     return (
         <div className="flex flex-col sm:flex-row sm:items-center">
             <p className="w-full sm:w-1/3 font-medium text-muted-foreground">{label}</p>
@@ -205,7 +207,6 @@ const ReviewStep = ({ formData }: { formData: EnrollmentSchemaType }) => {
         </div>
     );
 };
-
 
 const Step1 = () => {
     return (
@@ -629,50 +630,46 @@ export default function EnrollmentFormPage() {
     return (
         <main className="flex-1 p-4 sm:p-6">
             <FormProvider {...methods}>
-                <form onSubmit={methods.handleSubmit(processForm)}>
-                    <Card className="max-w-4xl mx-auto rounded-xl">
-                        <CardHeader>
-                            <CardTitle>{isReviewing ? 'Review Your Information' : 'Enrollment Form'}</CardTitle>
-                            <CardDescription>
-                                {isReviewing 
-                                    ? 'Please review your details carefully before final submission.' 
-                                    : `Please fill out all the necessary fields. (${steps[currentStep].name})`
-                                }
-                            </CardDescription>
-                            {!isReviewing && <Progress value={(currentStep / (steps.length - 1)) * 100} className="mt-4" />}
-                        </CardHeader>
-                        <CardContent>
+                <Card className="max-w-4xl mx-auto rounded-xl">
+                    <CardHeader>
+                        <CardTitle>{isReviewing ? 'Review Your Information' : 'Enrollment Form'}</CardTitle>
+                        <CardDescription>
+                            {isReviewing 
+                                ? 'Please review your details carefully before final submission.' 
+                                : `Please fill out all the necessary fields. (${steps[currentStep].name})`
+                            }
+                        </CardDescription>
+                        {!isReviewing && <Progress value={(currentStep / (steps.length - 1)) * 100} className="mt-4" />}
+                    </CardHeader>
+                    <CardContent>
+                        {isReviewing ? (
+                            <ReviewStep formData={methods.getValues()} />
+                        ) : (
+                            <>
+                                {currentStep === 0 && <Step1 />}
+                                {currentStep === 1 && <Step2 />}
+                                {currentStep === 2 && <Step3 />}
+                            </>
+                        )}
+                    </CardContent>
+                    <CardFooter>
+                        <div className="flex justify-between w-full">
+                            <Button type="button" onClick={prev} disabled={currentStep === 0 && !isReviewing} variant="outline" className="rounded-xl">
+                                {isReviewing ? 'Edit' : 'Previous'}
+                            </Button>
                             {isReviewing ? (
-                                <ReviewStep formData={methods.getValues()} />
+                                <Button type="button" onClick={methods.handleSubmit(processForm)} className="rounded-xl">
+                                    Confirm & Submit
+                                </Button>
                             ) : (
-                                <>
-                                    {currentStep === 0 && <Step1 />}
-                                    {currentStep === 1 && <Step2 />}
-                                    {currentStep === 2 && <Step3 />}
-                                </>
+                                <Button type="button" onClick={next} className="rounded-xl">
+                                    {currentStep < steps.length - 1 ? 'Next' : 'Review'}
+                                </Button>
                             )}
-                        </CardContent>
-                        <CardFooter>
-                                <div className="flex justify-between w-full">
-                                    <Button type="button" onClick={prev} disabled={currentStep === 0 && !isReviewing} variant="outline" className="rounded-xl">
-                                        {isReviewing ? 'Edit' : 'Previous'}
-                                    </Button>
-                                    {isReviewing ? (
-                                        <Button type="submit" className="rounded-xl">
-                                            Confirm & Submit
-                                        </Button>
-                                    ) : (
-                                        <Button type="button" onClick={next} className="rounded-xl">
-                                            {currentStep < steps.length - 1 ? 'Next' : 'Review'}
-                                        </Button>
-                                    )}
-                                </div>
-                        </CardFooter>
-                    </Card>
-                </form>
+                        </div>
+                    </CardFooter>
+                </Card>
             </FormProvider>
         </main>
     );
 }
-
-    
