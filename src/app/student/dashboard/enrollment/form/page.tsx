@@ -338,28 +338,25 @@ function Step3() {
                     <FormItem><FormLabel>Year Level</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value} disabled><FormControl><SelectTrigger className="rounded-xl"><SelectValue placeholder="Select year level" /></SelectTrigger></FormControl><SelectContent className="rounded-xl"><SelectItem value="1st Year">1st Year</SelectItem><SelectItem value="2nd Year">2nd Year</SelectItem><SelectItem value="3rd Year">3rd Year</SelectItem><SelectItem value="4th Year">4th Year</SelectItem></SelectContent></Select><FormMessage /></FormItem>
                 )} />
                 {selectedYear === '1st Year' && (
-                     <>
-                        {availableBlocks.length > 0 ? (
-                             <FormField name="block" render={({ field }) => (
-                                <FormItem><FormLabel>Block</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger className="rounded-xl"><SelectValue placeholder="Select block" /></SelectTrigger></FormControl><SelectContent className="rounded-xl">
+                     <FormField name="block" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Block</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={availableBlocks.length === 0}>
+                                <FormControl>
+                                    <SelectTrigger className="rounded-xl">
+                                        <SelectValue placeholder={availableBlocks.length === 0 ? "No available blocks" : "Select block"} />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent className="rounded-xl">
                                     {availableBlocks.map(block => (
                                         <SelectItem key={block.value} value={block.value}>{block.label}</SelectItem>
                                     ))}
-                                </SelectContent></Select><FormMessage /></FormItem>
-                            )} />
-                        ) : (
-                            <div className="space-y-2">
-                                <FormLabel>Block</FormLabel>
-                                <Alert variant="destructive" className="rounded-xl">
-                                    <Info className="h-4 w-4" />
-                                    <AlertTitle>No Blocks Available</AlertTitle>
-                                    <AlertDescription>
-                                        There are no available blocks for this year level. Please try again later.
-                                    </AlertDescription>
-                                </Alert>
-                            </div>
-                        )}
-                    </>
+                                </SelectContent>
+                            </Select>
+                            {availableBlocks.length === 0 && <p className="text-sm text-destructive mt-2">There are no available blocks for this year level. Please contact admin.</p>}
+                            <FormMessage />
+                        </FormItem>
+                    )} />
                 )}
             </div>
             
@@ -621,3 +618,5 @@ export default function EnrollmentFormPage() {
         </main>
     );
 }
+
+    
