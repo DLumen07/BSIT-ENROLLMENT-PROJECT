@@ -1,4 +1,3 @@
-
 'use client';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useForm, FormProvider, useFormContext } from 'react-hook-form';
@@ -278,6 +277,7 @@ function Step3() {
     const availableBlocks = useMemo(() => {
         if (!selectedYear || !selectedCourse) return [];
         const yearKey = yearLevelMap[selectedYear];
+        if (!yearKey) return [];
         return adminData.blocks
             .filter(b => b.year === yearKey && b.course === selectedCourse && b.capacity > b.enrolled)
             .map(b => ({ value: b.name, label: b.name }));
@@ -286,7 +286,8 @@ function Step3() {
     const availableSubjects = useMemo(() => {
         if (!selectedYear) return [];
         const yearKey = yearLevelMap[selectedYear];
-        return Object.values(adminData.subjects[yearKey] || {}).map(s => ({
+        if (!yearKey || !adminData.subjects[yearKey]) return [];
+        return Object.values(adminData.subjects[yearKey]).map(s => ({
             id: s.code,
             label: `${s.code} - ${s.description}`,
             units: s.units,
@@ -418,17 +419,17 @@ export default function EnrollmentFormPage() {
 
     const getInitialCourse = useCallback(() => {
         if (!studentData) return 'ACT';
-        const year = studentData.academic.yearLevel;
-        if (year === '1st Year' || year === '2nd Year') {
+        const year = parseInt(studentData.academic.yearLevel, 10);
+        if (year <= 2) {
             return 'ACT';
         }
         return 'BSIT';
     }, [studentData]);
     
     useEffect(() => {
-        if (studentData && studentData.academic.yearLevel !== '1st Year' && !hasMadeSkipChoice) {
+        if (studentData && parseInt(studentData.academic.yearLevel, 10) > 1 && !hasMadeSkipChoice) {
             setShowSkipDialog(true);
-        } else if (studentData && studentData.academic.yearLevel === '1st Year') {
+        } else if (studentData && parseInt(studentData.academic.yearLevel, 10) === 1) {
             setHasMadeSkipChoice(true); // Don't show dialog for 1st years
         }
     }, [studentData, hasMadeSkipChoice]);
@@ -446,6 +447,7 @@ export default function EnrollmentFormPage() {
             yearLevel: studentData?.academic.yearLevel,
             course: getInitialCourse(),
             subjects: [],
+            block: '',
         }
     });
 
@@ -518,7 +520,7 @@ export default function EnrollmentFormPage() {
         return <div>Loading form...</div>
     }
 
-    if (studentData.academic.yearLevel !== '1st Year' && !hasMadeSkipChoice) {
+    if (parseInt(studentData.academic.yearLevel, 10) > 1 && !hasMadeSkipChoice) {
         return (
              <AlertDialog open={showSkipDialog}>
                 <AlertDialogContent>
