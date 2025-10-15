@@ -1,6 +1,6 @@
 
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useForm, FormProvider, useFormContext } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -201,7 +201,7 @@ const Step1 = () => (
                 <FormItem><FormLabel>Guardian's Name (Optional)</FormLabel><FormControl><Input {...field} className="rounded-xl" /></FormControl><FormMessage /></FormItem>
             )} />
             <FormField name="guardiansOccupation" render={({ field }) => (
-                <FormItem><FormLabel>Guardian's Occupation (Optional)</FormLabel><FormControl><Input {...field} className="rounded-xl" /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Guardian's Occupation (Optional)</FormLabel><FormControl><Input {...field} className="rounded-xl" /></FormControl><FormMessage /></FormMessage /></FormItem>
             )} />
         </div>
         <FormField name="guardiansAddress" render={({ field }) => (
@@ -491,22 +491,22 @@ export default function EnrollmentFormPage() {
     const [showSkipDialog, setShowSkipDialog] = useState(false);
     const [hasMadeSkipChoice, setHasMadeSkipChoice] = useState(false);
 
-    const getInitialStatus = () => {
+    const getInitialStatus = useCallback(() => {
         if (!studentData) return 'New';
         if (studentData.academic.yearLevel === '1st Year') {
             return 'New';
         }
         return 'Old';
-    };
+    }, [studentData]);
 
-    const getInitialCourse = () => {
+    const getInitialCourse = useCallback(() => {
         if (!studentData) return 'ACT';
         const year = studentData.academic.yearLevel;
         if (year === '1st Year' || year === '2nd Year') {
             return 'ACT';
         }
         return 'BSIT';
-    };
+    }, [studentData]);
     
     useEffect(() => {
         if (studentData && studentData.academic.yearLevel !== '1st Year' && !hasMadeSkipChoice) {
@@ -530,6 +530,14 @@ export default function EnrollmentFormPage() {
         }
     });
 
+    useEffect(() => {
+        const status = getInitialStatus();
+        const course = getInitialCourse();
+        methods.setValue('status', status);
+        methods.setValue('course', course);
+    }, [studentData, methods, getInitialStatus, getInitialCourse]);
+
+
     const processForm = (data: EnrollmentSchemaType) => {
         console.log(data);
         setIsSubmitted(true);
@@ -551,7 +559,7 @@ export default function EnrollmentFormPage() {
         if (currentStep < steps.length - 1) {
             setCurrentStep(step => step + 1);
         } else {
-            setIsReviewing(true);
+             setIsReviewing(true);
         }
     };
 
@@ -676,6 +684,5 @@ export default function EnrollmentFormPage() {
         </main>
     );
 }
-
 
     
