@@ -193,7 +193,7 @@ const Step1 = () => (
                 <FormItem><FormLabel>Mother's Name</FormLabel><FormControl><Input {...field} className="rounded-xl" /></FormControl><FormMessage /></FormItem>
             )} />
             <FormField name="mothersOccupation" render={({ field }) => (
-                <FormItem><FormLabel>Mother's Occupation</FormLabel><FormControl><Input {...field} className="rounded-xl" /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Mother's Occupation</FormLabel><FormControl><Input {...field} className="rounded-xl" /></FormControl><FormMessage /></FormMessage /></FormItem>
             )} />
         </div>
          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -530,14 +530,6 @@ export default function EnrollmentFormPage() {
         }
     });
 
-    useEffect(() => {
-        const status = getInitialStatus();
-        const course = getInitialCourse();
-        methods.setValue('status', status);
-        methods.setValue('course', course);
-    }, [studentData, methods, getInitialStatus, getInitialCourse]);
-
-
     const processForm = (data: EnrollmentSchemaType) => {
         console.log(data);
         setIsSubmitted(true);
@@ -633,7 +625,7 @@ export default function EnrollmentFormPage() {
 
     return (
         <main className="flex-1 p-4 sm:p-6">
-            <FormProvider {...methods}>
+             <FormProvider {...methods}>
                 <form onSubmit={methods.handleSubmit(processForm)}>
                     <Card className="max-w-4xl mx-auto rounded-xl">
                         <CardHeader>
@@ -658,25 +650,20 @@ export default function EnrollmentFormPage() {
                             )}
                         </CardContent>
                         <CardFooter>
-                            {isReviewing ? (
                                 <div className="flex justify-between w-full">
-                                    <Button type="button" onClick={() => setIsReviewing(false)} variant="outline" className="rounded-xl">
-                                        Edit
+                                    <Button type="button" onClick={prev} disabled={currentStep === 0 && !isReviewing} variant="outline" className="rounded-xl">
+                                        {isReviewing ? 'Edit' : 'Previous'}
                                     </Button>
-                                    <Button type="submit" className="rounded-xl">
-                                        Confirm & Submit
-                                    </Button>
+                                    {isReviewing ? (
+                                        <Button type="submit" className="rounded-xl">
+                                            Confirm & Submit
+                                        </Button>
+                                    ) : (
+                                        <Button type="button" onClick={next} className="rounded-xl">
+                                            {currentStep < steps.length - 1 ? 'Next' : 'Review'}
+                                        </Button>
+                                    )}
                                 </div>
-                            ) : (
-                                <div className="flex justify-between w-full">
-                                    <Button type="button" onClick={prev} disabled={currentStep === 0} variant="outline" className="rounded-xl">
-                                        Previous
-                                    </Button>
-                                    <Button type="button" onClick={next} className="rounded-xl">
-                                        {currentStep < steps.length - 1 ? 'Next' : 'Review'}
-                                    </Button>
-                                </div>
-                            )}
                         </CardFooter>
                     </Card>
                 </form>
@@ -684,5 +671,3 @@ export default function EnrollmentFormPage() {
         </main>
     );
 }
-
-    
