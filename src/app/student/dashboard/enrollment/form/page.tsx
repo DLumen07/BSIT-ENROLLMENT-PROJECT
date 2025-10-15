@@ -1,6 +1,6 @@
 
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, FormProvider, useFormContext } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -286,13 +286,37 @@ const Step3 = () => {
 
     const availableBlocks = selectedYear ? blocksByYear[selectedYear] || [] : [];
     const availableSubjects = selectedCourse && selectedYear ? subjectsByCourseAndYear[selectedCourse]?.[selectedYear] || [] : [];
+    
+    useEffect(() => {
+        const yearLevel = form.getValues('yearLevel');
+        if (yearLevel === '1st Year' || yearLevel === '2nd Year') {
+            form.setValue('course', 'ACT', { shouldValidate: true });
+        } else if (yearLevel === '3rd Year' || yearLevel === '4th Year') {
+            form.setValue('course', 'BSIT', { shouldValidate: true });
+        }
+    }, [form]);
+
 
     return (
         <div className="space-y-6">
             <h3 className="text-lg font-medium">Academic Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField name="course" render={({ field }) => (
-                    <FormItem><FormLabel>Course</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger className="rounded-xl"><SelectValue placeholder="Select course" /></SelectTrigger></FormControl><SelectContent className="rounded-xl"><SelectItem value="BSIT">BSIT</SelectItem><SelectItem value="ACT">ACT</SelectItem></SelectContent></Select><FormMessage /></FormItem>
+                    <FormItem>
+                        <FormLabel>Course</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value} disabled>
+                            <FormControl>
+                                <SelectTrigger className="rounded-xl">
+                                    <SelectValue placeholder="Course is auto-assigned" />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="rounded-xl">
+                                <SelectItem value="BSIT">BSIT</SelectItem>
+                                <SelectItem value="ACT">ACT</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                    </FormItem>
                 )} />
                 <FormField name="status" render={({ field }) => (
                     <FormItem><FormLabel>Status</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value} disabled><FormControl><SelectTrigger className="rounded-xl"><SelectValue placeholder="Select status" /></SelectTrigger></FormControl><SelectContent className="rounded-xl"><SelectItem value="New">New</SelectItem><SelectItem value="Old">Old</SelectItem><SelectItem value="Transferee">Transferee</SelectItem></SelectContent></Select><FormMessage /></FormItem>
@@ -468,19 +492,18 @@ export default function EnrollmentFormPage() {
     const getInitialStatus = () => {
         if (!studentData) return 'New';
 
-        // A student with 'Not Enrolled' status who is a 1st year is 'New'
-        if (studentData.academic.yearLevel === '1st Year') {
+        const year = studentData.academic.yearLevel;
+
+        if (year === '1st Year') {
             return 'New';
         }
 
-        // An upper-year student re-enrolling is "Old"
-        if (parseInt(studentData.academic.yearLevel, 10) > 1) {
+        if (parseInt(year, 10) > 1) {
             return 'Old';
         }
         
-        // Fallback for any other case, e.g., if status was Transferee, it should remain so.
+        // Fallback for transferees or other edge cases
         const validStatuses = ['New', 'Old', 'Transferee'];
-        // This check is a bit redundant with the above, but good for safety
         const academicStatus = studentData.academic.status as string;
         if (validStatuses.includes(academicStatus)) {
             return studentData.academic.status as 'New' | 'Old' | 'Transferee';
@@ -622,5 +645,3 @@ export default function EnrollmentFormPage() {
         </main>
     );
 }
-
-    
