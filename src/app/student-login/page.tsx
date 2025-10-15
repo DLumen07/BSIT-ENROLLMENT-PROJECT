@@ -10,6 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import React, { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+import { useAdmin } from '@/app/admin/context/admin-context';
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg role="img" viewBox="0 0 24 24" {...props}>
@@ -43,10 +45,23 @@ const FacebookIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 function LoginForm() {
   const router = useRouter();
+  const { adminData } = useAdmin();
+  const { toast } = useToast();
+  const [email, setEmail] = useState('');
 
   const handleLogin = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    router.push('/student/dashboard');
+    const student = adminData.students.find(s => s.email === email);
+
+    if (student) {
+        router.push(`/student/dashboard?email=${encodeURIComponent(email)}`);
+    } else {
+        toast({
+            variant: 'destructive',
+            title: 'Login Failed',
+            description: 'No student account found with that email address.',
+        });
+    }
   };
 
   return (
@@ -58,6 +73,8 @@ function LoginForm() {
               type="email"
               placeholder="student@example.com"
               required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="rounded-xl hover:border-primary focus-visible:ring-primary hover:shadow-[0_0_8px_hsl(var(--primary)/0.5)] focus-visible:shadow-[0_0_8px_hsl(var(--primary)/0.5)] transition-all"
           />
       </div>

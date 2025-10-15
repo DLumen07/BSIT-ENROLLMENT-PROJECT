@@ -46,11 +46,16 @@ const profileCompletionConfig = {
 
 export default function StudentDashboardPage() {
   const { studentData } = useStudent();
+  const [isClassmatesDialogOpen, setIsClassmatesDialogOpen] = useState(false);
+  
+  if (!studentData) {
+    return <div>Loading...</div>; // Or a loading spinner
+  }
+
   const { isEnrolled } = studentData.enrollment;
   const { block } = studentData.academic;
   const allStudentSchedule = studentData.schedule;
 
-  const [isClassmatesDialogOpen, setIsClassmatesDialogOpen] = useState(false);
   const [todaysSchedule, setTodaysSchedule] = useState<typeof allStudentSchedule>([]);
 
   useEffect(() => {

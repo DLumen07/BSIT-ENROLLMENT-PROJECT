@@ -1,6 +1,8 @@
 
 'use client';
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useAdmin } from '@/app/admin/context/admin-context';
+import { useSearchParams } from 'next/navigation';
 
 // Define the shape of your data
 // This combines all the disparate mock data into a single structure.
@@ -10,7 +12,7 @@ const mockStudentData = {
         lastName: 'Name',
         middleName: 'Dela Cruz',
         birthdate: 'January 1, 2004',
-        sex: 'Male',
+        sex: 'Male' as 'Male' | 'Female',
         civilStatus: 'Single',
         nationality: 'Filipino',
         religion: 'Roman Catholic',
@@ -48,7 +50,7 @@ const mockStudentData = {
         course: 'BS in Information Technology',
         yearLevel: '2nd Year',
         block: 'BSIT 2-A',
-        status: 'Enrolled',
+        status: 'Enrolled' as 'Enrolled' | 'Not Enrolled' | 'Graduated',
         dateEnrolled: 'August 15, 2024'
     },
     enrollment: {
@@ -73,14 +75,96 @@ const mockStudentData = {
 type StudentDataType = typeof mockStudentData;
 
 interface StudentContextType {
-  studentData: StudentDataType;
-  setStudentData: React.Dispatch<React.SetStateAction<StudentDataType>>;
+  studentData: StudentDataType | null;
+  setStudentData: React.Dispatch<React.SetStateAction<StudentDataType | null>>;
 }
 
 const StudentContext = createContext<StudentContextType | undefined>(undefined);
 
 export const StudentProvider = ({ children }: { children: React.ReactNode }) => {
-  const [studentData, setStudentData] = useState<StudentDataType>(mockStudentData);
+  const { adminData } = useAdmin();
+  const [studentData, setStudentData] = useState<StudentDataType | null>(null);
+  const searchParams = useSearchParams();
+  const studentEmail = searchParams.get('email');
+
+  useEffect(() => {
+    if (adminData && studentEmail) {
+      const currentStudent = adminData.students.find(s => s.email === studentEmail);
+      if (currentStudent) {
+        const studentSchedule = adminData.schedules[currentStudent.block || ''] || [];
+        const isEnrolled = currentStudent.status === 'Enrolled';
+        
+        const [firstName, ...lastNameParts] = currentStudent.name.split(' ');
+        const lastName = lastNameParts.join(' ');
+
+        const data: StudentDataType = {
+          personal: {
+            firstName: firstName,
+            lastName: lastName,
+            middleName: '',
+            birthdate: 'January 1, 2004',
+            sex: currentStudent.sex,
+            civilStatus: 'Single',
+            nationality: 'Filipino',
+            religion: 'Roman Catholic',
+            dialect: 'Tagalog',
+          },
+          contact: {
+            email: currentStudent.email,
+            phoneNumber: currentStudent.phoneNumber,
+          },
+          address: {
+            currentAddress: '123 Main St, Quezon City, Metro Manila',
+            permanentAddress: '456 Provincial Rd, Cebu City, Cebu',
+          },
+          family: {
+            fathersName: "Father's Name",
+            fathersOccupation: "Father's Occupation",
+            mothersName: "Mother's Name",
+            mothersOccupation: "Mother's Occupation",
+            guardiansName: "Guardian's Name",
+          },
+          additional: {
+            emergencyContactName: 'Emergency Contact',
+            emergencyContactAddress: 'Emergency Address',
+            emergencyContactNumber: '09876543210',
+          },
+          education: {
+            elementarySchool: 'Central Elementary School',
+            elemYearGraduated: '2016',
+            secondarySchool: 'National High School',
+            secondaryYearGraduated: '2022',
+            collegiateSchool: 'Previous University (if transferee)',
+          },
+          academic: {
+            studentId: currentStudent.studentId,
+            course: currentStudent.course,
+            yearLevel: `${currentStudent.year}${currentStudent.year === 1 ? 'st' : currentStudent.year === 2 ? 'nd' : currentStudent.year === 3 ? 'rd' : 'th'} Year`,
+            block: currentStudent.block || 'N/A',
+            status: currentStudent.status,
+            dateEnrolled: 'August 15, 2024'
+          },
+          enrollment: {
+            isEnrolled: isEnrolled,
+            registeredSubjects: isEnrolled ? (currentStudent.enlistedSubjects || []).map(sub => ({
+                 code: sub.code,
+                 description: sub.description,
+                 units: sub.units,
+                 schedule: studentSchedule.find(ss => ss.code === sub.code) ? `${studentSchedule.find(ss => ss.code === sub.code)!.day.substring(0,1)} ${studentSchedule.find(ss => ss.code === sub.code)!.startTime}-${studentSchedule.find(ss => ss.code === sub.code)!.endTime}` : 'TBA',
+                 instructor: studentSchedule.find(ss => ss.code === sub.code)?.instructor || 'TBA'
+            })) : [],
+          },
+          schedule: isEnrolled ? studentSchedule.map(s => ({...s, room: 'TBA'})) : []
+        };
+        setStudentData(data);
+      }
+    }
+  }, [adminData, studentEmail]);
+
+
+  if (!studentData) {
+    return <div>Loading student data...</div>;
+  }
 
   return (
     <StudentContext.Provider value={{ studentData, setStudentData }}>
@@ -96,5 +180,4 @@ export const useStudent = (): StudentContextType => {
   }
   return context;
 };
-
     

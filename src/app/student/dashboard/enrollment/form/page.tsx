@@ -15,9 +15,9 @@ import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import Link from 'next/link';
+import { useStudent } from '@/app/student/context/student-context';
 
 const steps = [
     { id: 'Step 1', name: 'Personal & Family Information' },
@@ -79,24 +79,14 @@ const enrollmentSchema = personalFamilySchema.merge(additionalInfoSchema).merge(
 type EnrollmentSchemaType = z.infer<typeof enrollmentSchema>;
 
 const blocksByYear: Record<string, { value: string; label: string }[]> = {
-    "1st Year": [{ value: 'BSIT-1A', label: 'BSIT 1-A' }, { value: 'BSIT-1B', label: 'BSIT 1-B' }],
-    "2nd Year": [{ value: 'BSIT-2A', label: 'BSIT 2-A' }, { value: 'BSIT-2B', label: 'BSIT 2-B' }],
-    "3rd Year": [{ value: 'BSIT-3A', label: 'BSIT 3-A' }, { value: 'BSIT-3B', label: 'BSIT 3-B' }],
-    "4th Year": [{ value: 'BSIT-4A', label: 'BSIT 4-A' }, { value: 'BSIT-4B', label: 'BSIT 4-B' }],
+    "1st Year": [{ value: 'ACT 1-A', label: 'ACT 1-A' }, { value: 'ACT 1-B', label: 'ACT 1-B' }],
+    "2nd Year": [{ value: 'ACT 2-A', label: 'ACT 2-A' }],
+    "3rd Year": [{ value: 'BSIT 3-A', label: 'BSIT 3-A (AP)' }, { value: 'BSIT 3-B', label: 'BSIT 3-B (DD)' }],
+    "4th Year": [{ value: 'BSIT 4-A', label: 'BSIT 4-A (AP)' }],
 };
 
 const subjectsByCourseAndYear: Record<string, Record<string, { id: string; label: string; units: number }[]>> = {
     "BSIT": {
-        "1st Year": [
-            { id: 'IT101', label: 'IT 101 - Introduction to Computing', units: 3 },
-            { id: 'MATH101', label: 'MATH 101 - Calculus 1', units: 3 },
-            { id: 'ENG101', label: 'ENG 101 - Purposive Communication', units: 3 },
-        ],
-        "2nd Year": [
-            { id: 'IT201', label: 'IT 201 - Data Structures & Algorithms', units: 3 },
-            { id: 'IT202', label: 'IT 202 - Web Development', units: 3 },
-            { id: 'MATH201', label: 'MATH 201 - Discrete Mathematics', units: 3 },
-        ],
         "3rd Year": [
              { id: 'IT301', label: 'IT 301 - Software Engineering', units: 3 },
              { id: 'IT302', label: 'IT 302 - Database Management', units: 3 },
@@ -108,12 +98,11 @@ const subjectsByCourseAndYear: Record<string, Record<string, { id: string; label
     },
     "ACT": {
         "1st Year": [
-            { id: 'ACT101', label: 'ACT 101 - Fundamentals of Accounting', units: 3 },
-            { id: 'ACT102', label: 'ACT 102 - Business Communication', units: 3 },
+            { id: 'IT 101', label: 'IT 101 - Introduction to Computing', units: 3 },
+            { id: 'MATH 101', label: 'MATH 101 - Calculus 1', units: 3 },
         ],
         "2nd Year": [
-             { id: 'ACT201', label: 'ACT 201 - Intermediate Accounting', units: 3 },
-             { id: 'ACT202', label: 'ACT 202 - Cost Accounting', units: 3 },
+             { id: 'IT 201', label: 'IT 201 - Data Structures & Algorithms', units: 3 },
         ]
     }
 };
@@ -471,6 +460,7 @@ const ReviewStep = ({ formData }: { formData: EnrollmentSchemaType }) => {
 
 
 export default function EnrollmentFormPage() {
+    const { studentData } = useStudent();
     const [currentStep, setCurrentStep] = useState(0);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isReviewing, setIsReviewing] = useState(false);
@@ -478,10 +468,15 @@ export default function EnrollmentFormPage() {
     const methods = useForm<EnrollmentSchemaType>({
         resolver: zodResolver(enrollmentSchema),
         defaultValues: {
-            sex: 'Male',
+            firstName: studentData?.personal.firstName,
+            lastName: studentData?.personal.lastName,
+            email: studentData?.contact.email,
+            phoneNumber: studentData?.contact.phoneNumber,
+            sex: studentData?.personal.sex,
             civilStatus: 'Single',
-            status: 'Old',
-            yearLevel: '2nd Year',
+            status: studentData?.academic.status as 'New' | 'Old' | 'Transferee',
+            yearLevel: studentData?.academic.yearLevel,
+            course: studentData?.academic.course,
             subjects: [],
         }
     });
@@ -546,6 +541,10 @@ export default function EnrollmentFormPage() {
         );
     }
     
+    if (!studentData) {
+        return <div>Loading form...</div>
+    }
+
     return (
         <main className="flex-1 p-4 sm:p-6">
             <Card className="max-w-4xl mx-auto rounded-xl">

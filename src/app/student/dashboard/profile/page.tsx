@@ -27,6 +27,10 @@ export default function StudentProfilePage() {
     const { toast } = useToast();
     const { studentData, setStudentData } = useStudent();
     
+    if (!studentData) {
+        return <div>Loading profile...</div>;
+    }
+
     // Create a temporary state for editing
     const [editableData, setEditableData] = React.useState({
         religion: studentData.personal.religion,
@@ -51,40 +55,44 @@ export default function StudentProfilePage() {
     }
 
     const handleSaveChanges = (tab: string) => {
+        if (!setStudentData) return;
         // In a real app, you'd send this to your backend.
         // For now, we update the context state.
-        setStudentData(prev => ({
-            ...prev,
-            personal: {
-                ...prev.personal,
-                religion: editableData.religion,
-                dialect: editableData.dialect,
-            },
-            contact: {
-                ...prev.contact,
-                email: editableData.email,
-                phoneNumber: editableData.phoneNumber,
-            },
-            address: {
-                ...prev.address,
-                currentAddress: editableData.currentAddress,
-                permanentAddress: editableData.permanentAddress,
-            },
-            family: {
-                ...prev.family,
-                fathersName: editableData.fathersName,
-                fathersOccupation: editableData.fathersOccupation,
-                mothersName: editableData.mothersName,
-                mothersOccupation: editableData.mothersOccupation,
-                guardiansName: editableData.guardiansName,
-            },
-            additional: {
-                 ...prev.additional,
-                 emergencyContactName: editableData.emergencyContactName,
-                 emergencyContactAddress: editableData.emergencyContactAddress,
-                 emergencyContactNumber: editableData.emergencyContactNumber,
+        setStudentData(prev => {
+            if (!prev) return null;
+            return {
+                ...prev,
+                personal: {
+                    ...prev.personal,
+                    religion: editableData.religion,
+                    dialect: editableData.dialect,
+                },
+                contact: {
+                    ...prev.contact,
+                    email: editableData.email,
+                    phoneNumber: editableData.phoneNumber,
+                },
+                address: {
+                    ...prev.address,
+                    currentAddress: editableData.currentAddress,
+                    permanentAddress: editableData.permanentAddress,
+                },
+                family: {
+                    ...prev.family,
+                    fathersName: editableData.fathersName,
+                    fathersOccupation: editableData.fathersOccupation,
+                    mothersName: editableData.mothersName,
+                    mothersOccupation: editableData.mothersOccupation,
+                    guardiansName: editableData.guardiansName,
+                },
+                additional: {
+                     ...prev.additional,
+                     emergencyContactName: editableData.emergencyContactName,
+                     emergencyContactAddress: editableData.emergencyContactAddress,
+                     emergencyContactNumber: editableData.emergencyContactNumber,
+                }
             }
-        }));
+        });
 
         toast({
             title: `${tab} Info Updated`,

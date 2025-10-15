@@ -12,9 +12,9 @@ import {
   Settings,
 } from 'lucide-react';
 import Image from 'next/image';
-import React from 'react';
-import { usePathname } from 'next/navigation';
-import { StudentProvider } from '@/app/student/context/student-context';
+import React, { Suspense } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { StudentProvider, useStudent } from '@/app/student/context/student-context';
 
 import {
   SidebarProvider,
@@ -41,109 +41,14 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useToast } from '@/hooks/use-toast';
 
-export default function StudentDashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const pathname = usePathname();
-  const schoolLogo = PlaceHolderImages.find(p => p.id === 'school-logo-sm');
-  const { toast } = useToast();
+function Header() {
+    const { studentData } = useStudent();
+    const searchParams = useSearchParams();
 
-  return (
-    <StudentProvider>
-      <SidebarProvider>
-        <Sidebar>
-          <SidebarHeader>
-            <div className="flex items-center gap-2">
-              {schoolLogo && (
-                  <Image
-                  src={schoolLogo.imageUrl}
-                  alt={schoolLogo.description}
-                  width={60}
-                  height={60}
-                  data-ai-hint={schoolLogo.imageHint}
-                  className="rounded-full"
-                  />
-              )}
-              <span className="font-semibold text-lg">Student Portal</span>
-            </div>
-          </SidebarHeader>
-          <SidebarContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === '/student/dashboard'}>
-                  <Link href="/student/dashboard">
-                    <Home />
-                    Dashboard
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === '/student/dashboard/profile'}>
-                  <Link href="/student/dashboard/profile">
-                    <User />
-                    Profile
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname.startsWith('/student/dashboard/enrollment')}>
-                  <Link href="/student/dashboard/enrollment">
-                    <FileSignature />
-                    Enrollment
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === '/student/dashboard/schedule'}>
-                  <Link href="/student/dashboard/schedule">
-                    <CalendarCheck2 />
-                    Schedule
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === '/student/dashboard/grades'}>
-                  <Link href="/student/dashboard/grades">
-                    <GraduationCap />
-                    Grades
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === '/student/dashboard/records'}>
-                  <Link href="/student/dashboard/records">
-                    <ClipboardList />
-                    Records
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === '/student/dashboard/settings'}>
-                  <Link href="/student/dashboard/settings">
-                    <Settings />
-                    Settings
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarContent>
-          <SidebarFooter>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/">
-                    <LogOut />
-                    Logout
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarFooter>
-        </Sidebar>
-        <SidebarInset>
-          <header className="flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6">
+    if (!studentData) return null;
+
+    return (
+         <header className="flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6">
             <SidebarTrigger className="md:hidden"/>
             <div className="flex-1">
               <h1 className="text-lg font-semibold">
@@ -171,23 +76,139 @@ export default function StudentDashboardLayout({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuLabel>{studentData.personal.firstName}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href="/student/dashboard/settings">Settings</Link>
+                    <Link href={`/student/dashboard/settings?${searchParams.toString()}`}>Settings</Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => toast({ title: 'Feature in progress', description: 'Support page is not yet implemented.' })}>Support</DropdownMenuItem>
+                  <DropdownMenuItem>Support</DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
+                   <DropdownMenuItem asChild>
                     <Link href="/">Logout</Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
           </header>
-          {children}
-        </SidebarInset>
-      </SidebarProvider>
-    </StudentProvider>
+    )
+}
+
+function StudentLayoutContent({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const schoolLogo = PlaceHolderImages.find(p => p.id === 'school-logo-sm');
+  const { toast } = useToast();
+  const emailQuery = searchParams.toString();
+
+  return (
+    <SidebarProvider>
+      <Sidebar>
+        <SidebarHeader>
+          <div className="flex items-center gap-2">
+            {schoolLogo && (
+                <Image
+                src={schoolLogo.imageUrl}
+                alt={schoolLogo.description}
+                width={60}
+                height={60}
+                data-ai-hint={schoolLogo.imageHint}
+                className="rounded-full"
+                />
+            )}
+            <span className="font-semibold text-lg">Student Portal</span>
+          </div>
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={pathname === '/student/dashboard'}>
+                <Link href={`/student/dashboard?${emailQuery}`}>
+                  <Home />
+                  Dashboard
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={pathname === '/student/dashboard/profile'}>
+                <Link href={`/student/dashboard/profile?${emailQuery}`}>
+                  <User />
+                  Profile
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+             <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={pathname.startsWith('/student/dashboard/enrollment')}>
+                <Link href={`/student/dashboard/enrollment?${emailQuery}`}>
+                  <FileSignature />
+                  Enrollment
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={pathname === '/student/dashboard/schedule'}>
+                <Link href={`/student/dashboard/schedule?${emailQuery}`}>
+                  <CalendarCheck2 />
+                  Schedule
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={pathname === '/student/dashboard/grades'}>
+                <Link href={`/student/dashboard/grades?${emailQuery}`}>
+                  <GraduationCap />
+                  Grades
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+             <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={pathname === '/student/dashboard/records'}>
+                <Link href={`/student/dashboard/records?${emailQuery}`}>
+                  <ClipboardList />
+                  Records
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={pathname === '/student/dashboard/settings'}>
+                <Link href={`/student/dashboard/settings?${emailQuery}`}>
+                  <Settings />
+                  Settings
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarContent>
+        <SidebarFooter>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link href="/">
+                  <LogOut />
+                  Logout
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
+      </Sidebar>
+      <SidebarInset>
+        <Header />
+        {children}
+      </SidebarInset>
+    </SidebarProvider>
+  );
+}
+
+export default function StudentDashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+     <Suspense fallback={<div>Loading...</div>}>
+      <StudentProvider>
+        <StudentLayoutContent>{children}</StudentLayoutContent>
+      </StudentProvider>
+    </Suspense>
   );
 }

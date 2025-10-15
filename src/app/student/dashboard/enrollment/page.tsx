@@ -10,6 +10,9 @@ import { useStudent } from '@/app/student/context/student-context';
 
 export default function EnrollmentPage() {
     const { studentData } = useStudent();
+    
+    if (!studentData) return <div>Loading...</div>;
+
     const { isEnrolled, registeredSubjects } = studentData.enrollment;
     const { studentId, course, yearLevel, dateEnrolled, status } = studentData.academic;
     const { firstName, lastName } = studentData.personal;
