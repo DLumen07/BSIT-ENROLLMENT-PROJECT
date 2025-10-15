@@ -296,7 +296,7 @@ const Step3 = () => {
 
     const availableBlocks = selectedYear ? blocksByYear[selectedYear] || [] : [];
     const availableSubjects = selectedCourse && selectedYear ? subjectsByCourseAndYear[selectedCourse]?.[selectedYear] || [] : [];
-
+    
     return (
         <div className="space-y-6">
             <h3 className="text-lg font-medium">Academic Information</h3>
@@ -551,10 +551,7 @@ export default function EnrollmentFormPage() {
         if (currentStep < steps.length - 1) {
             setCurrentStep(step => step + 1);
         } else {
-             const isValid = await methods.trigger();
-            if (isValid) {
-                setIsReviewing(true);
-            }
+            setIsReviewing(true);
         }
     };
 
