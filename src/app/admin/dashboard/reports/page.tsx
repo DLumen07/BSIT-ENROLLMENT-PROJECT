@@ -107,13 +107,13 @@ export default function ReportsPage() {
                             Generate and view enrollment statistics and master lists.
                         </p>
                     </div>
-                    <Button onClick={handlePrint}>
+                    <Button onClick={handlePrint} className="rounded-xl">
                         <Printer className="mr-2 h-4 w-4" />
                         Print Report
                     </Button>
                 </div>
 
-                <Card className="no-print">
+                <Card className="no-print rounded-xl">
                     <CardHeader>
                         <CardTitle>Filters</CardTitle>
                         <CardDescription>Select the academic year and semester to generate a report.</CardDescription>
@@ -122,10 +122,10 @@ export default function ReportsPage() {
                         <div className="flex-1 space-y-2">
                              <label htmlFor="academic-year" className="text-sm font-medium">Academic Year</label>
                             <Select value={academicYear} onValueChange={setAcademicYear}>
-                                <SelectTrigger id="academic-year">
+                                <SelectTrigger id="academic-year" className="rounded-xl">
                                     <SelectValue placeholder="Select Academic Year" />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent className="rounded-xl">
                                     {academicYearOptions.map(year => (
                                         <SelectItem key={year} value={year}>{year}</SelectItem>
                                     ))}
@@ -135,10 +135,10 @@ export default function ReportsPage() {
                         <div className="flex-1 space-y-2">
                             <label htmlFor="semester" className="text-sm font-medium">Semester</label>
                             <Select value={semester} onValueChange={setSemester}>
-                                <SelectTrigger id="semester">
+                                <SelectTrigger id="semester" className="rounded-xl">
                                     <SelectValue placeholder="Select Semester" />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent className="rounded-xl">
                                     {semesterOptions.map(sem => (
                                         <SelectItem key={sem.value} value={sem.value}>{sem.label}</SelectItem>
                                     ))}
@@ -154,7 +154,7 @@ export default function ReportsPage() {
                         <p>Academic Year {academicYear}, {semesterLabel}</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <Card>
+                        <Card className="rounded-xl">
                             <CardHeader>
                                 <CardTitle>Total Enrollees</CardTitle>
                             </CardHeader>
@@ -162,7 +162,7 @@ export default function ReportsPage() {
                                 <p className="text-3xl font-bold">{currentData.summary.totalEnrollees}</p>
                             </CardContent>
                         </Card>
-                         <Card>
+                         <Card className="rounded-xl">
                             <CardHeader>
                                 <CardTitle>New Students</CardTitle>
                             </CardHeader>
@@ -170,7 +170,7 @@ export default function ReportsPage() {
                                 <p className="text-3xl font-bold">{currentData.summary.newStudents}</p>
                             </CardContent>
                         </Card>
-                         <Card>
+                         <Card className="rounded-xl">
                             <CardHeader>
                                 <CardTitle>Old Students</CardTitle>
                             </CardHeader>
@@ -178,7 +178,7 @@ export default function ReportsPage() {
                                 <p className="text-3xl font-bold">{currentData.summary.oldStudents}</p>
                             </CardContent>
                         </Card>
-                         <Card>
+                         <Card className="rounded-xl">
                             <CardHeader>
                                 <CardTitle>Transferees</CardTitle>
                             </CardHeader>
@@ -189,7 +189,7 @@ export default function ReportsPage() {
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-6">
-                        <Card className="lg:col-span-2">
+                        <Card className="lg:col-span-2 rounded-xl">
                              <CardHeader>
                                 <CardTitle>Student Distribution by Year Level</CardTitle>
                             </CardHeader>
@@ -209,13 +209,13 @@ export default function ReportsPage() {
                                 </ChartContainer>
                             </CardContent>
                         </Card>
-                         <Card className="lg:col-span-3">
+                         <Card className="lg:col-span-3 rounded-xl">
                             <CardHeader>
                                 <CardTitle>Master List</CardTitle>
                                 <CardDescription>Official list of enrolled students.</CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <div className="border rounded-lg">
+                                <div className="border rounded-xl">
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
