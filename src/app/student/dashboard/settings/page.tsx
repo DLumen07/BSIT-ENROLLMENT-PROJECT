@@ -55,7 +55,6 @@ export default function StudentSettingsPage() {
     const { toast } = useToast();
     const [email, setEmail] = useState(studentData.contact.email);
     const [contactNumber, setContactNumber] = useState(studentData.contact.phoneNumber);
-    const [currentAddress, setCurrentAddress] = useState(studentData.address.currentAddress);
     
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
@@ -159,11 +158,6 @@ export default function StudentSettingsPage() {
                                             <Label htmlFor="contact-number">Contact Number</Label>
                                             <Input id="contact-number" value={contactNumber} onChange={(e) => setContactNumber(e.target.value)} className="rounded-xl" />
                                         </div>
-                                         <div className="space-y-2">
-                                            <Label htmlFor="current-address">Current Address</Label>
-                                            <Input id="current-address" value={currentAddress} onChange={(e) => setCurrentAddress(e.target.value)} className="rounded-xl" />
-                                        </div>
-                                        <InfoField label="Permanent Address" value={studentData.address.permanentAddress} />
                                     </div>
                                 </CardContent>
                                 <CardFooter>
@@ -206,5 +200,3 @@ export default function StudentSettingsPage() {
         </main>
     );
 }
-
-    
