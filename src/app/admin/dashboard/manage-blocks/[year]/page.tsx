@@ -13,7 +13,6 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -179,7 +178,7 @@ export default function YearLevelBlocksPage() {
                                 Add New Block
                             </Button>
                         </DialogTrigger>
-                        <DialogContent>
+                        <DialogContent className="rounded-xl">
                             <DialogHeader>
                                 <DialogTitle>Add New Block</DialogTitle>
                                 <DialogDescription>
@@ -189,20 +188,20 @@ export default function YearLevelBlocksPage() {
                             <div className="space-y-4 py-2">
                                 <div className="space-y-2">
                                     <Label htmlFor="block-name">Block Section</Label>
-                                    <Input id="block-name" value={blockName} onChange={e => setBlockName(e.target.value)} placeholder="e.g., 1-A" />
+                                    <Input id="block-name" value={blockName} onChange={e => setBlockName(e.target.value)} placeholder="e.g., 1-A" className="rounded-xl" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="block-capacity">Capacity</Label>
-                                    <Input id="block-capacity" type="number" value={blockCapacity} onChange={e => setBlockCapacity(e.target.value)} placeholder="e.g., 40" />
+                                    <Input id="block-capacity" type="number" value={blockCapacity} onChange={e => setBlockCapacity(e.target.value)} placeholder="e.g., 40" className="rounded-xl" />
                                 </div>
                                 {isUpperYear && (
                                      <div className="space-y-2">
                                         <Label htmlFor="block-specialization">Specialization</Label>
                                         <Select value={blockSpecialization} onValueChange={setBlockSpecialization} required>
-                                            <SelectTrigger id="block-specialization">
+                                            <SelectTrigger id="block-specialization" className="rounded-xl">
                                                 <SelectValue placeholder="Select a specialization" />
                                             </SelectTrigger>
-                                            <SelectContent>
+                                            <SelectContent className="rounded-xl">
                                                 {specializations.map(spec => (
                                                     <SelectItem key={spec.value} value={spec.value}>{spec.label}</SelectItem>
                                                 ))}
@@ -212,13 +211,13 @@ export default function YearLevelBlocksPage() {
                                 )}
                             </div>
                             <DialogFooter>
-                                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-                                <Button onClick={handleAddBlock}>Add Block</Button>
+                                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} className="rounded-xl">Cancel</Button>
+                                <Button onClick={handleAddBlock} className="rounded-xl">Add Block</Button>
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
                 </div>
-                <Card>
+                <Card className="rounded-xl">
                     <CardHeader>
                         <CardTitle>Blocks for {yearLabel}</CardTitle>
                         <CardDescription>
@@ -252,7 +251,7 @@ export default function YearLevelBlocksPage() {
                                                             <MoreHorizontal className="h-4 w-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
+                                                    <DropdownMenuContent align="end" className="rounded-xl">
                                                         <DropdownMenuItem onSelect={() => openViewStudentsDialog(block)}>
                                                             <Users className="mr-2 h-4 w-4" /> View Students
                                                         </DropdownMenuItem>
@@ -290,7 +289,7 @@ export default function YearLevelBlocksPage() {
             </main>
 
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-                <DialogContent>
+                <DialogContent className="rounded-xl">
                     <DialogHeader>
                         <DialogTitle>Edit Block</DialogTitle>
                         <DialogDescription>
@@ -300,20 +299,20 @@ export default function YearLevelBlocksPage() {
                     <div className="space-y-4 py-2">
                         <div className="space-y-2">
                             <Label htmlFor="edit-block-name">Block Section</Label>
-                            <Input id="edit-block-name" value={blockName} onChange={e => setBlockName(e.target.value)} />
+                            <Input id="edit-block-name" value={blockName} onChange={e => setBlockName(e.target.value)} className="rounded-xl" />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="edit-block-capacity">Capacity</Label>
-                            <Input id="edit-block-capacity" type="number" value={blockCapacity} onChange={e => setBlockCapacity(e.target.value)} />
+                            <Input id="edit-block-capacity" type="number" value={blockCapacity} onChange={e => setBlockCapacity(e.target.value)} className="rounded-xl" />
                         </div>
                          {isUpperYear && (
                             <div className="space-y-2">
                                 <Label htmlFor="edit-block-specialization">Specialization</Label>
                                 <Select value={blockSpecialization} onValueChange={setBlockSpecialization} required>
-                                    <SelectTrigger id="edit-block-specialization">
+                                    <SelectTrigger id="edit-block-specialization" className="rounded-xl">
                                         <SelectValue placeholder="Select a specialization" />
                                     </SelectTrigger>
-                                    <SelectContent>
+                                    <SelectContent className="rounded-xl">
                                         {specializations.map(spec => (
                                             <SelectItem key={spec.value} value={spec.value}>{spec.label}</SelectItem>
                                         ))}
@@ -323,14 +322,14 @@ export default function YearLevelBlocksPage() {
                         )}
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={handleEditBlock}>Save Changes</Button>
+                        <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} className="rounded-xl">Cancel</Button>
+                        <Button onClick={handleEditBlock} className="rounded-xl">Save Changes</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
 
              <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-                <AlertDialogContent>
+                <AlertDialogContent className="rounded-xl">
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                         <AlertDialogDescription>
@@ -343,15 +342,15 @@ export default function YearLevelBlocksPage() {
                             name="delete-confirm"
                             value={deleteInput}
                             onChange={(e) => setDeleteInput(e.target.value)}
-                            className="mt-4"
+                            className="mt-4 rounded-xl"
                         />
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setDeleteInput('')}>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel onClick={() => setDeleteInput('')} className="rounded-xl">Cancel</AlertDialogCancel>
                         <AlertDialogAction 
                             disabled={deleteInput !== 'delete'}
                             onClick={handleDeleteBlock} 
-                            className="bg-destructive hover:bg-destructive/90"
+                            className="bg-destructive hover:bg-destructive/90 rounded-xl"
                         >
                             Delete
                         </AlertDialogAction>
@@ -360,7 +359,7 @@ export default function YearLevelBlocksPage() {
             </AlertDialog>
 
             <Dialog open={isViewStudentsOpen} onOpenChange={setIsViewStudentsOpen}>
-                <DialogContent className="max-w-md">
+                <DialogContent className="max-w-md rounded-xl">
                     <DialogHeader>
                         <DialogTitle>Students in {selectedBlock ? getBlockDisplayName(selectedBlock) : ''}</DialogTitle>
                          <DialogDescription>
@@ -394,7 +393,7 @@ export default function YearLevelBlocksPage() {
                         </Table>
                     </div>
                      <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsViewStudentsOpen(false)}>Close</Button>
+                        <Button variant="outline" onClick={() => setIsViewStudentsOpen(false)} className="rounded-xl">Close</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
