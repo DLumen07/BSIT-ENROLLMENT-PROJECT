@@ -70,7 +70,7 @@ const Breadcrumb = () => {
       return null;
     }
     
-    const isSchedulePath = segments.length > 2 && segments[2] === 'schedule' && segments.length > 3;
+    const isSchedulePath = segments.length > 2 && segments[1] === 'dashboard' && segments[2] === 'schedule' && segments.length > 3;
 
     if (isSchedulePath) {
         const blockId = segments[3];
@@ -91,7 +91,7 @@ const Breadcrumb = () => {
                 {scheduleBreadcrumbs.map((crumb, index) => {
                     const isLast = index === scheduleBreadcrumbs.length - 1;
                     return (
-                        <React.Fragment key={crumb.href}>
+                        <React.Fragment key={`${crumb.href}-${crumb.name}`}>
                             {index > 0 && <ChevronRight className="h-4 w-4" />}
                             {isLast ? (
                                 <span className="text-foreground">{crumb.name}</span>
