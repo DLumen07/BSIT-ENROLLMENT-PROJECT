@@ -1,5 +1,4 @@
 
-
 'use client';
 import React, { useState } from 'react';
 import Link from 'next/link';
@@ -256,7 +255,7 @@ export default function InstructorsPage() {
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end" className="rounded-xl">
                                                      <DropdownMenuItem asChild>
-                                                        <Link href={`/instructor/dashboard/schedule?email=${encodeURIComponent(instructor.email)}`}>
+                                                        <Link href={`/admin/dashboard/instructors/${instructor.id}/schedule`}>
                                                             <Calendar className="mr-2 h-4 w-4" />
                                                             View Schedule
                                                         </Link>
