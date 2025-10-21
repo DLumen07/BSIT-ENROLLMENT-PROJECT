@@ -746,10 +746,6 @@ const ReviewField = ({ label, value }: { label: string, value?: string | null })
                                                                 <UserPlus className="mr-2 h-4 w-4" />
                                                                 Enroll Student
                                                             </DropdownMenuItem>
-                                                            <DropdownMenuItem onSelect={() => toast({ title: 'Feature in progress', description: 'Editing approved applications is not yet implemented.' })}>
-                                                                <Pencil className="mr-2 h-4 w-4" />
-                                                                Edit
-                                                            </DropdownMenuItem>
                                                             <DropdownMenuSeparator />
                                                             <DropdownMenuItem onSelect={() => handleOpenRejectionDialog(application)}>
                                                                 <X className="mr-2 h-4 w-4" />
