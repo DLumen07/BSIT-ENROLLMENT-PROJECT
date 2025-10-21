@@ -230,7 +230,7 @@ export default function AdminDashboardLayout({
                               isActive={isEnrollmentPath}
                           >
                               <div className="flex items-center gap-2">
-                                  <ClipboardList />
+                                  <ClipboardList className="h-4 w-4" />
                                   Manage Enrollment
                               </div>
                               <ChevronDown className="h-4 w-4 data-[state=open]:rotate-180" />
