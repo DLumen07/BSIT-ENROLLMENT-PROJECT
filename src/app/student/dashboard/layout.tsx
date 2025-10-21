@@ -1,3 +1,4 @@
+
 'use client';
 import Link from 'next/link';
 import {
@@ -10,6 +11,7 @@ import {
   FileSignature,
   ClipboardList,
   Settings,
+  ChevronRight,
 } from 'lucide-react';
 import Image from 'next/image';
 import React, { Suspense } from 'react';
@@ -41,6 +43,60 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useToast } from '@/hooks/use-toast';
 
+const Breadcrumb = () => {
+    const pathname = usePathname();
+    const segments = pathname.split('/').filter(Boolean);
+    const searchParams = useSearchParams();
+    const emailQuery = searchParams.toString();
+
+    const formatSegment = (s: string) => {
+        if (!s) return '';
+        const decoded = decodeURIComponent(s);
+        const str = decoded.replace(/-/g, ' ');
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    if (segments.length < 2) {
+        return null;
+    }
+
+    const breadcrumbs = segments.map((segment, index) => {
+        let path = `/${segments.slice(0, index + 1).join('/')}`;
+        let name = formatSegment(segment);
+        let href = `${path}?${emailQuery}`;
+
+        if (segment === 'student' || segment === 'dashboard') {
+             if (segment === 'student') return null;
+             name = 'Dashboard';
+             href = `/student/dashboard?${emailQuery}`;
+        }
+
+        return { name, href };
+    }).filter(Boolean);
+
+    return (
+        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            {breadcrumbs.map((crumb, index) => {
+                if (!crumb) return null;
+                const isLast = index === breadcrumbs.length - 1;
+                return (
+                    <React.Fragment key={`${crumb.href}-${crumb.name}`}>
+                        {index > 0 && <ChevronRight className="h-4 w-4" />}
+                        {isLast ? (
+                            <span className="text-foreground">{crumb.name}</span>
+                        ) : (
+                            <Link href={crumb.href} className="hover:text-foreground">
+                                {crumb.name}
+                            </Link>
+                        )}
+                    </React.Fragment>
+                );
+            })}
+        </div>
+    );
+};
+
+
 function Header() {
     const { studentData } = useStudent();
     const searchParams = useSearchParams();
@@ -51,9 +107,7 @@ function Header() {
          <header className="flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6">
             <SidebarTrigger className="md:hidden"/>
             <div className="flex-1">
-              <h1 className="text-lg font-semibold">
-                  Student Portal
-              </h1>
+              <Breadcrumb />
             </div>
             <div className="flex items-center gap-4">
               <ThemeToggle />
