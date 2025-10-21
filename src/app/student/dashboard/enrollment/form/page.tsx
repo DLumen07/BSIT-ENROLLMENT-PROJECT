@@ -238,15 +238,18 @@ function Step3() {
         if (isFourthYear && studentData?.academic.specialization) {
             form.setValue('specialization', studentData.academic.specialization);
         }
-         if (!isUpperYear) { // Clear specialization for lower years
-            form.setValue('specialization', undefined);
-        }
-    }, [isFourthYear, isUpperYear, studentData, form]);
+    }, [isFourthYear, studentData, form]);
 
     const availableBlocks = useMemo(() => {
         if (!selectedYear || !selectedCourse) return [];
         const yearKey = yearLevelMap[selectedYear];
         if (!yearKey) return [];
+        
+        // Clear specialization if not an upper year to prevent infinite loops
+        if (!isUpperYear) {
+            form.setValue('specialization', undefined);
+        }
+
         return adminData.blocks
             .filter(b => {
                 const yearMatch = b.year === yearKey;
@@ -256,7 +259,7 @@ function Step3() {
                 return yearMatch && courseMatch && specMatch && capacityMatch;
             })
             .map(b => ({ value: b.name, label: b.name }));
-    }, [selectedYear, selectedCourse, selectedSpecialization, adminData.blocks, isUpperYear]);
+    }, [selectedYear, selectedCourse, selectedSpecialization, adminData.blocks, isUpperYear, form]);
 
     const availableSubjects = useMemo(() => {
         if (!selectedYear) return [];
