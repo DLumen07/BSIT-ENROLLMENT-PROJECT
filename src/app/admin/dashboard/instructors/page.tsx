@@ -2,6 +2,7 @@
 
 'use client';
 import React, { useState } from 'react';
+import Link from 'next/link';
 import {
   Card,
   CardContent,
@@ -254,9 +255,11 @@ export default function InstructorsPage() {
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end" className="rounded-xl">
-                                                     <DropdownMenuItem onSelect={() => toast({ title: 'Feature in progress', description: 'Viewing instructor schedules is not yet implemented.' })}>
-                                                        <Calendar className="mr-2 h-4 w-4" />
-                                                        View Schedule
+                                                     <DropdownMenuItem asChild>
+                                                        <Link href={`/instructor/dashboard/schedule?email=${encodeURIComponent(instructor.email)}`}>
+                                                            <Calendar className="mr-2 h-4 w-4" />
+                                                            View Schedule
+                                                        </Link>
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem onSelect={() => openEditDialog(instructor)}>
                                                         <Pencil className="mr-2 h-4 w-4" />
@@ -386,9 +389,3 @@ export default function InstructorsPage() {
         </>
     );
 }
-
-    
-
-    
-
-    
