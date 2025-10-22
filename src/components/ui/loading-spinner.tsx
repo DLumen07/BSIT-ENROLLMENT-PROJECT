@@ -5,36 +5,10 @@ import { cn } from '@/lib/utils';
 
 export function LoadingSpinner({ className }: { className?: string }) {
   return (
-    <div className={cn("relative", className)}>
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={cn('animate-spin text-primary', className)}
-            >
-            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-        </svg>
-         <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={cn('animate-spin absolute top-0 left-0 text-accent opacity-50', className)}
-            style={{ animationDelay: '-0.5s', animationDirection: 'reverse' }}
-            >
-            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-        </svg>
+    <div className={cn("flex items-center justify-center space-x-2", className)}>
+        <div className="h-3 w-3 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]"></div>
+        <div className="h-3 w-3 rounded-full bg-accent animate-bounce [animation-delay:-0.15s]"></div>
+        <div className="h-3 w-3 rounded-full bg-foreground animate-bounce"></div>
     </div>
   );
 }
