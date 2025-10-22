@@ -372,5 +372,4 @@ export default function StudentProfilePage() {
             </form>
         </main>
     );
-
-    
+}
