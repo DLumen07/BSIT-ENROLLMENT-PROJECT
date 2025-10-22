@@ -157,11 +157,11 @@ export default function AdminDashboardLayout({
   const router = useRouter();
   const { toast } = useToast();
   const schoolLogo = PlaceHolderImages.find(p => p.id === 'school-logo-sm');
-  const isEnrollmentPath = pathname.startsWith('/admin/dashboard/manage-') || pathname === '/admin/dashboard/students';
+  const isEnrollmentPath = pathname.startsWith('/admin/dashboard/manage-');
   const [isEnrollmentOpen, setIsEnrollmentOpen] = React.useState(isEnrollmentPath);
 
   React.useEffect(() => {
-    setIsEnrollmentOpen(pathname.startsWith('/admin/dashboard/manage-') || pathname === '/admin/dashboard/students');
+    setIsEnrollmentOpen(pathname.startsWith('/admin/dashboard/manage-'));
   }, [pathname]);
 
   const { adminData, setAdminData } = useAdmin();
@@ -251,17 +251,17 @@ export default function AdminDashboardLayout({
                                       </Link>
                                   </SidebarMenuSubButton>
                               </SidebarMenuSubItem>
-                               <SidebarMenuSubItem>
-                                   <SidebarMenuSubButton asChild isActive={pathname === '/admin/dashboard/students'}>
-                                      <Link href="/admin/dashboard/students">
-                                          <Users2 />
-                                          <span>Students</span>
-                                      </Link>
-                                  </SidebarMenuSubButton>
-                              </SidebarMenuSubItem>
                           </SidebarMenuSub>
                       </CollapsibleContent>
                   </Collapsible>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                   <SidebarMenuButton asChild isActive={pathname === '/admin/dashboard/students'}>
+                      <Link href="/admin/dashboard/students">
+                          <Users2 />
+                          Students
+                      </Link>
+                  </SidebarMenuButton>
               </SidebarMenuItem>
               {currentUser.role !== 'Moderator' && (
                 <SidebarMenuItem>
