@@ -81,25 +81,27 @@ function LoginForm() {
               className="rounded-xl hover:border-primary focus-visible:ring-primary hover:shadow-[0_0_8px_hsl(var(--primary)/0.5)] focus-visible:shadow-[0_0_8px_hsl(var(--primary)/0.5)] transition-all"
           />
       </div>
-      <div className="space-y-2 text-left relative">
+      <div className="space-y-2 text-left">
           <Label htmlFor="password">Password</Label>
-          <Input 
-              id="password" 
-              type={showPassword ? "text" : "password"}
-              required 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="rounded-xl hover:border-primary focus-visible:ring-primary hover:shadow-[0_0_8px_hsl(var(--primary)/0.5)] focus-visible:shadow-[0_0_8px_hsl(var(--primary)/0.5)] transition-all pr-10"
-          />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="absolute right-1 top-[29px] h-7 w-7 text-muted-foreground hover:bg-transparent"
-            onClick={() => setShowPassword(prev => !prev)}
-        >
-            {showPassword ? <EyeOff /> : <Eye />}
-        </Button>
+          <div className="relative">
+            <Input 
+                id="password" 
+                type={showPassword ? "text" : "password"}
+                required 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="rounded-xl hover:border-primary focus-visible:ring-primary hover:shadow-[0_0_8px_hsl(var(--primary)/0.5)] focus-visible:shadow-[0_0_8px_hsl(var(--primary)/0.5)] transition-all pr-10"
+            />
+            <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:bg-transparent"
+                onClick={() => setShowPassword(prev => !prev)}
+            >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </Button>
+          </div>
       </div>
       <Button onClick={handleLogin} className="w-full rounded-xl hover:shadow-[0_0_8px_hsl(var(--primary)/0.5)] transition-shadow">
           Login
