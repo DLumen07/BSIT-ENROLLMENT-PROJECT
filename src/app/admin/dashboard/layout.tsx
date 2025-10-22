@@ -54,6 +54,7 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { useAdmin } from '../context/admin-context';
 import { useToast } from '@/hooks/use-toast';
+import PageTransition from '@/components/page-transition';
 
 const Breadcrumb = () => {
     const pathname = usePathname();
@@ -361,7 +362,9 @@ export default function AdminDashboardLayout({
               </DropdownMenu>
             </div>
           </header>
-          {children}
+          <PageTransition>
+            {children}
+          </PageTransition>
         </SidebarInset>
       </SidebarProvider>
   );

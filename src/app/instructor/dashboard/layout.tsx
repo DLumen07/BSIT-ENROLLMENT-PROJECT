@@ -37,6 +37,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import PageTransition from '@/components/page-transition';
 
 const Breadcrumb = () => {
     const pathname = usePathname();
@@ -215,7 +216,9 @@ function InstructorLayoutContent({ children }: { children: React.ReactNode }) {
       </Sidebar>
       <SidebarInset>
         <Header />
-        {children}
+        <PageTransition>
+          {children}
+        </PageTransition>
       </SidebarInset>
     </SidebarProvider>
   );

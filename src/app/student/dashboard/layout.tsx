@@ -42,6 +42,7 @@ import {
 import { ThemeToggle } from '@/components/theme-toggle';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useToast } from '@/hooks/use-toast';
+import PageTransition from '@/components/page-transition';
 
 const Breadcrumb = () => {
     const pathname = usePathname();
@@ -247,7 +248,9 @@ function StudentLayoutContent({ children }: { children: React.ReactNode }) {
       </Sidebar>
       <SidebarInset>
         <Header />
-        {children}
+        <PageTransition>
+          {children}
+        </PageTransition>
       </SidebarInset>
     </SidebarProvider>
   );
