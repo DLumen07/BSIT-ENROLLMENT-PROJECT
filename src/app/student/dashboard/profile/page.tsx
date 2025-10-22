@@ -59,10 +59,10 @@ export default function StudentProfilePage() {
         setEditableData(prev => ({ ...prev, [id]: value }));
     }
 
-    const handleSaveChanges = (tab: string) => {
+    const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
         if (!setStudentData) return;
-        // In a real app, you'd send this to your backend.
-        // For now, we update the context state.
+        
         setStudentData(prev => {
             if (!prev) return null;
             return {
@@ -108,8 +108,8 @@ export default function StudentProfilePage() {
         });
 
         toast({
-            title: `${tab} Info Updated`,
-            description: `Your ${tab.toLowerCase()} information has been successfully updated.`,
+            title: `Profile Updated`,
+            description: `Your information has been successfully updated.`,
         });
     };
 
@@ -122,200 +122,193 @@ export default function StudentProfilePage() {
                 </p>
             </div>
             
-             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-1 space-y-6">
-                     <Card className="rounded-xl">
-                        <CardContent className="pt-6 flex flex-col items-center text-center">
-                            <div className="relative mb-4">
-                                <Avatar className="h-24 w-24">
-                                    <AvatarImage src="https://picsum.photos/seed/student-avatar/128/128" alt="Student Name" data-ai-hint="person avatar"/>
-                                    <AvatarFallback>SN</AvatarFallback>
-                                </Avatar>
-                                <Button variant="ghost" size="icon" className="absolute bottom-0 right-0 rounded-full h-8 w-8 bg-background hover:bg-muted">
-                                    <Camera className="h-4 w-4" />
-                                    <span className="sr-only">Change photo</span>
-                                </Button>
-                            </div>
-                            <h2 className="text-xl font-semibold">{`${studentData.personal.firstName} ${studentData.personal.lastName}`}</h2>
-                            <p className="text-sm text-muted-foreground">{studentData.academic.studentId}</p>
-                            <p className="text-sm text-muted-foreground">{studentData.academic.course}</p>
-                        </CardContent>
-                    </Card>
-                    <Card className="rounded-xl">
-                        <CardHeader>
-                            <CardTitle>Academic Information</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4 text-sm">
-                            <InfoField label="Student ID" value={studentData.academic.studentId} />
-                            <InfoField label="Course" value={studentData.academic.course} />
-                            <InfoField label="Year Level" value={studentData.academic.yearLevel} />
-                            <InfoField label="Block" value={studentData.academic.block} />
-                            <InfoField label="Status" value={studentData.academic.status} />
-                        </CardContent>
-                    </Card>
-                </div>
-                <div className="lg:col-span-2">
-                    <Tabs defaultValue="personal" className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 rounded-xl">
-                            <TabsTrigger value="personal">Personal</TabsTrigger>
-                            <TabsTrigger value="address">Address & Family</TabsTrigger>
-                            <TabsTrigger value="additional">Additional</TabsTrigger>
-                            <TabsTrigger value="education">Education</TabsTrigger>
-                        </TabsList>
+             <form onSubmit={handleFormSubmit}>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-1 space-y-6">
+                        <Card className="rounded-xl">
+                            <CardContent className="pt-6 flex flex-col items-center text-center">
+                                <div className="relative mb-4">
+                                    <Avatar className="h-24 w-24">
+                                        <AvatarImage src="https://picsum.photos/seed/student-avatar/128/128" alt="Student Name" data-ai-hint="person avatar"/>
+                                        <AvatarFallback>SN</AvatarFallback>
+                                    </Avatar>
+                                    <Button variant="ghost" size="icon" className="absolute bottom-0 right-0 rounded-full h-8 w-8 bg-background hover:bg-muted">
+                                        <Camera className="h-4 w-4" />
+                                        <span className="sr-only">Change photo</span>
+                                    </Button>
+                                </div>
+                                <h2 className="text-xl font-semibold">{`${studentData.personal.firstName} ${studentData.personal.lastName}`}</h2>
+                                <p className="text-sm text-muted-foreground">{studentData.academic.studentId}</p>
+                                <p className="text-sm text-muted-foreground">{studentData.academic.course}</p>
+                            </CardContent>
+                        </Card>
+                        <Card className="rounded-xl">
+                            <CardHeader>
+                                <CardTitle>Academic Information</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4 text-sm">
+                                <InfoField label="Student ID" value={studentData.academic.studentId} />
+                                <InfoField label="Course" value={studentData.academic.course} />
+                                <InfoField label="Year Level" value={studentData.academic.yearLevel} />
+                                <InfoField label="Block" value={studentData.academic.block} />
+                                <InfoField label="Status" value={studentData.academic.status} />
+                            </CardContent>
+                        </Card>
+                    </div>
+                    <div className="lg:col-span-2">
+                        <Tabs defaultValue="personal" className="w-full">
+                            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 rounded-xl">
+                                <TabsTrigger value="personal">Personal</TabsTrigger>
+                                <TabsTrigger value="address">Address & Family</TabsTrigger>
+                                <TabsTrigger value="additional">Additional</TabsTrigger>
+                                <TabsTrigger value="education">Education</TabsTrigger>
+                            </TabsList>
 
-                        <TabsContent value="personal">
-                            <Card className="rounded-xl mt-4">
-                                <CardHeader>
-                                    <CardTitle>Personal & Contact</CardTitle>
-                                    <CardDescription>Your personal and contact details.</CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <InfoField label="First Name" value={studentData.personal.firstName} />
-                                        <InfoField label="Last Name" value={studentData.personal.lastName} />
-                                        <InfoField label="Middle Name" value={studentData.personal.middleName} />
-                                     </div>
-                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <InfoField label="Date of Birth" value={studentData.personal.birthdate} />
-                                        <InfoField label="Sex" value={studentData.personal.sex} />
-                                        <InfoField label="Civil Status" value={studentData.personal.civilStatus} />
-                                        <InfoField label="Nationality" value={studentData.personal.nationality} />
-                                    </div>
-                                    <div className="border-t pt-4 space-y-4">
-                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                             <div className="space-y-2">
-                                                <Label htmlFor="religion">Religion</Label>
-                                                <Input id="religion" value={editableData.religion} onChange={handleInputChange} className="rounded-xl" />
+                            <TabsContent value="personal">
+                                <Card className="rounded-xl mt-4">
+                                    <CardHeader>
+                                        <CardTitle>Personal & Contact</CardTitle>
+                                        <CardDescription>Your personal and contact details.</CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <InfoField label="First Name" value={studentData.personal.firstName} />
+                                            <InfoField label="Last Name" value={studentData.personal.lastName} />
+                                            <InfoField label="Middle Name" value={studentData.personal.middleName} />
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <InfoField label="Date of Birth" value={studentData.personal.birthdate} />
+                                            <InfoField label="Sex" value={studentData.personal.sex} />
+                                            <InfoField label="Civil Status" value={studentData.personal.civilStatus} />
+                                            <InfoField label="Nationality" value={studentData.personal.nationality} />
+                                        </div>
+                                        <div className="border-t pt-4 space-y-4">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="religion">Religion</Label>
+                                                    <Input id="religion" value={editableData.religion} onChange={handleInputChange} className="rounded-xl" />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="dialect">Dialect</Label>
+                                                    <Input id="dialect" value={editableData.dialect} onChange={handleInputChange} className="rounded-xl" />
+                                                </div>
                                             </div>
                                             <div className="space-y-2">
-                                                <Label htmlFor="dialect">Dialect</Label>
-                                                <Input id="dialect" value={editableData.dialect} onChange={handleInputChange} className="rounded-xl" />
+                                                <Label htmlFor="email">Email Address</Label>
+                                                <Input id="email" value={editableData.email} onChange={handleInputChange} className="rounded-xl" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="phoneNumber">Contact Number</Label>
+                                                <Input id="phoneNumber" value={editableData.phoneNumber} onChange={handleInputChange} className="rounded-xl" />
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+
+                            <TabsContent value="address">
+                                <Card className="rounded-xl mt-4">
+                                    <CardHeader>
+                                        <CardTitle>Address & Family</CardTitle>
+                                        <CardDescription>Your address and family background.</CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="currentAddress">Current Address</Label>
+                                            <Input id="currentAddress" value={editableData.currentAddress} onChange={handleInputChange} className="rounded-xl" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="permanentAddress">Permanent Address</Label>
+                                            <Input id="permanentAddress" value={editableData.permanentAddress} onChange={handleInputChange} className="rounded-xl" />
+                                        </div>
+                                        <div className="border-t pt-4 space-y-4">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="fathersName">Father's Name</Label>
+                                                <Input id="fathersName" value={editableData.fathersName} onChange={handleInputChange} className="rounded-xl" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="fathersOccupation">Father's Occupation</Label>
+                                                <Input id="fathersOccupation" value={editableData.fathersOccupation} onChange={handleInputChange} className="rounded-xl" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="mothersName">Mother's Name</Label>
+                                                <Input id="mothersName" value={editableData.mothersName} onChange={handleInputChange} className="rounded-xl" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="mothersOccupation">Mother's Occupation</Label>
+                                                <Input id="mothersOccupation" value={editableData.mothersOccupation} onChange={handleInputChange} className="rounded-xl" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="guardiansName">Guardian's Name</Label>
+                                                <Input id="guardiansName" value={editableData.guardiansName} onChange={handleInputChange} className="rounded-xl" />
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+                            
+                            <TabsContent value="additional">
+                                <Card className="rounded-xl mt-4">
+                                    <CardHeader>
+                                        <CardTitle>Additional Information</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="emergencyContactName">Emergency Contact Name</Label>
+                                            <Input id="emergencyContactName" value={editableData.emergencyContactName} onChange={handleInputChange} className="rounded-xl" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="emergencyContactAddress">Emergency Address</Label>
+                                            <Input id="emergencyContactAddress" value={editableData.emergencyContactAddress} onChange={handleInputChange} className="rounded-xl" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="emergencyContactNumber">Emergency Number</Label>
+                                            <Input id="emergencyContactNumber" value={editableData.emergencyContactNumber} onChange={handleInputChange} className="rounded-xl" />
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+
+                            <TabsContent value="education">
+                                <Card className="rounded-xl mt-4">
+                                    <CardHeader>
+                                        <CardTitle>Educational Background</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="elementarySchool">Elementary School</Label>
+                                                <Input id="elementarySchool" value={editableData.elementarySchool} onChange={handleInputChange} className="rounded-xl" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="elemYearGraduated">Year Graduated</Label>
+                                                <Input id="elemYearGraduated" value={editableData.elemYearGraduated} onChange={handleInputChange} className="rounded-xl" />
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="secondarySchool">Secondary School</Label>
+                                                <Input id="secondarySchool" value={editableData.secondarySchool} onChange={handleInputChange} className="rounded-xl" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="secondaryYearGraduated">Year Graduated</Label>
+                                                <Input id="secondaryYearGraduated" value={editableData.secondaryYearGraduated} onChange={handleInputChange} className="rounded-xl" />
                                             </div>
                                         </div>
                                         <div className="space-y-2">
-                                            <Label htmlFor="email">Email Address</Label>
-                                            <Input id="email" value={editableData.email} onChange={handleInputChange} className="rounded-xl" />
+                                            <Label htmlFor="collegiateSchool">Collegiate School (if transferee)</Label>
+                                            <Input id="collegiateSchool" value={editableData.collegiateSchool || ''} onChange={handleInputChange} className="rounded-xl" />
                                         </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="phoneNumber">Contact Number</Label>
-                                            <Input id="phoneNumber" value={editableData.phoneNumber} onChange={handleInputChange} className="rounded-xl" />
-                                        </div>
-                                    </div>
-                                </CardContent>
-                                <CardFooter>
-                                    <Button onClick={() => handleSaveChanges('Personal')} className="rounded-xl">Save Personal Info</Button>
-                                </CardFooter>
-                            </Card>
-                        </TabsContent>
-
-                        <TabsContent value="address">
-                             <Card className="rounded-xl mt-4">
-                                <CardHeader>
-                                    <CardTitle>Address & Family</CardTitle>
-                                    <CardDescription>Your address and family background.</CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="currentAddress">Current Address</Label>
-                                        <Input id="currentAddress" value={editableData.currentAddress} onChange={handleInputChange} className="rounded-xl" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="permanentAddress">Permanent Address</Label>
-                                        <Input id="permanentAddress" value={editableData.permanentAddress} onChange={handleInputChange} className="rounded-xl" />
-                                    </div>
-                                    <div className="border-t pt-4 space-y-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="fathersName">Father's Name</Label>
-                                            <Input id="fathersName" value={editableData.fathersName} onChange={handleInputChange} className="rounded-xl" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="fathersOccupation">Father's Occupation</Label>
-                                            <Input id="fathersOccupation" value={editableData.fathersOccupation} onChange={handleInputChange} className="rounded-xl" />
-                                        </div>
-                                         <div className="space-y-2">
-                                            <Label htmlFor="mothersName">Mother's Name</Label>
-                                            <Input id="mothersName" value={editableData.mothersName} onChange={handleInputChange} className="rounded-xl" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="mothersOccupation">Mother's Occupation</Label>
-                                            <Input id="mothersOccupation" value={editableData.mothersOccupation} onChange={handleInputChange} className="rounded-xl" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="guardiansName">Guardian's Name</Label>
-                                            <Input id="guardiansName" value={editableData.guardiansName} onChange={handleInputChange} className="rounded-xl" />
-                                        </div>
-                                    </div>
-                                </CardContent>
-                                 <CardFooter>
-                                    <Button onClick={() => handleSaveChanges('Address & Family')} className="rounded-xl">Save Address & Family Info</Button>
-                                </CardFooter>
-                            </Card>
-                        </TabsContent>
-                        
-                         <TabsContent value="additional">
-                             <Card className="rounded-xl mt-4">
-                                <CardHeader>
-                                    <CardTitle>Additional Information</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="emergencyContactName">Emergency Contact Name</Label>
-                                        <Input id="emergencyContactName" value={editableData.emergencyContactName} onChange={handleInputChange} className="rounded-xl" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="emergencyContactAddress">Emergency Address</Label>
-                                        <Input id="emergencyContactAddress" value={editableData.emergencyContactAddress} onChange={handleInputChange} className="rounded-xl" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="emergencyContactNumber">Emergency Number</Label>
-                                        <Input id="emergencyContactNumber" value={editableData.emergencyContactNumber} onChange={handleInputChange} className="rounded-xl" />
-                                    </div>
-                                </CardContent>
-                                <CardFooter>
-                                     <Button onClick={() => handleSaveChanges('Additional')} className="rounded-xl">Save Additional Info</Button>
-                                </CardFooter>
-                            </Card>
-                        </TabsContent>
-
-                        <TabsContent value="education">
-                             <Card className="rounded-xl mt-4">
-                                <CardHeader>
-                                    <CardTitle>Educational Background</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="elementarySchool">Elementary School</Label>
-                                            <Input id="elementarySchool" value={editableData.elementarySchool} onChange={handleInputChange} className="rounded-xl" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="elemYearGraduated">Year Graduated</Label>
-                                            <Input id="elemYearGraduated" value={editableData.elemYearGraduated} onChange={handleInputChange} className="rounded-xl" />
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="secondarySchool">Secondary School</Label>
-                                            <Input id="secondarySchool" value={editableData.secondarySchool} onChange={handleInputChange} className="rounded-xl" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="secondaryYearGraduated">Year Graduated</Label>
-                                            <Input id="secondaryYearGraduated" value={editableData.secondaryYearGraduated} onChange={handleInputChange} className="rounded-xl" />
-                                        </div>
-                                    </div>
-                                     <div className="space-y-2">
-                                        <Label htmlFor="collegiateSchool">Collegiate School (if transferee)</Label>
-                                        <Input id="collegiateSchool" value={editableData.collegiateSchool || ''} onChange={handleInputChange} className="rounded-xl" />
-                                    </div>
-                                </CardContent>
-                                <CardFooter>
-                                     <Button onClick={() => handleSaveChanges('Education')} className="rounded-xl">Save Education Info</Button>
-                                </CardFooter>
-                            </Card>
-                        </TabsContent>
-                    </Tabs>
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+                        </Tabs>
+                        <div className="flex justify-end mt-6">
+                            <Button type="submit" className="rounded-xl">Save All Changes</Button>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </form>
         </main>
     );
 }
