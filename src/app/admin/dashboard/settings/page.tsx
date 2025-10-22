@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Camera, Settings as SettingsIcon, Eye, EyeOff, Calendar as CalendarIcon } from 'lucide-react';
+import { Camera, Settings as SettingsIcon, Eye, EyeOff, Calendar as CalendarIcon, Clock } from 'lucide-react';
 import { useAdmin } from '../../context/admin-context';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -28,6 +28,11 @@ const InfoField = ({ label, value }: { label: string; value?: string | null }) =
 };
 
 type YearLevelKey = '1st-year' | '2nd-year' | '3rd-year' | '4th-year';
+
+const timeOptions = Array.from({ length: 24 }, (_, i) => {
+    const hour = i.toString().padStart(2, '0');
+    return [`${hour}:00`, `${hour}:30`];
+}).flat();
 
 export default function AdminSettingsPage() {
     const { toast } = useToast();
@@ -53,6 +58,17 @@ export default function AdminSettingsPage() {
     const [endDate, setEndDate] = useState<Date | undefined>(enrollmentEndDate);
     
     const [phasedSchedule, setPhasedSchedule] = useState(phasedEnrollmentSchedule);
+    
+    const handlePhasedScheduleChange = (year: YearLevelKey, field: 'date' | 'startTime' | 'endTime', value: Date | string | undefined) => {
+        if (value === undefined) return;
+        setPhasedSchedule(prev => ({
+            ...prev,
+            [year]: {
+                ...prev[year],
+                [field]: value,
+            }
+        }));
+    };
 
     useEffect(() => {
         if (currentUser) {
@@ -318,7 +334,7 @@ export default function AdminSettingsPage() {
                             <Card className="rounded-xl mt-6">
                                 <CardHeader>
                                     <CardTitle>Phased Enrollment Schedule</CardTitle>
-                                    <CardDescription>Set specific enrollment dates for each year level.</CardDescription>
+                                    <CardDescription>Set a specific date and time window for each year level.</CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     {Object.keys(phasedSchedule).map(year => {
@@ -326,35 +342,43 @@ export default function AdminSettingsPage() {
                                         const yearLabel = key.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
                                         return (
                                             <div key={key} className="p-3 border rounded-lg">
-                                                <p className="font-medium text-sm mb-2">{yearLabel}</p>
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <p className="font-medium text-sm mb-3">{yearLabel}</p>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                                     <div className="space-y-2">
-                                                        <Label>Start Date</Label>
+                                                        <Label>Enrollment Date</Label>
                                                         <Popover>
                                                             <PopoverTrigger asChild>
-                                                                <Button variant="outline" className={cn("w-full justify-start text-left font-normal rounded-xl", !phasedSchedule[key].startDate && "text-muted-foreground")}>
+                                                                <Button variant="outline" className={cn("w-full justify-start text-left font-normal rounded-xl", !phasedSchedule[key].date && "text-muted-foreground")}>
                                                                     <CalendarIcon className="mr-2 h-4 w-4" />
-                                                                    {phasedSchedule[key].startDate ? format(phasedSchedule[key].startDate, "PPP") : <span>Pick a date</span>}
+                                                                    {phasedSchedule[key].date ? format(phasedSchedule[key].date, "PPP") : <span>Pick a date</span>}
                                                                 </Button>
                                                             </PopoverTrigger>
                                                             <PopoverContent className="w-auto p-0 rounded-xl" align="start">
-                                                                <Calendar mode="single" selected={phasedSchedule[key].startDate} onSelect={(date) => handlePhasedScheduleChange(key, 'startDate', date)} initialFocus />
+                                                                <Calendar mode="single" selected={phasedSchedule[key].date} onSelect={(date) => handlePhasedScheduleChange(key, 'date', date)} initialFocus />
                                                             </PopoverContent>
                                                         </Popover>
                                                     </div>
                                                     <div className="space-y-2">
-                                                        <Label>End Date</Label>
-                                                        <Popover>
-                                                            <PopoverTrigger asChild>
-                                                                <Button variant="outline" className={cn("w-full justify-start text-left font-normal rounded-xl", !phasedSchedule[key].endDate && "text-muted-foreground")}>
-                                                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                                                    {phasedSchedule[key].endDate ? format(phasedSchedule[key].endDate, "PPP") : <span>Pick a date</span>}
-                                                                </Button>
-                                                            </PopoverTrigger>
-                                                            <PopoverContent className="w-auto p-0 rounded-xl" align="start">
-                                                                <Calendar mode="single" selected={phasedSchedule[key].endDate} onSelect={(date) => handlePhasedScheduleChange(key, 'endDate', date)} initialFocus />
-                                                            </PopoverContent>
-                                                        </Popover>
+                                                        <Label>Start Time</Label>
+                                                        <Select value={phasedSchedule[key].startTime} onValueChange={(value) => handlePhasedScheduleChange(key, 'startTime', value)}>
+                                                            <SelectTrigger className="rounded-xl">
+                                                                <SelectValue />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {timeOptions.map(time => <SelectItem key={`start-${key}-${time}`} value={time}>{format(new Date(`1970-01-01T${time}`), 'hh:mm a')}</SelectItem>)}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label>End Time</Label>
+                                                         <Select value={phasedSchedule[key].endTime} onValueChange={(value) => handlePhasedScheduleChange(key, 'endTime', value)}>
+                                                            <SelectTrigger className="rounded-xl">
+                                                                <SelectValue />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {timeOptions.map(time => <SelectItem key={`end-${key}-${time}`} value={time}>{format(new Date(`1970-01-01T${time}`), 'hh:mm a')}</SelectItem>)}
+                                                            </SelectContent>
+                                                        </Select>
                                                     </div>
                                                 </div>
                                             </div>
@@ -372,5 +396,3 @@ export default function AdminSettingsPage() {
         </main>
     );
 }
-
-    

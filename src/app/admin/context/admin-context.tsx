@@ -186,10 +186,10 @@ const mockAdminData = {
     enrollmentStartDate: new Date('2024-08-01'),
     enrollmentEndDate: new Date('2024-08-15'),
     phasedEnrollmentSchedule: {
-        '1st-year': { startDate: new Date('2024-08-01'), endDate: new Date('2024-08-03') },
-        '2nd-year': { startDate: new Date('2024-08-04'), endDate: new Date('2024-08-06') },
-        '3rd-year': { startDate: new Date('2024-08-07'), endDate: new Date('2024-08-09') },
-        '4th-year': { startDate: new Date('2024-08-10'), endDate: new Date('2024-08-12') },
+        '1st-year': { date: new Date('2024-08-01'), startTime: '08:00', endTime: '17:00' },
+        '2nd-year': { date: new Date('2024-08-02'), startTime: '08:00', endTime: '17:00' },
+        '3rd-year': { date: new Date('2024-08-03'), startTime: '08:00', endTime: '17:00' },
+        '4th-year': { date: new Date('2024-08-04'), startTime: '08:00', endTime: '17:00' },
     },
     academicYearOptions: ['2024-2025', '2023-2024'],
     semesterOptions: [
