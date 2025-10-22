@@ -10,6 +10,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Camera } from 'lucide-react';
 import { useStudent } from '@/app/student/context/student-context';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { CalendarIcon } from 'lucide-react';
 
 
 const InfoField = ({ label, value }: { label: string; value?: string | null }) => {
@@ -33,6 +39,13 @@ export default function StudentProfilePage() {
 
     // Create a temporary state for editing
     const [editableData, setEditableData] = React.useState({
+        firstName: studentData.personal.firstName,
+        lastName: studentData.personal.lastName,
+        middleName: studentData.personal.middleName,
+        birthdate: new Date(studentData.personal.birthdate),
+        sex: studentData.personal.sex,
+        civilStatus: studentData.personal.civilStatus,
+        nationality: studentData.personal.nationality,
         religion: studentData.personal.religion,
         dialect: studentData.personal.dialect,
         email: studentData.contact.email,
@@ -59,6 +72,17 @@ export default function StudentProfilePage() {
         setEditableData(prev => ({ ...prev, [id]: value }));
     }
 
+    const handleSelectChange = (id: keyof typeof editableData, value: string) => {
+        setEditableData(prev => ({ ...prev, [id]: value }));
+    };
+
+    const handleDateChange = (id: keyof typeof editableData, value: Date | undefined) => {
+        if(value) {
+            setEditableData(prev => ({ ...prev, [id]: value }));
+        }
+    };
+
+
     const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!setStudentData) return;
@@ -69,6 +93,13 @@ export default function StudentProfilePage() {
                 ...prev,
                 personal: {
                     ...prev.personal,
+                    firstName: editableData.firstName,
+                    lastName: editableData.lastName,
+                    middleName: editableData.middleName,
+                    birthdate: format(editableData.birthdate, 'MMMM d, yyyy'),
+                    sex: editableData.sex,
+                    civilStatus: editableData.civilStatus,
+                    nationality: editableData.nationality,
                     religion: editableData.religion,
                     dialect: editableData.dialect,
                 },
@@ -172,15 +203,57 @@ export default function StudentProfilePage() {
                                     </CardHeader>
                                     <CardContent className="space-y-4">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <InfoField label="First Name" value={studentData.personal.firstName} />
-                                            <InfoField label="Last Name" value={studentData.personal.lastName} />
-                                            <InfoField label="Middle Name" value={studentData.personal.middleName} />
+                                            <div className="space-y-2">
+                                                <Label htmlFor="firstName">First Name</Label>
+                                                <Input id="firstName" value={editableData.firstName} onChange={handleInputChange} className="rounded-xl" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="lastName">Last Name</Label>
+                                                <Input id="lastName" value={editableData.lastName} onChange={handleInputChange} className="rounded-xl" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="middleName">Middle Name</Label>
+                                                <Input id="middleName" value={editableData.middleName || ''} onChange={handleInputChange} className="rounded-xl" />
+                                            </div>
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <InfoField label="Date of Birth" value={studentData.personal.birthdate} />
-                                            <InfoField label="Sex" value={studentData.personal.sex} />
-                                            <InfoField label="Civil Status" value={studentData.personal.civilStatus} />
-                                            <InfoField label="Nationality" value={studentData.personal.nationality} />
+                                            <div className="space-y-2">
+                                                <Label>Date of Birth</Label>
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal rounded-xl", !editableData.birthdate && "text-muted-foreground")}>
+                                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                                            {editableData.birthdate ? format(editableData.birthdate, "PPP") : <span>Pick a date</span>}
+                                                        </Button>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-auto p-0 rounded-xl" align="start">
+                                                        <Calendar mode="single" selected={editableData.birthdate} onSelect={(date) => handleDateChange('birthdate', date)} disabled={(date) => date > new Date() || date < new Date("1900-01-01")} initialFocus />
+                                                    </PopoverContent>
+                                                </Popover>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Sex</Label>
+                                                <Select value={editableData.sex} onValueChange={(value) => handleSelectChange('sex', value)}>
+                                                    <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                                                    <SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem></SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Civil Status</Label>
+                                                 <Select value={editableData.civilStatus} onValueChange={(value) => handleSelectChange('civilStatus', value)}>
+                                                    <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="Single">Single</SelectItem>
+                                                        <SelectItem value="Married">Married</SelectItem>
+                                                        <SelectItem value="Widowed">Widowed</SelectItem>
+                                                        <SelectItem value="Separated">Separated</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                             <div className="space-y-2">
+                                                <Label htmlFor="nationality">Nationality</Label>
+                                                <Input id="nationality" value={editableData.nationality} onChange={handleInputChange} className="rounded-xl" />
+                                            </div>
                                         </div>
                                         <div className="border-t pt-4 space-y-4">
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -240,7 +313,7 @@ export default function StudentProfilePage() {
                                             </div>
                                             <div className="space-y-2">
                                                 <Label htmlFor="guardiansName">Guardian's Name</Label>
-                                                <Input id="guardiansName" value={editableData.guardiansName} onChange={handleInputChange} className="rounded-xl" />
+                                                <Input id="guardiansName" value={editableData.guardiansName || ''} onChange={handleInputChange} className="rounded-xl" />
                                             </div>
                                         </div>
                                     </CardContent>
@@ -312,3 +385,5 @@ export default function StudentProfilePage() {
         </main>
     );
 }
+
+    
