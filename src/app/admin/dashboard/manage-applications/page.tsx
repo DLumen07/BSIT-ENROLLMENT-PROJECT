@@ -196,7 +196,8 @@ export default function ManageApplicationsPage() {
 
     const completedSubjectsForEnrollment = useMemo(() => {
         if (!applicationToEnroll) return [];
-        const completed = adminData.getCompletedSubjects(applicationToEnroll.studentId);
+        const student = adminData.students.find(s => s.studentId === applicationToEnroll.studentId);
+        const completed = student ? adminData.getCompletedSubjects(student.studentId) : [];
         const overridden = prerequisiteOverrides.map(code => ({ code, units: 0 })); // Units don't matter for prereq check
         return [...completed, ...overridden];
     }, [adminData, applicationToEnroll, prerequisiteOverrides]);
@@ -1038,7 +1039,26 @@ const ReviewField = ({ label, value }: { label: string, value?: string | null })
 
                             {enrollBlock && availableSubjectsForEnrollment.length > 0 && (
                                 <div className="space-y-3 mt-4 pt-4 border-t">
-                                    <h4 className="font-medium">Enlist Subjects</h4>
+                                    <div className="flex justify-between items-center">
+                                        <h4 className="font-medium">Enlist Subjects</h4>
+                                        <div className="flex items-center space-x-2">
+                                            <Checkbox
+                                                id="select-all-subjects"
+                                                checked={enlistedSubjects.length === availableSubjectsForEnrollment.filter(s => !s.prerequisite || completedSubjectsForEnrollment.some(cs => cs.code === s.prerequisite)).length}
+                                                onCheckedChange={(checked) => {
+                                                    const subjectsWithMetPrereqs = availableSubjectsForEnrollment.filter(s => !s.prerequisite || completedSubjectsForEnrollment.some(cs => cs.code === s.prerequisite));
+                                                    if (checked) {
+                                                        setEnlistedSubjects(subjectsWithMetPrereqs);
+                                                    } else {
+                                                        setEnlistedSubjects([]);
+                                                    }
+                                                }}
+                                            />
+                                            <Label htmlFor="select-all-subjects" className="text-sm font-normal">
+                                                Select All
+                                            </Label>
+                                        </div>
+                                    </div>
                                     <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
                                         {availableSubjectsForEnrollment.map(subject => (
                                             <div key={subject.id} className={cn("flex items-center space-x-2 p-2 border rounded-md", !subject.prerequisite || completedSubjectsForEnrollment.some(cs => cs.code === subject.prerequisite) ? "" : "bg-muted/50")}>
@@ -1113,3 +1133,5 @@ const ReviewField = ({ label, value }: { label: string, value?: string | null })
     </>
   );
 }
+
+    
