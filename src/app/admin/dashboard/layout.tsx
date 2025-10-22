@@ -58,6 +58,7 @@ import { cn } from '@/lib/utils';
 import { useAdmin } from '../context/admin-context';
 import { useToast } from '@/hooks/use-toast';
 import PageTransition from '@/components/page-transition';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 const Breadcrumb = () => {
     const pathname = usePathname();
@@ -205,7 +206,11 @@ export default function AdminDashboardLayout({
   }, [currentUser, router]);
 
   if (!currentUser) {
-    return <div>Loading user or redirecting...</div>;
+    return (
+        <div className="flex h-screen w-full items-center justify-center">
+            <LoadingSpinner className="h-8 w-8" />
+        </div>
+    );
   }
 
   return (
