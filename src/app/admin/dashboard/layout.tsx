@@ -212,14 +212,6 @@ export default function AdminDashboardLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === '/admin/dashboard/users'}>
-                  <Link href="/admin/dashboard/users">
-                    <Users />
-                    Users
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={pathname === '/admin/dashboard/students'}>
                   <Link href="/admin/dashboard/students">
                     <Users2 />
@@ -289,6 +281,14 @@ export default function AdminDashboardLayout({
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={pathname === '/admin/dashboard/users'}>
+                  <Link href="/admin/dashboard/users">
+                    <Users />
+                    Users
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               {currentUser.role === 'Super Admin' && (
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={pathname === '/admin/dashboard/administrators'}>
