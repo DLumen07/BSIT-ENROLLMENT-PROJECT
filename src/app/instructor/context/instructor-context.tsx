@@ -90,6 +90,7 @@ export const InstructorProvider = ({ children }: { children: React.ReactNode }) 
 
   const updateStudentGrade = (studentId: string, subjectCode: string, grade: number) => {
     setAdminData(prevAdminData => {
+        if (!prevAdminData) return null;
         const newGrades = { ...prevAdminData.grades };
         const studentGrades = newGrades[studentId] ? [...newGrades[studentId]] : [];
         const gradeIndex = studentGrades.findIndex(g => g.subjectCode === subjectCode);
