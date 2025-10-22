@@ -81,7 +81,14 @@
   body {
     @apply bg-background text-foreground;
   }
-  .dark input {
-    @apply bg-background text-foreground;
+  
+  /* Fix for browser autofill styles */
+  .dark input:-webkit-autofill,
+  .dark input:-webkit-autofill:hover,
+  .dark input:-webkit-autofill:focus,
+  .dark input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px hsl(var(--background)) inset !important;
+    -webkit-text-fill-color: hsl(var(--foreground)) !important;
+    caret-color: hsl(var(--foreground));
   }
 }
