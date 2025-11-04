@@ -1,6 +1,6 @@
 
 'use client';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { MoreHorizontal, CheckCircle2, XCircle, Pencil, X, RotateCw, Trash2, Search, FilterX, Filter, PlusCircle, UserPlus, AlertTriangle, BadgeCheck, FileText } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -60,9 +60,44 @@ const credentialLabels: { key: keyof Application['credentials']; label: string; 
 
 
 export default function ManageApplicationsPage() {
-  const { adminData, setAdminData } = useAdmin();
+    const { adminData, refreshAdminData } = useAdmin();
   const { pendingApplications, approvedApplications, rejectedApplications, blocks, subjects: yearLevelSubjects, students } = adminData;
   const { toast } = useToast();
+
+    const API_BASE_URL = (process.env.NEXT_PUBLIC_BSIT_API_BASE_URL ?? 'http://localhost/bsit_api').replace(/\/$/, '');
+    const buildApiUrl = useCallback((endpoint: string) => `${API_BASE_URL}/${endpoint.replace(/^\//, '')}`, [API_BASE_URL]);
+
+    const [busyAction, setBusyAction] = useState<string | null>(null);
+        const isBusy = useCallback((key: string) => busyAction === key, [busyAction]);
+
+    const callAdminApi = useCallback(async <T = unknown>(endpoint: string, payload: unknown) => {
+        const response = await fetch(buildApiUrl(endpoint), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify(payload),
+        });
+
+        let data: any = null;
+        try {
+            data = await response.json();
+        } catch (error) {
+            // No body is still an error for our use case.
+        }
+
+        if (!response.ok) {
+            const message = data?.message ?? `Request failed with status ${response.status}`;
+            throw new Error(message);
+        }
+
+        if (!data || data.status !== 'success') {
+            throw new Error(data?.message ?? 'Request failed due to an unknown server error.');
+        }
+
+        return data as { status: 'success'; data?: T; message?: string };
+    }, [buildApiUrl]);
 
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
     const [isReviewFormOpen, setIsReviewFormOpen] = useState(false);
@@ -134,37 +169,40 @@ export default function ManageApplicationsPage() {
         }, 300);
     };
 
-    const handleDirectEnrollSubmit = () => {
+    const handleDirectEnrollSubmit = async () => {
         if (!foundStudent || !directEnrollBlock) {
             toast({ variant: 'destructive', title: 'Missing Information', description: 'Please select a block.' });
             return;
         }
-        
-        const updatedStudent: Student = {
-            ...foundStudent,
-            status: 'Enrolled',
-            block: directEnrollBlock,
-            enlistedSubjects: directEnlistedSubjects,
-        };
 
-        setAdminData(prev => {
-            const updatedStudents = prev.students.map(s => s.id === updatedStudent.id ? updatedStudent : s);
-            const updatedBlocks = prev.blocks.map(b => 
-                b.name === directEnrollBlock ? { ...b, enrolled: b.enrolled + 1 } : b
-            );
-            return {
-                ...prev,
-                students: updatedStudents,
-                blocks: updatedBlocks,
-            };
-        });
+        const actionKey = `direct-enroll-${foundStudent.id}`;
+        if (isBusy(actionKey)) {
+            return;
+        }
 
-        toast({
-            title: 'Enrollment Successful',
-            description: `${foundStudent.name} has been directly enrolled in block ${directEnrollBlock}.`,
-        });
-        
-        resetDirectEnroll();
+        setBusyAction(actionKey);
+        try {
+            await callAdminApi('finalize_enrollment.php', {
+                mode: 'direct',
+                studentUserId: foundStudent.id,
+                blockName: directEnrollBlock,
+                subjectIds: directEnlistedSubjects.map(subject => subject.id),
+            });
+
+            await refreshAdminData();
+
+            toast({
+                title: 'Enrollment Successful',
+                description: `${foundStudent.name} has been directly enrolled in block ${directEnrollBlock}.`,
+            });
+
+            resetDirectEnroll();
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Direct enrollment failed. Please try again.';
+            toast({ variant: 'destructive', title: 'Enrollment Failed', description: message });
+        } finally {
+            setBusyAction(null);
+        }
     };
 
      const availableBlocksForDirectEnroll = useMemo(() => {
@@ -246,52 +284,122 @@ export default function ManageApplicationsPage() {
     setRejectionDialog({ isOpen: false, application: null });
   };
 
-  const handleApprove = (application: Application) => {
-    setAdminData(prev => ({
-        ...prev,
-        pendingApplications: prev.pendingApplications.filter(app => app.id !== application.id),
-        approvedApplications: [...prev.approvedApplications, application]
-    }));
-    setSelectedApplication(null);
+  const handleApprove = async (application: Application) => {
+    const actionKey = `approve-${application.id}`;
+    if (isBusy(actionKey)) {
+        return;
+    }
+
+    setBusyAction(actionKey);
+    try {
+        await callAdminApi('update_application_status.php', {
+            applicationId: application.id,
+            status: 'approved',
+            blockName: application.block ?? null,
+        });
+
+        await refreshAdminData();
+
+        toast({
+            title: 'Application Approved',
+            description: `${application.name}'s application has been marked as approved.`,
+        });
+    } catch (error) {
+        const message = error instanceof Error ? error.message : 'Could not approve the application. Please try again.';
+        toast({ variant: 'destructive', title: 'Approval Failed', description: message });
+    } finally {
+        setBusyAction(null);
+        setSelectedApplication(null);
+    }
   };
 
-  const handleReject = (application: Application, reason: string) => {
-    const isApproved = approvedApplications.find(app => app.id === application.id);
-    const updatedRejected = [...rejectedApplications, { ...application, rejectionReason: reason }];
-    
-    if (isApproved) {
-        setAdminData(prev => ({
-            ...prev,
-            approvedApplications: prev.approvedApplications.filter(app => app.id !== application.id),
-            rejectedApplications: updatedRejected
-        }));
-    } else {
-        setAdminData(prev => ({
-            ...prev,
-            pendingApplications: prev.pendingApplications.filter(app => app.id !== application.id),
-            rejectedApplications: updatedRejected
-        }));
+  const handleReject = async (application: Application, reason: string) => {
+    const actionKey = `reject-${application.id}`;
+    if (isBusy(actionKey)) {
+        return;
     }
-    handleCloseRejectionDialog();
-    setSelectedApplication(null);
+
+    setBusyAction(actionKey);
+    try {
+        await callAdminApi('update_application_status.php', {
+            applicationId: application.id,
+            status: 'rejected',
+            rejectionReason: reason,
+            blockName: application.block ?? null,
+        });
+
+        await refreshAdminData();
+
+        toast({
+            title: 'Application Rejected',
+            description: `${application.name}'s application has been rejected.`,
+        });
+
+        handleCloseRejectionDialog();
+    } catch (error) {
+        const message = error instanceof Error ? error.message : 'Could not reject the application. Please try again.';
+        toast({ variant: 'destructive', title: 'Rejection Failed', description: message });
+    } finally {
+        setBusyAction(null);
+        setSelectedApplication(null);
+    }
   };
   
-  const handleRetrieve = (application: Application) => {
-    const { rejectionReason, ...rest } = application;
-    setAdminData(prev => ({
-        ...prev,
-        rejectedApplications: prev.rejectedApplications.filter(app => app.id !== application.id),
-        pendingApplications: [...prev.pendingApplications, rest]
-    }));
+  const handleRetrieve = async (application: Application) => {
+    const actionKey = `retrieve-${application.id}`;
+    if (isBusy(actionKey)) {
+        return;
+    }
+
+    setBusyAction(actionKey);
+    try {
+        await callAdminApi('update_application_status.php', {
+            applicationId: application.id,
+            status: 'pending',
+            blockName: application.block ?? null,
+        });
+
+        await refreshAdminData();
+
+        toast({
+            title: 'Application Retrieved',
+            description: `${application.name}'s application has been moved back to pending.`,
+        });
+    } catch (error) {
+        const message = error instanceof Error ? error.message : 'Could not retrieve the application. Please try again.';
+        toast({ variant: 'destructive', title: 'Retrieve Failed', description: message });
+    } finally {
+        setBusyAction(null);
+    }
   };
 
-  const handleDelete = (application: Application) => {
-    setAdminData(prev => ({
-        ...prev,
-        rejectedApplications: prev.rejectedApplications.filter(app => app.id !== application.id)
-    }));
-    setDeleteDialog({ isOpen: false, application: null });
-    setDeleteInput('');
+  const handleDelete = async (application: Application) => {
+    const actionKey = `delete-${application.id}`;
+    if (isBusy(actionKey)) {
+        return;
+    }
+
+    setBusyAction(actionKey);
+    try {
+        await callAdminApi('delete_application.php', {
+            applicationId: application.id,
+        });
+
+        await refreshAdminData();
+
+        toast({
+            title: 'Application Deleted',
+            description: `${application.name}'s application has been removed.`,
+        });
+
+        setDeleteDialog({ isOpen: false, application: null });
+        setDeleteInput('');
+    } catch (error) {
+        const message = error instanceof Error ? error.message : 'Could not delete the application. Please try again.';
+        toast({ variant: 'destructive', title: 'Delete Failed', description: message });
+    } finally {
+        setBusyAction(null);
+    }
   };
   
   const handleFilterChange = (filterType: keyof typeof filters, value: string) => {
@@ -303,8 +411,9 @@ export default function ManageApplicationsPage() {
       setFilters({ course: 'all', year: 'all', status: 'all' });
   };
 
-  const handleEnroll = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleEnroll = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     if (!applicationToEnroll || !enrollBlock) {
         toast({
             variant: 'destructive',
@@ -314,41 +423,48 @@ export default function ManageApplicationsPage() {
         return;
     }
 
-    const newStudent: Student = {
-        id: applicationToEnroll.id, // Re-use ID for simplicity, or generate new
-        studentId: applicationToEnroll.studentId,
-        name: applicationToEnroll.name,
-        avatar: `https://picsum.photos/seed/${applicationToEnroll.id}/40/40`,
-        email: `${applicationToEnroll.name.toLowerCase().replace(' ', '.')}@example.com`,
-        course: applicationToEnroll.course as 'BSIT' | 'ACT',
-        year: applicationToEnroll.year,
-        status: 'Enrolled',
-        block: enrollBlock,
-        enlistedSubjects: enlistedSubjects,
-        sex: 'Male', // Default, should be from application data if available
-        phoneNumber: '09' + Math.floor(100000000 + Math.random() * 900000000), // Placeholder
-    };
+    if (!applicationToEnroll.studentUserId) {
+        toast({
+            variant: 'destructive',
+            title: 'Enrollment Failed',
+            description: 'This application is missing the associated student record.',
+        });
+        return;
+    }
 
-    setAdminData(prev => {
-        const updatedStudents = [...prev.students, newStudent];
-        const updatedBlocks = prev.blocks.map(b => 
-            b.name === enrollBlock ? { ...b, enrolled: b.enrolled + 1 } : b
-        );
-        return {
-            ...prev,
-            approvedApplications: prev.approvedApplications.filter(app => app.id !== applicationToEnroll.id),
-            students: updatedStudents,
-            blocks: updatedBlocks,
-        };
-    });
+    const actionKey = `enroll-${applicationToEnroll.id}`;
+    if (isBusy(actionKey)) {
+        return;
+    }
 
-    toast({
-        title: 'Enrollment Successful',
-        description: `${applicationToEnroll.name} has been enrolled in block ${enrollBlock}.`,
-    });
+    setBusyAction(actionKey);
+    try {
+        await callAdminApi('finalize_enrollment.php', {
+            mode: 'application',
+            applicationId: applicationToEnroll.id,
+            studentUserId: applicationToEnroll.studentUserId,
+            blockName: enrollBlock,
+            subjectIds: enlistedSubjects.map(subject => subject.id),
+            prerequisiteOverrides,
+        });
 
-    setIsEnrollDialogOpen(false);
-    setApplicationToEnroll(null);
+        await refreshAdminData();
+
+        toast({
+            title: 'Enrollment Successful',
+            description: `${applicationToEnroll.name} has been enrolled in block ${enrollBlock}.`,
+        });
+
+        setIsEnrollDialogOpen(false);
+        setApplicationToEnroll(null);
+        setEnlistedSubjects([]);
+        setPrerequisiteOverrides([]);
+    } catch (error) {
+        const message = error instanceof Error ? error.message : 'Could not enroll the student. Please try again.';
+        toast({ variant: 'destructive', title: 'Enrollment Failed', description: message });
+    } finally {
+        setBusyAction(null);
+    }
   };
 
 
@@ -582,7 +698,13 @@ const ReviewField = ({ label, value }: { label: string, value?: string | null })
                                 </div>
                                 <DialogFooter>
                                     <Button variant="outline" onClick={() => setDirectEnrollStep(2)} className="rounded-xl">Back</Button>
-                                    <Button onClick={handleDirectEnrollSubmit} className="rounded-xl">Confirm Enrollment</Button>
+                                    <Button
+                                        onClick={handleDirectEnrollSubmit}
+                                        className="rounded-xl"
+                                        disabled={foundStudent ? isBusy(`direct-enroll-${foundStudent.id}`) : false}
+                                    >
+                                        Confirm Enrollment
+                                    </Button>
                                 </DialogFooter>
                             </>
                         )}
@@ -698,7 +820,12 @@ const ReviewField = ({ label, value }: { label: string, value?: string | null })
                                                                 View Credentials
                                                             </DropdownMenuItem>
                                                             <DropdownMenuSeparator />
-                                                            <DropdownMenuItem onSelect={() => handleApprove(application)}>Approve</DropdownMenuItem>
+                                                            <DropdownMenuItem
+                                                                onSelect={() => handleApprove(application)}
+                                                                disabled={isBusy(`approve-${application.id}`)}
+                                                            >
+                                                                Approve
+                                                            </DropdownMenuItem>
                                                             <DropdownMenuItem onSelect={() => handleOpenRejectionDialog(application)}>
                                                                 Reject
                                                             </DropdownMenuItem>
@@ -802,13 +929,17 @@ const ReviewField = ({ label, value }: { label: string, value?: string | null })
                                                             <DropdownMenuItem onSelect={() => setSelectedApplication(application)}>
                                                                 View Credentials
                                                             </DropdownMenuItem>
-                                                            <DropdownMenuItem onSelect={() => handleRetrieve(application)}>
+                                                            <DropdownMenuItem
+                                                                onSelect={() => handleRetrieve(application)}
+                                                                disabled={isBusy(`retrieve-${application.id}`)}
+                                                            >
                                                                 <RotateCw className="mr-2 h-4 w-4" />
                                                                 Retrieve
                                                             </DropdownMenuItem>
                                                             <DropdownMenuSeparator />
                                                             <DropdownMenuItem
                                                                 className="text-destructive focus:bg-destructive focus:text-destructive-foreground"
+                                                                disabled={isBusy(`delete-${application.id}`)}
                                                                 onSelect={() => {
                                                                     setDeleteDialog({ isOpen: true, application });
                                                                     setDeleteInput('');
@@ -885,16 +1016,29 @@ const ReviewField = ({ label, value }: { label: string, value?: string | null })
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button variant="destructive" className="rounded-xl" onClick={() => {
-                            if (selectedApplication) {
-                                handleOpenRejectionDialog(selectedApplication);
-                            }
-                        }}>Reject</Button>
-                        <Button className="bg-green-500 hover:bg-green-600 text-white rounded-xl" onClick={() => {
-                             if (selectedApplication) {
-                                handleApprove(selectedApplication);
-                            }
-                        }}>Approve</Button>
+                        <Button
+                            variant="destructive"
+                            className="rounded-xl"
+                            onClick={() => {
+                                if (selectedApplication) {
+                                    handleOpenRejectionDialog(selectedApplication);
+                                }
+                            }}
+                            disabled={selectedApplication ? isBusy(`reject-${selectedApplication.id}`) || isBusy(`approve-${selectedApplication.id}`) : false}
+                        >
+                            Reject
+                        </Button>
+                        <Button
+                            className="bg-green-500 hover:bg-green-600 text-white rounded-xl"
+                            onClick={() => {
+                                 if (selectedApplication) {
+                                    handleApprove(selectedApplication);
+                                }
+                            }}
+                            disabled={selectedApplication ? isBusy(`approve-${selectedApplication.id}`) : false}
+                        >
+                            Approve
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -976,7 +1120,17 @@ const ReviewField = ({ label, value }: { label: string, value?: string | null })
                     </form>
                     <DialogFooter>
                         <Button variant="outline" onClick={handleCloseRejectionDialog} className="rounded-xl">Cancel</Button>
-                        <Button variant="destructive" type="submit" form="rejection-form" className="rounded-xl">Confirm Rejection</Button>
+                        <Button
+                            variant="destructive"
+                            type="submit"
+                            form="rejection-form"
+                            className="rounded-xl"
+                            disabled={
+                                rejectionDialog.application ? isBusy(`reject-${rejectionDialog.application.id}`) : false
+                            }
+                        >
+                            Confirm Rejection
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -1087,7 +1241,14 @@ const ReviewField = ({ label, value }: { label: string, value?: string | null })
                     </form>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsEnrollDialogOpen(false)} className="rounded-xl">Cancel</Button>
-                        <Button type="submit" form="enroll-student-form" className="rounded-xl">Confirm Enrollment</Button>
+                        <Button
+                            type="submit"
+                            form="enroll-student-form"
+                            className="rounded-xl"
+                            disabled={applicationToEnroll ? isBusy(`enroll-${applicationToEnroll.id}`) : false}
+                        >
+                            Confirm Enrollment
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -1119,7 +1280,10 @@ const ReviewField = ({ label, value }: { label: string, value?: string | null })
                     <AlertDialogFooter>
                         <AlertDialogCancel onClick={() => setDeleteInput('')} className="rounded-xl">Cancel</AlertDialogCancel>
                         <AlertDialogAction
-                            disabled={deleteInput !== 'delete'}
+                            disabled={
+                                deleteInput !== 'delete' ||
+                                (deleteDialog.application ? isBusy(`delete-${deleteDialog.application.id}`) : false)
+                            }
                             className="bg-destructive hover:bg-destructive/90 rounded-xl"
                             onClick={() => handleDelete(deleteDialog.application!)}
                         >

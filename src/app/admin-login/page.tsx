@@ -21,7 +21,7 @@ function LoginForm() {
   const { adminUsers, instructors } = adminData;
 
   const [email, setEmail] = React.useState('alice.j@example.com');
-  const [password, setPassword] = React.useState('password123');
+  const [password, setPassword] = React.useState('admin123');
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = (e: React.MouseEvent<HTMLButtonElement>) => {

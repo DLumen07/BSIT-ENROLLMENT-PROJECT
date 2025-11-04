@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useStudent } from '@/app/student/context/student-context';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 type Subject = {
     id: number;
@@ -39,8 +40,16 @@ const formatTime = (timeStr: string) => {
 
 export default function StudentSchedulePage() {
     const { studentData } = useStudent();
-    const studentSchedule = studentData.schedule;
-    const { block } = studentData.academic;
+    if (!studentData) {
+        return (
+            <div className="flex h-full min-h-[300px] w-full items-center justify-center">
+                <LoadingSpinner className="h-6 w-6" />
+            </div>
+        );
+    }
+
+    const studentSchedule = studentData.schedule ?? [];
+    const block = studentData.academic?.block ?? 'N/A';
 
     return (
         <main className="flex-1 p-4 sm:p-6 space-y-6">

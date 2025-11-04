@@ -100,8 +100,7 @@ export default function AdminSettingsPage() {
         }
 
         setAdminData(prev => {
-            if (!prev) return null;
-            const updatedAdminData = {
+            const updatedAdminData: typeof prev = {
                 ...prev,
                 currentUser: { ...currentUser, name: editableData.name, email: editableData.email },
                 adminUsers: prev.adminUsers.map(user => 
@@ -116,8 +115,8 @@ export default function AdminSettingsPage() {
                     ...updatedAdminData,
                     academicYear: currentAcademicYear,
                     semester: currentSemester,
-                    enrollmentStartDate: startDate,
-                    enrollmentEndDate: endDate,
+                    enrollmentStartDate: startDate ?? prev.enrollmentStartDate,
+                    enrollmentEndDate: endDate ?? prev.enrollmentEndDate,
                     phasedEnrollmentSchedule: phasedSchedule,
                 };
             }

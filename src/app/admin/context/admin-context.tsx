@@ -1,6 +1,6 @@
 
 'use client';
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { AdminUser, initialAdminUsers, roles as adminRoles } from '../dashboard/administrators/page';
 import { Subject as ScheduleSubject } from '../dashboard/schedule/[blockId]/page';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
@@ -30,19 +30,42 @@ export const availableSubjects = [
 
 
 // --- Data from manage-applications ---
-const initialPendingApplications = [
-    { id: 1, studentId: '24-00-0001', name: 'John Doe', course: 'BSIT', year: 3, status: 'Old', block: 'BSIT 3-A', credentials: { birthCertificate: true, grades: true, goodMoral: false, registrationForm: true }},
-    { id: 2, studentId: '24-00-0002', name: 'Jane Smith', course: 'ACT', year: 1, status: 'New', block: 'ACT 1-A', credentials: { birthCertificate: true, grades: false, goodMoral: true, registrationForm: false }},
-    { id: 3, studentId: '24-00-0003', name: 'Peter Jones', course: 'BSIT', year: 3, status: 'Transferee', block: 'BSIT 3-B', credentials: { birthCertificate: true, grades: true, goodMoral: true, registrationForm: true }},
+export type ApplicationStatus = 'New' | 'Old' | 'Transferee';
+export type ApplicationCredentials = {
+    birthCertificate: boolean;
+    grades: boolean;
+    goodMoral: boolean;
+    registrationForm: boolean;
+};
+
+export type Application = {
+    id: number;
+    studentId: string;
+    studentUserId?: number;
+    name: string;
+    course: 'BSIT' | 'ACT';
+    year: number;
+    status: ApplicationStatus;
+    block?: string | null;
+    credentials: ApplicationCredentials;
+    rejectionReason?: string | null;
+    submittedAt?: string | null;
+};
+
+const initialPendingApplications: Application[] = [
+    { id: 1, studentId: '24-00-0001', studentUserId: 1001, name: 'John Doe', course: 'BSIT', year: 3, status: 'Old', block: 'BSIT 3-A', credentials: { birthCertificate: true, grades: true, goodMoral: false, registrationForm: true }, submittedAt: '2024-07-31T10:00:00Z' },
+    { id: 2, studentId: '24-00-0002', studentUserId: 1002, name: 'Jane Smith', course: 'ACT', year: 1, status: 'New', block: 'ACT 1-A', credentials: { birthCertificate: true, grades: false, goodMoral: true, registrationForm: false }, submittedAt: '2024-07-31T11:15:00Z' },
+    { id: 3, studentId: '24-00-0003', studentUserId: 1003, name: 'Peter Jones', course: 'BSIT', year: 3, status: 'Transferee', block: 'BSIT 3-B', credentials: { birthCertificate: true, grades: true, goodMoral: true, registrationForm: true }, submittedAt: '2024-07-31T13:30:00Z' },
 ];
-const initialApprovedApplications = [
-    { id: 4, studentId: '23-00-0999', name: 'Emily White', course: 'BSIT', year: 3, status: 'Old', block: 'BSIT 3-A', credentials: { birthCertificate: true, grades: true, goodMoral: true, registrationForm: true }},
-    { id: 5, studentId: '22-00-0998', name: 'Chris Green', course: 'ACT', year: 2, status: 'Old', block: 'ACT 2-A', credentials: { birthCertificate: true, grades: true, goodMoral: true, registrationForm: true }},
+
+const initialApprovedApplications: Application[] = [
+    { id: 4, studentId: '23-00-0999', studentUserId: 987, name: 'Emily White', course: 'BSIT', year: 3, status: 'Old', block: 'BSIT 3-A', credentials: { birthCertificate: true, grades: true, goodMoral: true, registrationForm: true }, submittedAt: '2024-07-30T09:45:00Z' },
+    { id: 5, studentId: '22-00-0998', studentUserId: 986, name: 'Chris Green', course: 'ACT', year: 2, status: 'Old', block: 'ACT 2-A', credentials: { birthCertificate: true, grades: true, goodMoral: true, registrationForm: true }, submittedAt: '2024-07-29T14:20:00Z' },
 ];
-const initialRejectedApplications = [
-     { id: 6, studentId: '24-00-0997', name: 'Michael Brown', course: 'ACT', year: 1, status: 'New', block: 'ACT 1-B', credentials: { birthCertificate: false, grades: true, goodMoral: true, registrationForm: true }, rejectionReason: 'Incomplete or missing documents.'},
+
+const initialRejectedApplications: Application[] = [
+     { id: 6, studentId: '24-00-0997', studentUserId: 1004, name: 'Michael Brown', course: 'ACT', year: 1, status: 'New', block: 'ACT 1-B', credentials: { birthCertificate: false, grades: true, goodMoral: true, registrationForm: true }, rejectionReason: 'Incomplete or missing documents.', submittedAt: '2024-07-31T08:55:00Z' },
 ];
-export type Application = typeof initialPendingApplications[0] & { rejectionReason?: string };
 export const rejectionReasons = [
     { id: 'incomplete_docs', label: 'Incomplete or missing documents.' },
     { id: 'not_qualified', label: 'Does not meet the minimum qualifications.' },
@@ -124,6 +147,7 @@ export type Student = {
     sex: 'Male' | 'Female';
     phoneNumber: string;
     specialization?: 'AP' | 'DD';
+    profileStatus?: 'New' | 'Old' | 'Transferee';
 };
 const initialStudentsList: Student[] = [
     { id: 1, studentId: '21-00-0123', name: 'Alice Johnson', avatar: 'https://picsum.photos/seed/aj-student/40/40', email: 'alice.j@student.example.com', course: 'BSIT', year: 4, status: 'Not Enrolled', sex: 'Female', phoneNumber: '09123456789', specialization: 'AP' },
@@ -223,68 +247,190 @@ const mockAdminData = {
     },
 };
 
+const ADMIN_DATA_ENDPOINT = process.env.NEXT_PUBLIC_BSIT_ADMIN_DATA_ENDPOINT ?? 'http://localhost/bsit_api/admin_data.php';
+
+type BackendAdminDataPayload = {
+    adminUsers?: AdminUser[];
+    availableSubjects?: typeof availableSubjects;
+    subjectsByYear?: YearLevelSubjects;
+    blocks?: Block[];
+    students?: Student[];
+    grades?: StudentGrades;
+    instructors?: Instructor[];
+    schedules?: Record<string, ScheduleSubject[]>;
+    pendingApplications?: Application[];
+    approvedApplications?: Application[];
+    rejectedApplications?: Application[];
+};
+
+type AdminApiResponse =
+    | { status: 'success'; data?: BackendAdminDataPayload }
+    | { status: 'error'; message?: string };
+
 export type AdminDataType = typeof mockAdminData;
 
+const normalizeSubjects = (subjects?: YearLevelSubjects): YearLevelSubjects => {
+    return subjects ?? {};
+};
+
+const normalizeGrades = (grades?: StudentGrades): StudentGrades => {
+    return grades ?? {};
+};
+
+const buildGetCompletedSubjects = (
+    subjects: YearLevelSubjects,
+    grades: StudentGrades,
+): AdminDataType['getCompletedSubjects'] => {
+    const flattenedSubjects = Object.values(subjects).flat();
+    return (studentId: string) => {
+        const studentGrades = grades[studentId] ?? [];
+        return studentGrades
+            .filter((grade) => typeof grade.grade === 'number' && grade.grade <= 3)
+            .map((grade) => {
+                const subjectDetails = flattenedSubjects.find((subject) => subject.code === grade.subjectCode);
+                return {
+                    code: grade.subjectCode,
+                    units: subjectDetails?.units ?? 0,
+                };
+            })
+            .filter((subject) => subject.units > 0);
+    };
+};
+
+const createAdminDataFromPayload = (
+    payload?: BackendAdminDataPayload | null,
+): AdminDataType => {
+    const subjects = normalizeSubjects(payload?.subjectsByYear);
+    const grades = normalizeGrades(payload?.grades);
+
+    return {
+        ...mockAdminData,
+        adminUsers: payload?.adminUsers ?? [],
+        availableSubjects: payload?.availableSubjects ?? [],
+        instructors: payload?.instructors ?? [],
+        blocks: payload?.blocks ?? [],
+        subjects,
+        schedules: payload?.schedules ?? {},
+        students: payload?.students ?? [],
+        grades,
+        pendingApplications: payload?.pendingApplications ?? [],
+        approvedApplications: payload?.approvedApplications ?? [],
+        rejectedApplications: payload?.rejectedApplications ?? [],
+        getCompletedSubjects: buildGetCompletedSubjects(subjects, grades),
+    };
+};
+
+const fetchAdminDataFromBackend = async (signal?: AbortSignal): Promise<AdminDataType> => {
+    const response = await fetch(ADMIN_DATA_ENDPOINT, {
+        cache: 'no-store',
+        credentials: 'include',
+        signal,
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch data from the server (${response.status})`);
+    }
+
+    const payload: AdminApiResponse = await response.json();
+
+    if (payload.status !== 'success') {
+        throw new Error(payload.message ?? 'Backend returned an error status.');
+    }
+
+    return createAdminDataFromPayload(payload.data ?? null);
+};
+
 interface AdminContextType {
-  adminData: AdminDataType | null;
-  setAdminData: React.Dispatch<React.SetStateAction<AdminDataType | null>>;
+    adminData: AdminDataType;
+    setAdminData: React.Dispatch<React.SetStateAction<AdminDataType>>;
   loading: boolean;
   error: string | null;
+  refreshAdminData: () => Promise<AdminDataType>;
 }
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
 export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
-  const [adminData, setAdminData] = useState<AdminDataType | null>(mockAdminData);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+        const [adminData, setAdminData] = useState<AdminDataType>(createAdminDataFromPayload(null));
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [hasRestoredUser, setHasRestoredUser] = useState(false);
 
   useEffect(() => {
-    // To connect to a backend, you would fetch data here.
-    // The code below is a template for fetching data.
-    /*
-    const fetchAdminData = async () => {
-      try {
-        // Replace with your actual API endpoint.
-        // Example for a PHP backend: 'https://your-domain.com/api/admin_data.php'
-        const response = await fetch('https://your-api.com/admin/data');
-        if (!response.ok) {
-          throw new Error('Failed to fetch data from the server.');
-        }
-        const data = await response.json();
-        setAdminData(data);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    // Uncomment the line below to enable API fetching
-    // fetchAdminData();
-    */
+        let isMounted = true;
+        const controller = new AbortController();
 
-    // For now, we are using mock data.
-    setLoading(false);
+        fetchAdminDataFromBackend(controller.signal)
+            .then((data) => {
+                if (!isMounted) {
+                    return;
+                }
+                setAdminData((prev) => ({
+                    ...data,
+                    currentUser: prev.currentUser ?? data.currentUser ?? null,
+                }));
+                setError(null);
+            })
+            .catch((err) => {
+                if (!isMounted || controller.signal.aborted) {
+                    return;
+                }
+                const message = err instanceof Error ? err.message : 'Unexpected error while fetching admin data.';
+                console.error('[AdminProvider] fetchAdminData failed:', message);
+                setError(message);
+                setAdminData(createAdminDataFromPayload(null));
+            })
+            .finally(() => {
+                if (isMounted) {
+                    setLoading(false);
+                }
+            });
+
+        return () => {
+            isMounted = false;
+            controller.abort();
+        };
   }, []);
 
+    const refreshAdminData = useCallback(async () => {
+        try {
+            const data = await fetchAdminDataFromBackend();
+            setAdminData((prev) => ({
+                ...data,
+                currentUser: prev.currentUser ?? data.currentUser ?? null,
+            }));
+            return data;
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Unexpected error while fetching admin data.';
+            console.error('[AdminProvider] refreshAdminData failed:', message);
+            throw err;
+        }
+    }, []);
 
-  useEffect(() => {
-    // This part handles loading the logged-in user from session storage.
-    // It should be kept even when you connect to a backend.
-    if (!loading) {
+
+    useEffect(() => {
+        // Restore the logged-in user from session storage exactly once.
+        if (loading || hasRestoredUser) {
+            return;
+        }
+
         try {
             const storedUser = sessionStorage.getItem('currentUser');
             if (storedUser) {
                 const user = JSON.parse(storedUser);
-                // Ensure adminData is not null before setting currentUser
-                setAdminData(prev => prev ? { ...prev, currentUser: user } : null);
+                setAdminData(prev => {
+                    if (prev.currentUser && prev.currentUser.email === user.email) {
+                        return prev;
+                    }
+                    return { ...prev, currentUser: user };
+                });
             }
         } catch (error) {
-            console.error("Failed to parse user from sessionStorage", error);
+            console.error('Failed to parse user from sessionStorage', error);
+        } finally {
+            setHasRestoredUser(true);
         }
-    }
-  }, [loading]);
+    }, [loading, hasRestoredUser]);
 
   if (loading) {
     return (
@@ -297,11 +443,11 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     return <div>Error: {error}</div>;
   }
 
-  return (
-    <AdminContext.Provider value={{ adminData, setAdminData, loading, error }}>
-      {children}
-    </AdminContext.Provider>
-  );
+    return (
+        <AdminContext.Provider value={{ adminData, setAdminData, loading, error, refreshAdminData }}>
+            {children}
+        </AdminContext.Provider>
+    );
 };
 
 export const useAdmin = (): AdminContextType => {

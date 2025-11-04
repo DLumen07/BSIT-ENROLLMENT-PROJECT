@@ -1,6 +1,6 @@
 
 'use client';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { MoreHorizontal, Search, Filter, FilterX, Trash2 } from 'lucide-react';
 import {
@@ -63,8 +63,9 @@ const InfoField = ({ label, value }: { label: string; value?: string | number | 
 
 export default function StudentsPage() {
     const { adminData, setAdminData } = useAdmin();
-    const { students, grades, subjects: allYearSubjects } = adminData;
+    const { students } = adminData;
     const { toast } = useToast();
+    const API_BASE_URL = (process.env.NEXT_PUBLIC_BSIT_API_BASE_URL ?? 'http://localhost/bsit_api').replace(/\/$/, '');
     
     const [searchTerm, setSearchTerm] = useState('');
     const [filters, setFilters] = useState({
@@ -73,12 +74,60 @@ export default function StudentsPage() {
         status: 'Enrolled', // Hardcoded to 'Enrolled'
     });
 
+    const [enrolledStudents, setEnrolledStudents] = useState<Student[]>(() => students.filter(student => student.status === 'Enrolled'));
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const [deleteInput, setDeleteInput] = useState('');
 
-    const allSubjects = useMemo(() => Object.values(allYearSubjects).flat(), [allYearSubjects]);
+    useEffect(() => {
+        setEnrolledStudents(students.filter(student => student.status === 'Enrolled'));
+    }, [students]);
+
+    useEffect(() => {
+        const controller = new AbortController();
+
+        const fetchEnrolledStudents = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin_data.php?student_enrollment_status=Enrolled`, {
+                    cache: 'no-store',
+                    credentials: 'include',
+                    signal: controller.signal,
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to load enrolled students (${response.status})`);
+                }
+
+                const payload = await response.json();
+                if (payload?.status !== 'success' || !payload?.data) {
+                    throw new Error(payload?.message ?? 'Backend returned an error status.');
+                }
+
+                const remoteStudents = Array.isArray(payload.data.students)
+                    ? (payload.data.students as Student[])
+                    : [];
+
+                setEnrolledStudents(remoteStudents);
+            } catch (error) {
+                if (controller.signal.aborted) {
+                    return;
+                }
+                const message = error instanceof Error ? error.message : 'Failed to load enrolled students.';
+                toast({
+                    variant: 'destructive',
+                    title: 'Unable to load enrolled students',
+                    description: message,
+                });
+            }
+        };
+
+        fetchEnrolledStudents();
+
+        return () => {
+            controller.abort();
+        };
+    }, [API_BASE_URL, toast]);
 
     const openDeleteDialog = (student: Student) => {
         setSelectedStudent(student);
@@ -97,6 +146,7 @@ export default function StudentsPage() {
             ...prev,
             students: prev.students.filter(s => s.id !== selectedStudent.id),
         }));
+        setEnrolledStudents(prev => prev.filter(s => s.id !== selectedStudent.id));
         setIsDeleteDialogOpen(false);
         setSelectedStudent(null);
     };
@@ -110,26 +160,27 @@ export default function StudentsPage() {
         setFilters({ course: 'all', year: 'all', status: 'Enrolled' });
     };
     
-    const isFiltered = searchTerm || filters.course !== 'all' || filters.year !== 'all';
-    
+    const isFiltered = Boolean(searchTerm || filters.course !== 'all' || filters.year !== 'all');
+
     const filteredStudents = useMemo(() => {
-        return students.filter(student => {
-            const searchTermLower = searchTerm.toLowerCase();
-            const matchesSearch = searchTerm ? 
-                student.name.toLowerCase().includes(searchTermLower) || 
-                student.studentId.toLowerCase().includes(searchTermLower) ||
-                student.email.toLowerCase().includes(searchTermLower) : true;
-            
+        const searchTermLower = searchTerm.toLowerCase();
+        return enrolledStudents.filter(student => {
+            const matchesSearch = searchTerm
+                ? student.name.toLowerCase().includes(searchTermLower) ||
+                  student.studentId.toLowerCase().includes(searchTermLower) ||
+                  student.email.toLowerCase().includes(searchTermLower)
+                : true;
+
             const matchesCourse = filters.course !== 'all' ? student.course === filters.course : true;
             const matchesYear = filters.year !== 'all' ? student.year.toString() === filters.year : true;
             const matchesStatus = student.status === 'Enrolled';
 
             return matchesSearch && matchesCourse && matchesYear && matchesStatus;
         });
-    }, [students, searchTerm, filters]);
-    
-    const courses = ['all', ...Array.from(new Set(students.map(app => app.course)))];
-    const years = ['all', ...Array.from(new Set(students.map(app => app.year.toString())))].sort();
+    }, [enrolledStudents, searchTerm, filters]);
+
+    const courses = ['all', ...Array.from(new Set(enrolledStudents.map(student => student.course)))];
+    const years = ['all', ...Array.from(new Set(enrolledStudents.map(student => student.year.toString())))].sort();
     
     const getStatusBadgeVariant = (status: Student['status']) => {
         switch (status) {
@@ -172,7 +223,7 @@ export default function StudentsPage() {
                         </div>
                         <div className="flex flex-wrap items-center gap-4">
                            <div className="text-sm text-muted-foreground">
-                                {isFiltered ? `${filteredStudents.length} of ${students.filter(s=>s.status === 'Enrolled').length} students shown` : `Total Enrolled Students: ${filteredStudents.length}`}
+                                {isFiltered ? `${filteredStudents.length} of ${enrolledStudents.length} students shown` : `Total Enrolled Students: ${filteredStudents.length}`}
                             </div>
                             <Popover>
                                 <PopoverTrigger asChild>

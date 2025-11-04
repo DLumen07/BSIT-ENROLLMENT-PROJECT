@@ -69,19 +69,23 @@ const baseAcademicSchema = z.object({
     specialization: z.string().optional(),
 });
 
-const academicSchema = baseAcademicSchema.refine(data => {
-    if ((data.yearLevel === '3rd Year' || data.yearLevel === '4th Year') && !data.specialization) {
-        return false;
-    }
-    return true;
-}, {
-    message: 'Specialization is required for 3rd and 4th year students.',
-    path: ['specialization'],
-});
+const applySpecializationRule = <T extends z.ZodTypeAny>(schema: T) =>
+    schema.superRefine((data, ctx) => {
+        if ((data.yearLevel === '3rd Year' || data.yearLevel === '4th Year') && !data.specialization) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'Specialization is required for 3rd and 4th year students.',
+                path: ['specialization'],
+            });
+        }
+    });
 
+const academicSchema = applySpecializationRule(baseAcademicSchema);
 
 // Full schema for new students
-const newStudentSchema = personalFamilySchema.merge(additionalInfoSchema).merge(academicSchema);
+const newStudentSchema = applySpecializationRule(
+    personalFamilySchema.merge(additionalInfoSchema).merge(baseAcademicSchema)
+);
 
 // Schema for old students (only step 3 is relevant)
 const oldStudentSchema = academicSchema;
@@ -383,13 +387,12 @@ function Step3() {
                                                 <Checkbox
                                                 checked={field.value?.includes(subject.id)}
                                                 onCheckedChange={(checked) => {
-                                                    return checked
-                                                    ? field.onChange([...(field.value || []), subject.id])
-                                                    : field.onChange(
-                                                        field.value?.filter(
-                                                            (value) => value !== subject.id
-                                                        )
-                                                        )
+                                                    if (checked === true) {
+                                                        field.onChange([...(field.value ?? []), subject.id]);
+                                                        return;
+                                                    }
+                                                    const filtered = (field.value ?? []).filter((selection: string) => selection !== subject.id);
+                                                    field.onChange(filtered);
                                                 }}
                                                 />
                                             </FormControl>
@@ -532,8 +535,8 @@ export default function EnrollmentFormPage() {
             Object.keys(baseAcademicSchema.shape) as FieldName[],
         ];
         
-        const fieldsToValidate = fieldsByStep[currentStep];
-        const output = await methods.trigger(fieldsToValidate, { shouldFocus: true });
+    const fieldsToValidate = fieldsByStep[currentStep].map(field => field as string);
+    const output = await methods.trigger(fieldsToValidate, { shouldFocus: true });
 
         if (!output) return;
 

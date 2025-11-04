@@ -51,7 +51,8 @@ const mockStudentData = {
         course: 'BS in Information Technology',
         yearLevel: '2nd Year',
         block: 'BSIT 2-A',
-        status: 'Enrolled' as 'Enrolled' | 'Not Enrolled' | 'Graduated',
+    status: 'Old' as 'New' | 'Old' | 'Transferee',
+    enrollmentStatus: 'Enrolled' as 'Enrolled' | 'Not Enrolled' | 'Graduated',
         dateEnrolled: 'August 15, 2024',
         specialization: undefined as 'AP' | 'DD' | undefined,
     },
@@ -93,8 +94,8 @@ export const StudentProvider = ({ children }: { children: React.ReactNode }) => 
     if (adminData && studentEmail) {
       const currentStudent = adminData.students.find(s => s.email === studentEmail);
       if (currentStudent) {
-        const studentSchedule = adminData.schedules[currentStudent.block || ''] || [];
-        const isEnrolled = currentStudent.status === 'Enrolled';
+  const studentSchedule = adminData.schedules[currentStudent.block || ''] || [];
+  const isEnrolled = currentStudent.status === 'Enrolled';
         
         const [firstName, ...lastNameParts] = currentStudent.name.split(' ');
         const lastName = lastNameParts.join(' ');
@@ -150,7 +151,8 @@ export const StudentProvider = ({ children }: { children: React.ReactNode }) => 
             course: currentStudent.course,
             yearLevel: yearLevelMap[currentStudent.year] || `${currentStudent.year}th Year`,
             block: currentStudent.block || 'N/A',
-            status: currentStudent.status,
+            status: currentStudent.profileStatus ?? 'Old',
+            enrollmentStatus: currentStudent.status,
             dateEnrolled: 'August 15, 2024',
             specialization: currentStudent.specialization,
           },
@@ -164,7 +166,13 @@ export const StudentProvider = ({ children }: { children: React.ReactNode }) => 
                  instructor: studentSchedule.find(ss => ss.code === sub.code)?.instructor || 'TBA'
             })) : [],
           },
-          schedule: isEnrolled ? studentSchedule.map(s => ({...s, room: 'TBA'})) : []
+          schedule: isEnrolled
+            ? studentSchedule.map(s => ({
+                ...s,
+                instructor: s.instructor ?? 'TBA',
+                room: 'TBA',
+              }))
+            : []
         };
         setStudentData(data);
       }

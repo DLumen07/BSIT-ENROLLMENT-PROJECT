@@ -76,7 +76,7 @@ export default function AdminDashboardPage() {
 
   const totalUsers = adminUsers.length + instructors.length + students.length;
   const totalStudents = students.length;
-  const newEnrollees = students.filter(s => s.year === 1 && s.status !== 'Old').length;
+  const newEnrollees = students.filter(s => s.year === 1 && s.profileStatus !== 'Old').length;
 
   return (
     <>
